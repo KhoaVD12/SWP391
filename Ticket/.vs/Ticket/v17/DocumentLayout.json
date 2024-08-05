@@ -3,6 +3,26 @@
   "WorkspaceRootPath": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\dataaccessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\dataaccessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\irepo\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\irepo\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\service\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\service\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\repo\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\repo\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -18,8 +38,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DataAccessObject",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\DataAccessObject.csproj",
+              "RelativeDocumentMoniker": "DataAccessObject\\DataAccessObject.csproj",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\DataAccessObject.csproj",
+              "RelativeToolTip": "DataAccessObject\\DataAccessObject.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-08-05T09:44:35.019Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
@@ -34,7 +67,59 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "Interface1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IService\\Interface1.cs",
+              "RelativeDocumentMoniker": "DataAccessObject\\IService\\Interface1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IService\\Interface1.cs",
+              "RelativeToolTip": "DataAccessObject\\IService\\Interface1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:43:31.852Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Interface1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IRepo\\Interface1.cs",
+              "RelativeDocumentMoniker": "DataAccessObject\\IRepo\\Interface1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IRepo\\Interface1.cs",
+              "RelativeToolTip": "DataAccessObject\\IRepo\\Interface1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:43:26.931Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Service\\Class1.cs",
+              "RelativeDocumentMoniker": "DataAccessObject\\Service\\Class1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Service\\Class1.cs",
+              "RelativeToolTip": "DataAccessObject\\Service\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:42:56.607Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Repo\\Class1.cs",
+              "RelativeDocumentMoniker": "DataAccessObject\\Repo\\Class1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Repo\\Class1.cs",
+              "RelativeToolTip": "DataAccessObject\\Repo\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:42:43.386Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Class1.cs",
@@ -47,7 +132,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 6,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\Class1.cs",
               "RelativeDocumentMoniker": "BusinessObject\\Class1.cs",
