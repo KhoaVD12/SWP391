@@ -1,0 +1,66 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\businessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|solutionrelative:businessobject\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Class1.cs",
+              "RelativeDocumentMoniker": "DataAccessObject\\Class1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Class1.cs",
+              "RelativeToolTip": "DataAccessObject\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:12:11.767Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\Class1.cs",
+              "RelativeDocumentMoniker": "BusinessObject\\Class1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\Class1.cs",
+              "RelativeToolTip": "BusinessObject\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-05T09:11:47.265Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
