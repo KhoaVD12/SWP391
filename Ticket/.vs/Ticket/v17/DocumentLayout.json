@@ -3,10 +3,6 @@
   "WorkspaceRootPath": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\dataaccessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\dataaccessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -38,21 +34,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DataAccessObject",
-              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\DataAccessObject.csproj",
-              "RelativeDocumentMoniker": "DataAccessObject\\DataAccessObject.csproj",
-              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\DataAccessObject.csproj",
-              "RelativeToolTip": "DataAccessObject\\DataAccessObject.csproj",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAfAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-08-05T09:44:35.019Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
@@ -67,7 +50,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Interface1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IService\\Interface1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\IService\\Interface1.cs",
@@ -80,7 +63,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Interface1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IRepo\\Interface1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\IRepo\\Interface1.cs",
@@ -93,7 +76,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Service\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Service\\Class1.cs",
@@ -106,7 +89,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 3,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Repo\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Repo\\Class1.cs",
@@ -119,7 +102,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Class1.cs",
@@ -132,7 +115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\Class1.cs",
               "RelativeDocumentMoniker": "BusinessObject\\Class1.cs",
@@ -140,7 +123,8 @@
               "RelativeToolTip": "BusinessObject\\Class1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:11:47.265Z"
+              "WhenOpened": "2024-08-05T09:11:47.265Z",
+              "EditorCaption": ""
             }
           ]
         }
