@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\businessobject\\businessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|solutionrelative:businessobject\\businessobject.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\businessobject\\dao\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B918A4D-1DC0-4D58-8E54-6BB3901A4708}|BusinessObject\\BusinessObject.csproj|solutionrelative:businessobject\\dao\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|d:\\major subject\\swp\\swp391\\ticket\\dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CA542F2D-531A-46C6-9069-A1E6D722275E}|DataAccessObject\\DataAccessObject.csproj|solutionrelative:dataaccessobject\\iservice\\interface1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -51,6 +59,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "BusinessObject.csproj",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\BusinessObject.csproj",
+              "RelativeDocumentMoniker": "BusinessObject\\BusinessObject.csproj",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\BusinessObject.csproj",
+              "RelativeToolTip": "BusinessObject\\BusinessObject.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAKAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-08-07T00:39:35.242Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\DAO\\Class1.cs",
+              "RelativeDocumentMoniker": "BusinessObject\\DAO\\Class1.cs",
+              "ToolTip": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\DAO\\Class1.cs",
+              "RelativeToolTip": "BusinessObject\\DAO\\Class1.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-07T00:39:19.026Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Interface1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IService\\Interface1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\IService\\Interface1.cs",
@@ -58,12 +92,11 @@
               "RelativeToolTip": "DataAccessObject\\IService\\Interface1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:43:31.852Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:43:31.852Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Interface1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\IRepo\\Interface1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\IRepo\\Interface1.cs",
@@ -71,12 +104,11 @@
               "RelativeToolTip": "DataAccessObject\\IRepo\\Interface1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:43:26.931Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:43:26.931Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Service\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Service\\Class1.cs",
@@ -84,12 +116,11 @@
               "RelativeToolTip": "DataAccessObject\\Service\\Class1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:42:56.607Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:42:56.607Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Repo\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Repo\\Class1.cs",
@@ -97,12 +128,11 @@
               "RelativeToolTip": "DataAccessObject\\Repo\\Class1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:42:43.386Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:42:43.386Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\DataAccessObject\\Class1.cs",
               "RelativeDocumentMoniker": "DataAccessObject\\Class1.cs",
@@ -110,12 +140,11 @@
               "RelativeToolTip": "DataAccessObject\\Class1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:12:11.767Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:12:11.767Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "Class1.cs",
               "DocumentMoniker": "D:\\MAJOR SUBJECT\\SWP\\SWP391\\Ticket\\BusinessObject\\Class1.cs",
               "RelativeDocumentMoniker": "BusinessObject\\Class1.cs",
@@ -123,8 +152,7 @@
               "RelativeToolTip": "BusinessObject\\Class1.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-05T09:11:47.265Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-05T09:11:47.265Z"
             }
           ]
         }
