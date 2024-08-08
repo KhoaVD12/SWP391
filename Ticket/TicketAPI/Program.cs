@@ -53,7 +53,7 @@ builder.Services.AddSwaggerGen(c =>
 var configuration = builder.Configuration;
 
 builder.Services.AddDbContext<TicketContext>(option =>
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
