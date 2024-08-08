@@ -1,14 +1,12 @@
-﻿using BusinessObject;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DataAccessObject.Entities;
 
 namespace DataAccessObject.IRepo
 {
-    public interface IUserRepo
+    public interface IUserRepo  : IGenericRepo<User>
     {
-        Task<User> Login(string email, string password);
+        Task<User> GetUserByEmailAddressAndPasswordHash(string email, string passwordHash);
+        Task<User?> GetByEmailAsync(string email);
+        Task<User> GetUserById(string id);
+        Task<bool> CheckEmailAddressExisted(string emailaddress);
     }
 }

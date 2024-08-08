@@ -1,8 +1,13 @@
-﻿using DataAccessObject.IService;
+﻿using BusinessObject.IService;
+using BusinessObject.Models;
+using BusinessObject.Models.UserDTO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TicketAPI.Controllers
 {
+    [EnableCors("Allow")]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -12,11 +17,37 @@ namespace TicketAPI.Controllers
         {
             _userService = userService;
         }
-        [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult>Login(string email, string password)
+        [HttpPost("login")]
+        public async Task<IActionResult>Login(LoginResquestDto login)
         {
-            var result =await _userService.Login(email, password);
+            var result =await _userService.LoginAsync(login);
+            if (!result.Success)
+            {
+                return StatusCode(401, result);
+            }
+
+            return Ok(
+                new
+                {
+                    success = result.Success,
+                    message = result.Message,
+                    token = result.Data,
+                    role = result.Role,
+                }
+            );
+        }
+
+        [AllowAnonymous]
+        [HttpPost("staff")] //Admin
+        public async Task<IActionResult> NewAccountStaff(CreateUserDto registerObject)
+        {
+            var result = await _userService.CreateStaff(registerObject);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
             return Ok(result);
         }
     }
