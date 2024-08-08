@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace BusinessObject;
+namespace DataAccessObject.Entities;
 
 public partial class TicketContext : DbContext
 {

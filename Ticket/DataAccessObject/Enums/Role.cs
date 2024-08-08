@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace DataAccessObject.Enums;
 
-public enum UserRole   
+public enum Role
 {
     [EnumMember(Value = "Admin")]
     Admin,
@@ -15,5 +15,4 @@ public enum UserRole
 
     [EnumMember(Value = "Organizer")]
     Organizer,
-
 }

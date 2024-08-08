@@ -1,6 +1,12 @@
 using System.Reflection;
 using System.Text;
-using BusinessObject;
+using BusinessObject.Commons;
+using BusinessObject.IService;
+using BusinessObject.Mappers;
+using BusinessObject.Service;
+using DataAccessObject.Entities;
+using DataAccessObject.IRepo;
+using DataAccessObject.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -34,8 +40,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer"
     });
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
+    Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
     c.AddSecurityRequirement(new OpenApiSecurityRequirement()
     {
@@ -51,9 +56,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 var configuration = builder.Configuration;
-
+builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
 builder.Services.AddDbContext<TicketContext>(option =>
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,6 +96,13 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
 });
+builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppConfiguration"));
+
+// Configure repositories
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+
+// Configure services
+builder.Services.AddScoped<IUserService, UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -107,8 +123,8 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-
 app.UseMiddleware<AuthorizeMiddleware>();
+
+app.MapControllers();
 
 app.Run();

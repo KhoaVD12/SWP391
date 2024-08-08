@@ -1,36 +1,41 @@
-﻿using BusinessObject;
+﻿using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DataAccessObject.Repo
+namespace DataAccessObject.Repo;
+
+public class UserRepo: RepoBase<User>, IUserRepo
 {
-    public class UserRepo: IUserRepo
+    private new readonly TicketContext _context;
+    public UserRepo(TicketContext context) : base(context)
     {
-        private IBaseRepo<User> baseRepo;
-        public UserRepo(IBaseRepo<User> repo)
+        _context = context;
+    }
+
+    public async Task<User> GetUserByEmailAddressAndPasswordHash(string email, string passwordHash)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(record => record.Email == email && record.Password == passwordHash);
+        if (user is null)
         {
-            baseRepo= repo;
+            throw new Exception("Email & password is not correct");
         }
 
-        public async Task<User> Login(string email, string password)
-        {
-            try
-            {
-                return await baseRepo.Get()
-                    .Include(p=>p.BoothRequests)
-                    .Include(p=>p.Events)
-                    .Where(u => u.Email == email && u.Password == password)
-                    .FirstOrDefaultAsync();
-            }
-            catch(Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
+        return user;
+    }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        return await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<User> GetUserById(string id)
+    {
+        return await _context.Users.FindAsync(id);
+    }
+
+    public async Task<bool> CheckEmailAddressExisted(string emailaddress)
+    {
+        return await _context.Users.AnyAsync(u => u.Email == emailaddress);
     }
 }

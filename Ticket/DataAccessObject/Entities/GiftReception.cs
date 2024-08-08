@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace BusinessObject;
+﻿namespace DataAccessObject.Entities;
 
 public partial class GiftReception
 {
