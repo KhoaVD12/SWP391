@@ -53,7 +53,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.TicketId, "IX_Attendee_TicketId");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CheckInStatus).IsUnicode(false);
             entity.Property(e => e.RegistrationDate).HasColumnType("datetime");
 
@@ -72,7 +71,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("AttendeeDetail");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Email).IsUnicode(false);
             entity.Property(e => e.Name).IsUnicode(false);
             entity.Property(e => e.Phone).IsUnicode(false);
@@ -87,7 +85,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("Booth");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.Location).IsUnicode(false);
             entity.Property(e => e.Name).IsUnicode(false);
@@ -102,7 +99,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.SponsorId, "IX_BoothRequest_SponsorId");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.RequestDate).HasColumnType("datetime");
             entity.Property(e => e.Status).IsUnicode(false);
 
@@ -125,7 +121,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.VenueId, "IX_Event_VenueId");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Description).IsUnicode(false);
             entity.Property(e => e.Status).IsUnicode(false);
             entity.Property(e => e.Title).IsUnicode(false);
@@ -147,7 +142,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.BoothId, "IX_Gift_BoothId");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.Name).IsUnicode(false);
 
@@ -163,7 +157,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.GiftId, "IX_GiftReception_GiftId");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ReceptionDate).HasColumnType("datetime");
 
             entity.HasOne(d => d.Attendee).WithMany(p => p.GiftReceptions)
@@ -181,7 +174,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("Payment");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).IsUnicode(false);
             entity.Property(e => e.Status).IsUnicode(false);
         });
@@ -190,7 +182,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("Ticket");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.TicketSaleEndDate).HasColumnType("datetime");
 
@@ -206,7 +197,6 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.PaymentMethod, "IX_Transaction_PaymentMethod");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Date).HasColumnType("datetime");
             entity.Property(e => e.Status).IsUnicode(false);
@@ -226,7 +216,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("User");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Email).IsUnicode(false);
             entity.Property(e => e.Name).IsUnicode(false);
             entity.Property(e => e.Password).IsUnicode(false);
@@ -238,7 +227,6 @@ public partial class TicketContext : DbContext
         {
             entity.ToTable("Venue");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.Name).IsUnicode(false);
             entity.Property(e => e.Status).IsUnicode(false);
