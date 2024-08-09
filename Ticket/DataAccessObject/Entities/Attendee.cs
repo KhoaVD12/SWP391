@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace DataAccessObject.Entities;
 
 public partial class Attendee
 {
-    public string AttendeeId { get; set; } = null!;
+    public int Id { get; set; }
 
     public DateTime RegistrationDate { get; set; }
 
