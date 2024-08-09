@@ -1,8 +1,11 @@
-﻿namespace DataAccessObject.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DataAccessObject.Entities;
 
 public partial class Gift
 {
-    public int GiftId { get; set; }
+    public int Id { get; set; }
 
     public string? Description { get; set; }
 

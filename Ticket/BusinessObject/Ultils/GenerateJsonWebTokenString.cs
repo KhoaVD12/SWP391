@@ -20,7 +20,7 @@ public static class GenerateJsonWebTokenString
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
-            new Claim("Id", user.UserId.ToString()),
+            new Claim("Id", user.Id.ToString()),
             new Claim("Email" ,user.Email),
             new Claim(ClaimTypes.Role ,user.Role),
         };

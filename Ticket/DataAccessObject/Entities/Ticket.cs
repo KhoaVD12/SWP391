@@ -1,8 +1,11 @@
-﻿namespace DataAccessObject.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DataAccessObject.Entities;
 
 public partial class Ticket
 {
-    public int TicketId { get; set; }
+    public int Id { get; set; }
 
     public decimal Price { get; set; }
 
@@ -10,5 +13,9 @@ public partial class Ticket
 
     public int Quantity { get; set; }
 
+    public DateTime TicketSaleEndDate { get; set; }
+
     public virtual ICollection<Attendee> Attendees { get; set; } = new List<Attendee>();
+
+    public virtual Event Event { get; set; } = null!;
 }
