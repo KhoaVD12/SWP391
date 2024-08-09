@@ -1,10 +1,13 @@
-﻿namespace DataAccessObject.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace DataAccessObject.Entities;
 
 public partial class AttendeeDetail
 {
-    public int DetailId { get; set; }
+    public int Id { get; set; }
 
-    public string AttendeeId { get; set; } = null!;
+    public int AttendeeId { get; set; }
 
     public string Name { get; set; } = null!;
 
