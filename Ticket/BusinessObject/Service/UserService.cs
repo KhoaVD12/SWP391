@@ -40,7 +40,7 @@ namespace BusinessObject.Service
                 }
 
                 var auth = user.Role;
-                var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.SecretKey,
+                var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key,
                     DateTime.Now);
                 response.Data = token;
                 response.Success = true;
@@ -93,13 +93,13 @@ namespace BusinessObject.Service
             {
                 response.Success = false;
                 response.Message = "Database error occurred.";
-                response.ErrorMessages = new List<string> { e.Message };
+                response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
             }
             catch (Exception e)
             {
                 response.Success = false;
                 response.Message = "Error";
-                response.ErrorMessages = new List<string> { e.Message };
+                response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
             }
 
             return response;

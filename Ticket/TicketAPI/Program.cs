@@ -16,10 +16,17 @@ using TicketAPI.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Configuration.AddJsonFile("Admin.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
+    options.AddPolicy("Sponsor", policy => policy.RequireRole("Sponsor"));
+    options.AddPolicy("Organizer", policy => policy.RequireRole("Organizer"));});
 builder.Services.AddSwaggerGen(c =>
 {
 
@@ -35,12 +42,10 @@ builder.Services.AddSwaggerGen(c =>
                       "\n\nEnter your token in the text input below. " +
                       "\n\nExample: '12345abcde'",
         Name = "Authorization",
-        Type = SecuritySchemeType.Http,
+        Type = SecuritySchemeType.ApiKey,
         BearerFormat = "JWT",
         Scheme = "bearer"
     });
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
     c.AddSecurityRequirement(new OpenApiSecurityRequirement()
     {
@@ -56,6 +61,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 var configuration = builder.Configuration;
+var myConfig = new AppConfiguration();
+configuration.Bind(myConfig);
+builder.Services.AddSingleton(myConfig);
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -77,11 +85,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             ValidIssuer = configuration["JWTSection:Issuer"],
             ValidAudience = configuration["JWTSection:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTSection:SecretKey"]))
-
-            //ValidIssuer = configuration["JWTSection:Issuer"],
-            //ValidAudience = configuration["JWTSection:Audience"],
-            //IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSection:Key"]))
 
         };
     });
@@ -114,7 +118,7 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("swagger/v1/swagger.json", "ZodiacJewelryWebApI v1");
+    c.SwaggerEndpoint("swagger/v1/swagger.json", "TicketApis v1");
     c.RoutePrefix = string.Empty;
 });
 
