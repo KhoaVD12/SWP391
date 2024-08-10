@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DataAccessObject.Enums;
 
 namespace DataAccessObject.Entities;
 
-public partial class User
+public class User
 {
     public int Id { get; set; }
 
@@ -13,11 +12,13 @@ public partial class User
 
     public string Password { get; set; } = null!;
 
-    public string Role { get; set; } = null!;
+    public Role Role { get; set; } 
 
     public string Status { get; set; } = null!;
 
     public virtual ICollection<BoothRequest> BoothRequests { get; set; } = new List<BoothRequest>();
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+
+
 }

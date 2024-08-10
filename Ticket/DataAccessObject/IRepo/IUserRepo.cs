@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 
 namespace DataAccessObject.IRepo
 {
@@ -8,5 +9,6 @@ namespace DataAccessObject.IRepo
         Task<User?> GetByEmailAsync(string email);
         Task<User> GetUserById(string id);
         Task<bool> CheckEmailAddressExisted(string emailaddress);
+        Task<User?> GetUserByRoleAsync(Role role);
     }
 }

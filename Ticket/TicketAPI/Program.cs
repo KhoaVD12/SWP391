@@ -100,7 +100,6 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
 });
-builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppConfiguration"));
 
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
@@ -127,7 +126,7 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<AuthorizeMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllers();
 
