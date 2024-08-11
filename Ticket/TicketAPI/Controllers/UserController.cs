@@ -1,53 +1,115 @@
-﻿using BusinessObject.IService;
-using BusinessObject.Models;
+using BusinessObject.IService;
 using BusinessObject.Models.UserDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TicketAPI.Controllers
+namespace TicketAPI.Controllers;
+
+[EnableCors("Allow")]
+[Authorize(Roles = "Admin")]
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
 {
-    [EnableCors("Allow")]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+
+    public UserController(IUserService userService)
     {
-        private readonly IUserService _userService;
-        public UserController(IUserService userService)
-        {
-            _userService = userService;
-        }
-        [HttpPost("login")]
-        public async Task<IActionResult>Login(LoginResquestDto login)
-        {
-            var result =await _userService.LoginAsync(login);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+        _userService = userService;
+    }
 
-            return Ok(
-                new
-                {
-                    success = result.Success,
-                    message = result.Message,
-                    token = result.Data,
-                    role = result.Role,
-                }
-            );
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    {
+        var result = await _userService.GetAllUsers(page, pageSize, search, sort);
+        if (!result.Success)
+        {
+            return BadRequest(result);
         }
 
-        [HttpPost("staff")] //Admin
-        public async Task<IActionResult> NewAccountStaff(CreateUserDto registerObject)
+        return Ok(result);
+    }
+
+    
+    [HttpPost("user")]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto registerObject)
+    {
+        var result = await _userService.CreateUserAsync(registerObject);
+
+        if (!result.Success)
         {
-            var result = await _userService.CreateStaff(registerObject);
-
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return BadRequest(result);
         }
+
+        return Ok(result);
+    }
+
+    [HttpGet("staff")]
+    public async Task<IActionResult> GetAllUsersCustomer([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    {
+        var result = await _userService.GetAllUsersByStaff(page, pageSize, search, sort);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("sponsor")]
+    public async Task<IActionResult> GetAllUsersAdmin([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    {
+        var result = await _userService.GetAllUsersBySponsor(page, pageSize, search, sort);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("organizer")]
+    public async Task<IActionResult> GetAllUsersStaff([FromQuery] int page = 1,  [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    {
+        var result = await _userService.GetAllUsersByOrganizer(page, pageSize, search, sort);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var result = await _userService.GetUserById(id);
+        if (!result.Success)
+        {
+            return NotFound(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userUpdateDto)
+    {
+        var result = await _userService.UpdateUser(userUpdateDto);
+        if (!result.Success)
+        {
+            return NotFound(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> ChangeStatus(int id, [FromBody] UserStatusDTO statusDto)
+    {
+        var result = await _userService.ChangeStatusCollection(id, statusDto);
+        return result.Success ? Ok(result) : BadRequest(result.Message);
     }
 }

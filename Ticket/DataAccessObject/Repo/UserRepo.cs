@@ -40,8 +40,63 @@ public class UserRepo: RepoBase<User>, IUserRepo
         return await _context.Users.AnyAsync(u => u.Email == emailaddress);
     }
 
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
     public async Task<User?> GetUserByRoleAsync(Role role)
     {
         return await _dbSet.FirstOrDefaultAsync(u => u.Role == role);
+    }
+
+    public async Task<User?> GetUserById(int id)
+    {
+        return await _context.Users.FindAsync(id);
+    }
+
+    public Task<IEnumerable<User?>> GetAllUsers()
+    {
+        return Task.FromResult<IEnumerable<User?>>(_context.Users.ToList());
+    }
+
+    public async Task<IEnumerable<User?>> GetAllUsersSponsor()
+    {
+        return await _context.Users
+            .Where(u => u.Role == Role.Sponsor)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<User?>> GetAllUsersStaff()
+    {
+        return await _context.Users
+            .Where(u => u.Role == Role.Staff)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<User?>> GetAllUsersOrganizer()
+    {
+        return await _context.Users
+            .Where(u => u.Role == Role.Organizer)
+            .ToListAsync();
+    }
+
+    public async Task UpdateUser(User user)
+    {
+        var existingUser = await _context.Users.FindAsync(user.Id);
+        if (existingUser == null)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+
+        // Update the properties
+        existingUser.Name = user.Name;
+        existingUser.Email = user.Email;
+
+        // Do not update the password to avoid setting it to null
+        // existingUser.Password remains unchanged
+
+        _context.Users.Update(existingUser);
+        await _context.SaveChangesAsync();
     }
 }
