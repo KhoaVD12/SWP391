@@ -27,6 +27,7 @@ builder.Services.AddDbContext<TicketContext>(options =>
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 // Configure services
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Configure AutoMapper

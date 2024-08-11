@@ -11,5 +11,11 @@ public class MapperConfigurationsProfile : Profile
     {
         CreateMap<User, LoginResquestDto>().ReverseMap();
         CreateMap<User, CreateUserDto>().ReverseMap();
+        CreateMap<ResetPassDTO, User>()
+            .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password));
+        CreateMap<User, ResetPassDTO>();
+        CreateMap<User, UserDTO>().ReverseMap();
+        CreateMap<User, UserUpdateDTO>().ReverseMap();
+        CreateMap<User, UserStatusDTO>().ReverseMap();
     }
 }
