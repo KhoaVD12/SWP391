@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,7 @@ namespace DataAccessObject.Repo;
 
 public class UserRepo: RepoBase<User>, IUserRepo
 {
-    private new readonly TicketContext _context;
+    private readonly TicketContext _context;
     public UserRepo(TicketContext context) : base(context)
     {
         _context = context;
@@ -37,5 +38,10 @@ public class UserRepo: RepoBase<User>, IUserRepo
     public async Task<bool> CheckEmailAddressExisted(string emailaddress)
     {
         return await _context.Users.AnyAsync(u => u.Email == emailaddress);
+    }
+
+    public async Task<User?> GetUserByRoleAsync(Role role)
+    {
+        return await _dbSet.FirstOrDefaultAsync(u => u.Role == role);
     }
 }

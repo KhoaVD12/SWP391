@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccessObject.Migrations
 {
     [DbContext(typeof(TicketContext))]
-    [Migration("20240808070258_Initial")]
-    partial class Initial
+    [Migration("20240811064058_FixAdmin")]
+    partial class FixAdmin
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,16 +27,16 @@ namespace DataAccessObject.Migrations
 
             modelBuilder.Entity("DataAccessObject.Entities.Attendee", b =>
                 {
-                    b.Property<string>("AttendeeId")
-                        .HasMaxLength(8)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(8)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CheckInStatus")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<int>("EventId")
                         .HasColumnType("int");
@@ -47,46 +47,42 @@ namespace DataAccessObject.Migrations
                     b.Property<int>("TicketId")
                         .HasColumnType("int");
 
-                    b.HasKey("AttendeeId")
-                        .HasName("PK_Attendee_1");
+                    b.HasKey("Id");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex(new[] { "EventId" }, "IX_Attendee_EventId");
 
-                    b.HasIndex("TicketId");
+                    b.HasIndex(new[] { "TicketId" }, "IX_Attendee_TicketId");
 
                     b.ToTable("Attendee", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.AttendeeDetail", b =>
                 {
-                    b.Property<int>("DetailId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("AttendeeId")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(8)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttendeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
-                    b.HasKey("DetailId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AttendeeId");
 
@@ -95,8 +91,11 @@ namespace DataAccessObject.Migrations
 
             modelBuilder.Entity("DataAccessObject.Entities.Booth", b =>
                 {
-                    b.Property<int>("BoothId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -106,34 +105,34 @@ namespace DataAccessObject.Migrations
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(30)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(30)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<int>("SponsorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
-                    b.HasKey("BoothId");
+                    b.HasKey("Id");
 
                     b.ToTable("Booth", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.BoothRequest", b =>
                 {
-                    b.Property<int>("BoothRequestId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BoothId")
                         .HasColumnType("int");
@@ -146,28 +145,29 @@ namespace DataAccessObject.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
-                    b.HasKey("BoothRequestId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("BoothId");
+                    b.HasIndex(new[] { "BoothId" }, "IX_BoothRequest_BoothId");
 
-                    b.HasIndex("SponsorId");
+                    b.HasIndex(new[] { "SponsorId" }, "IX_BoothRequest_SponsorId");
 
                     b.ToTable("BoothRequest", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Event", b =>
                 {
-                    b.Property<int>("EventId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
@@ -180,32 +180,33 @@ namespace DataAccessObject.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<int>("VenueId")
                         .HasColumnType("int");
 
-                    b.HasKey("EventId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OrganizerId");
+                    b.HasIndex(new[] { "OrganizerId" }, "IX_Event_OrganizerId");
 
-                    b.HasIndex("VenueId");
+                    b.HasIndex(new[] { "VenueId" }, "IX_Event_VenueId");
 
                     b.ToTable("Event", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Gift", b =>
                 {
-                    b.Property<int>("GiftId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BoothId")
                         .HasColumnType("int");
@@ -215,30 +216,29 @@ namespace DataAccessObject.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("GiftId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("BoothId");
+                    b.HasIndex(new[] { "BoothId" }, "IX_Gift_BoothId");
 
                     b.ToTable("Gift", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.GiftReception", b =>
                 {
-                    b.Property<int>("GiftReceptionId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("AttendeeId")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(8)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttendeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("GiftId")
                         .HasColumnType("int");
@@ -246,11 +246,11 @@ namespace DataAccessObject.Migrations
                     b.Property<DateTime>("ReceptionDate")
                         .HasColumnType("datetime");
 
-                    b.HasKey("GiftReceptionId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AttendeeId");
 
-                    b.HasIndex("GiftId");
+                    b.HasIndex(new[] { "GiftId" }, "IX_GiftReception_GiftId");
 
                     b.ToTable("GiftReception", (string)null);
                 });
@@ -258,22 +258,23 @@ namespace DataAccessObject.Migrations
             modelBuilder.Entity("DataAccessObject.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<DateOnly>("PaymentDate")
                         .HasColumnType("date");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
                     b.HasKey("Id");
 
@@ -282,8 +283,11 @@ namespace DataAccessObject.Migrations
 
             modelBuilder.Entity("DataAccessObject.Entities.Ticket", b =>
                 {
-                    b.Property<int>("TicketId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("EventId")
                         .HasColumnType("int");
@@ -294,24 +298,29 @@ namespace DataAccessObject.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("TicketId");
+                    b.Property<DateTime>("TicketSaleEndDate")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
 
                     b.ToTable("Ticket", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Transaction", b =>
                 {
-                    b.Property<int>("TransactionId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(10, 2)");
 
-                    b.Property<string>("AttendeeId")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(8)");
+                    b.Property<int>("AttendeeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime");
@@ -321,84 +330,86 @@ namespace DataAccessObject.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
-                    b.HasKey("TransactionId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AttendeeId");
 
-                    b.HasIndex("PaymentMethod");
+                    b.HasIndex(new[] { "PaymentMethod" }, "IX_Transaction_PaymentMethod");
 
                     b.ToTable("Transaction", (string)null);
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(8)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(8)");
+                        .HasColumnType("varchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(15)
+                    b.Property<int>("Role")
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
-                    b.Property<int>("UserRoleEnum")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserStatusEnum")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("User", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "admin@gmail.com",
+                            Name = "Admin",
+                            Password = "e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7",
+                            Role = 0,
+                            Status = "Active"
+                        });
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Venue", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(15)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("varchar(max)");
 
                     b.HasKey("Id");
 
@@ -503,6 +514,17 @@ namespace DataAccessObject.Migrations
                     b.Navigation("Gift");
                 });
 
+            modelBuilder.Entity("DataAccessObject.Entities.Ticket", b =>
+                {
+                    b.HasOne("DataAccessObject.Entities.Event", "Event")
+                        .WithMany("Tickets")
+                        .HasForeignKey("EventId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Ticket_Event");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("DataAccessObject.Entities.Transaction", b =>
                 {
                     b.HasOne("DataAccessObject.Entities.Attendee", "Attendee")
@@ -541,6 +563,8 @@ namespace DataAccessObject.Migrations
             modelBuilder.Entity("DataAccessObject.Entities.Event", b =>
                 {
                     b.Navigation("Attendees");
+
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Gift", b =>

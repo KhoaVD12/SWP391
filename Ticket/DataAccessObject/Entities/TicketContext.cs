@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BusinessObject.Ultils;
+using DataAccessObject.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessObject.Entities;
@@ -38,13 +38,9 @@ public partial class TicketContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Venue> Venues { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=(local);Database=Ticket;Uid=sa;Pwd=12345;TrustServerCertificate=True");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         modelBuilder.Entity<Attendee>(entity =>
         {
             entity.ToTable("Attendee");
@@ -236,4 +232,24 @@ public partial class TicketContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
+    {
+        // Hash the admin's password
+        var hashedPassword = HashPass.HashWithSHA256("Admin@123");
+
+        // Create the admin user
+        var adminUser = new User
+        {
+            Id = 1,
+            Name = "Admin",
+            Email = "admin@gmail.com",
+            Password = hashedPassword,
+            Role = Role.Admin,
+            Status = "Active"
+        };
+
+        // Seed the admin user
+        modelBuilder.Entity<User>().HasData(adminUser);
+    }
+
 }

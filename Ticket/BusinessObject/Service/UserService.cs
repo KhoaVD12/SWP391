@@ -7,102 +7,120 @@ using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.Extensions.Options;
 
-namespace BusinessObject.Service
+namespace BusinessObject.Service;
+
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private readonly IUserRepo _repo;
+    private readonly IMapper _mapper;
+    private readonly AppConfiguration _configuration;
+
+    public UserService(IUserRepo repo, AppConfiguration configuration, IMapper mapper)
     {
-        private readonly IUserRepo _repo;
-        private readonly IMapper _mapper;
-        private readonly AppConfiguration _configuration;
+        _repo = repo;
+        _mapper = mapper;
+        _configuration = configuration;
+    }
 
-        public UserService(IUserRepo repo, IOptions<AppConfiguration> configuration, IMapper mapper)
+    public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginForm)
+    {
+        var response = new ServiceResponse<string>();
+        try
         {
-            _repo = repo;
-            _mapper = mapper;
-            _configuration = configuration.Value;
-        }
-
-        public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginform)
-        {
-            var response = new ServiceResponse<string>();
-            try
+            if (loginForm == null)
             {
-                var passHash = HashPass.HashWithSHA256(loginform.Password);
-                var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginform.Email, passHash);
-                if (user == null)
-                {
-                    response.Success = false;
-                    response.Message = "Invalid username or password";
-                    return response;
-                }
-
-                var auth = user.Role;
-                var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.SecretKey,
-                    DateTime.Now);
-                response.Data = token;
-                response.Success = true;
-                response.Role = auth;
-                response.Message = "Login successful.";
+                throw new ArgumentNullException(nameof(loginForm));
+            }
+        
+            var passHash = HashPass.HashWithSHA256(loginForm.Password);
+            var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginForm.Email, passHash);
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "Invalid email or password.";
                 return response;
             }
-            catch (DbException ex)
-            {
-                response.Success = false;
-                response.Message = "Database error occurred.";
-                response.ErrorMessages = new List<string> { ex.Message };
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = "Error";
-                response.ErrorMessages = new List<string> { ex.Message };
-            }
 
+
+            var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
+            response.Data = token;
+            response.Success = true;
+            response.Message = "Login successful.";
             return response;
         }
-
-        public async Task<ServiceResponse<CreateUserDto>> CreateStaff(CreateUserDto userObject)
+        catch (DbException ex)
         {
-            var response = new ServiceResponse<CreateUserDto>();
-            try
+            response.Success = false;
+            response.Message = "Database error occurred.";
+            response.ErrorMessages = new List<string> { ex.Message };
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = "An error occurred.";
+            response.ErrorMessages = new List<string> { ex.Message };
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<CreateUserDto>> CreateStaff(CreateUserDto userObject)
+    {
+        var response = new ServiceResponse<CreateUserDto>();
+        try
+        {
+            // Check if email already exists
+            var userAccount = await _repo.CheckEmailAddressExisted(userObject.Email);
+            if (userAccount != null)
             {
-                var userAccount = await _repo.CheckEmailAddressExisted(userObject.Email);
-                if (userAccount == null)
+                response.Success = false;
+                response.Message = "Email is already existed";
+                return response;
+            }
+
+            // Prevent creation of additional admin accounts
+            if (userObject.Role == Role.Admin)
+            {
+                var existingAdmin = await _repo.GetUserByRoleAsync(Role.Admin);
+                if (existingAdmin != null)
                 {
                     response.Success = false;
-                    response.Message = "Email is already existed";
+                    response.Message = "An Admin already exists and cannot create another Admin.";
                     return response;
                 }
-
-                var userAccountRegister = _mapper.Map<User>(userObject);
-                userAccountRegister.Password = HashPass.HashWithSHA256(userObject.Password);
-
-                userAccountRegister.Status = "Active";
-                userAccountRegister.Role = "Staff";
-
-                await _repo.AddAsync(userAccountRegister);
-                var accountRegistedDto = _mapper.Map<CreateUserDto>(userAccountRegister);
-                response.Success = true;
-                response.Data = accountRegistedDto;
-                response.Message = "Register successfully.";
-            }
-            catch (DbException e)
-            {
-                response.Success = false;
-                response.Message = "Database error occurred.";
-                response.ErrorMessages = new List<string> { e.Message };
-            }
-            catch (Exception e)
-            {
-                response.Success = false;
-                response.Message = "Error";
-                response.ErrorMessages = new List<string> { e.Message };
             }
 
-            return response;
+            // Map the DTO to the User entity
+            var userAccountRegister = _mapper.Map<User>(userObject);
+            userAccountRegister.Password = HashPass.HashWithSHA256(userObject.Password);
+            userAccountRegister.Status = "Active"; // Default status
+
+            // Save the user
+            await _repo.AddAsync(userAccountRegister);
+
+            // Prepare the response
+            var accountRegisteredDto = _mapper.Map<CreateUserDto>(userAccountRegister);
+            response.Success = true;
+            response.Data = accountRegisteredDto;
+            response.Message = "User created successfully.";
         }
+        catch (DbException e)
+        {
+            response.Success = false;
+            response.Message = "Database error occurred.";
+            response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
+        }
+        catch (Exception e)
+        {
+            response.Success = false;
+            response.Message = "An error occurred.";
+            response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
+        }
+
+        return response;
     }
 }

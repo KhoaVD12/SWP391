@@ -23,7 +23,7 @@ namespace TicketAPI.Controllers
             var result =await _userService.LoginAsync(login);
             if (!result.Success)
             {
-                return StatusCode(401, result);
+                return BadRequest(result);
             }
 
             return Ok(
@@ -37,7 +37,6 @@ namespace TicketAPI.Controllers
             );
         }
 
-        [AllowAnonymous]
         [HttpPost("staff")] //Admin
         public async Task<IActionResult> NewAccountStaff(CreateUserDto registerObject)
         {

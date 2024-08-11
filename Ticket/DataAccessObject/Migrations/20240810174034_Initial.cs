@@ -15,26 +15,28 @@ namespace DataAccessObject.Migrations
                 name: "Booth",
                 columns: table => new
                 {
-                    BoothId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     SponsorId = table.Column<int>(type: "int", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
-                    Location = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: false)
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Location = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Booth", x => x.BoothId);
+                    table.PrimaryKey("PK_Booth", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Payment",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     PaymentDate = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
@@ -43,45 +45,31 @@ namespace DataAccessObject.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ticket",
-                columns: table => new
-                {
-                    TicketId = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    EventId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ticket", x => x.TicketId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    Password = table.Column<string>(type: "varchar(8)", unicode: false, maxLength: 8, nullable: false),
-                    Role = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
-                    UserRoleEnum = table.Column<int>(type: "int", nullable: false),
-                    UserStatusEnum = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Email = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Password = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Role = table.Column<int>(type: "int", unicode: false, nullable: false),
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.UserId);
+                    table.PrimaryKey("PK_User", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Venue",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false)
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,68 +80,71 @@ namespace DataAccessObject.Migrations
                 name: "Gift",
                 columns: table => new
                 {
-                    GiftId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Description = table.Column<string>(type: "text", nullable: true),
                     BoothId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Gift", x => x.GiftId);
+                    table.PrimaryKey("PK_Gift", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Gift_Booth",
                         column: x => x.BoothId,
                         principalTable: "Booth",
-                        principalColumn: "BoothId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "BoothRequest",
                 columns: table => new
                 {
-                    BoothRequestId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     SponsorId = table.Column<int>(type: "int", nullable: false),
                     BoothId = table.Column<int>(type: "int", nullable: false),
                     RequestDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false)
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BoothRequest", x => x.BoothRequestId);
+                    table.PrimaryKey("PK_BoothRequest", x => x.Id);
                     table.ForeignKey(
                         name: "FK_BoothRequest_Booth",
                         column: x => x.BoothId,
                         principalTable: "Booth",
-                        principalColumn: "BoothId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_BoothRequest_User",
                         column: x => x.SponsorId,
                         principalTable: "User",
-                        principalColumn: "UserId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Event",
                 columns: table => new
                 {
-                    EventId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     OrganizerId = table.Column<int>(type: "int", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Description = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
+                    Description = table.Column<string>(type: "varchar(max)", unicode: false, nullable: true),
                     VenueId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false)
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Event", x => x.EventId);
+                    table.PrimaryKey("PK_Event", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Event_User",
                         column: x => x.OrganizerId,
                         principalTable: "User",
-                        principalColumn: "UserId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Event_Venue",
                         column: x => x.VenueId,
@@ -162,93 +153,118 @@ namespace DataAccessObject.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Ticket",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    EventId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    TicketSaleEndDate = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ticket", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Ticket_Event",
+                        column: x => x.EventId,
+                        principalTable: "Event",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Attendee",
                 columns: table => new
                 {
-                    AttendeeId = table.Column<string>(type: "varchar(8)", unicode: false, maxLength: 8, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RegistrationDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    CheckInStatus = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false),
+                    CheckInStatus = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     TicketId = table.Column<int>(type: "int", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Attendee_1", x => x.AttendeeId);
+                    table.PrimaryKey("PK_Attendee", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Attendee_Event",
                         column: x => x.EventId,
                         principalTable: "Event",
-                        principalColumn: "EventId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Attendee_Ticket1",
                         column: x => x.TicketId,
                         principalTable: "Ticket",
-                        principalColumn: "TicketId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "AttendeeDetail",
                 columns: table => new
                 {
-                    DetailId = table.Column<int>(type: "int", nullable: false),
-                    AttendeeId = table.Column<string>(type: "varchar(8)", unicode: false, maxLength: 8, nullable: false),
-                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
-                    Phone = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AttendeeId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Email = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Phone = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AttendeeDetail", x => x.DetailId);
+                    table.PrimaryKey("PK_AttendeeDetail", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AttendeeDetail_Attendee",
                         column: x => x.AttendeeId,
                         principalTable: "Attendee",
-                        principalColumn: "AttendeeId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "GiftReception",
                 columns: table => new
                 {
-                    GiftReceptionId = table.Column<int>(type: "int", nullable: false),
-                    AttendeeId = table.Column<string>(type: "varchar(8)", unicode: false, maxLength: 8, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AttendeeId = table.Column<int>(type: "int", nullable: false),
                     GiftId = table.Column<int>(type: "int", nullable: false),
                     ReceptionDate = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GiftReception", x => x.GiftReceptionId);
+                    table.PrimaryKey("PK_GiftReception", x => x.Id);
                     table.ForeignKey(
                         name: "FK_GiftReception_Attendee",
                         column: x => x.AttendeeId,
                         principalTable: "Attendee",
-                        principalColumn: "AttendeeId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_GiftReception_Gift",
                         column: x => x.GiftId,
                         principalTable: "Gift",
-                        principalColumn: "GiftId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Transaction",
                 columns: table => new
                 {
-                    TransactionId = table.Column<int>(type: "int", nullable: false),
-                    AttendeeId = table.Column<string>(type: "varchar(8)", unicode: false, maxLength: 8, nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AttendeeId = table.Column<int>(type: "int", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "varchar(15)", unicode: false, maxLength: 15, nullable: false)
+                    Status = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Transaction", x => x.TransactionId);
+                    table.PrimaryKey("PK_Transaction", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Transaction_Attendee",
                         column: x => x.AttendeeId,
                         principalTable: "Attendee",
-                        principalColumn: "AttendeeId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Transaction_Payment",
                         column: x => x.PaymentMethod,
@@ -307,6 +323,11 @@ namespace DataAccessObject.Migrations
                 column: "GiftId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Ticket_EventId",
+                table: "Ticket",
+                column: "EventId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transaction_AttendeeId",
                 table: "Transaction",
                 column: "AttendeeId");
@@ -345,10 +366,10 @@ namespace DataAccessObject.Migrations
                 name: "Booth");
 
             migrationBuilder.DropTable(
-                name: "Event");
+                name: "Ticket");
 
             migrationBuilder.DropTable(
-                name: "Ticket");
+                name: "Event");
 
             migrationBuilder.DropTable(
                 name: "User");
