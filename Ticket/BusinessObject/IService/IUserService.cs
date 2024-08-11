@@ -6,7 +6,7 @@ namespace BusinessObject.IService
 {
     public interface IUserService
     {
-        Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginform);
+        Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginForm);
         public Task<ServiceResponse<CreateUserDto>> CreateStaff(CreateUserDto userObject);
 
     }

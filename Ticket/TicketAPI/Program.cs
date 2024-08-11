@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text;
 using BusinessObject.Commons;
 using BusinessObject.IService;
@@ -15,21 +14,55 @@ using TicketAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Configuration.AddJsonFile("Admin.json", optional: false, reloadOnChange: true);
+var configuration = builder.Configuration;
+var myConfig = new AppConfiguration();
+configuration.Bind(myConfig);
+builder.Services.AddSingleton(myConfig);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+// Configure DbContext
+builder.Services.AddDbContext<TicketContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+
+// Configure repositories
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+
+// Configure services
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Configure AutoMapper
+builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
+
+// Configure JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSection = builder.Configuration.GetSection("JWTSection");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]))
+        };
+    });
+// Configure Authorization
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
     options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
     options.AddPolicy("Sponsor", policy => policy.RequireRole("Sponsor"));
-    options.AddPolicy("Organizer", policy => policy.RequireRole("Organizer"));});
+    options.AddPolicy("Organizer", policy => policy.RequireRole("Organizer"));
+});
+
+// Configure Swagger
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
@@ -47,11 +80,13 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer"
     });
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme{
-                Reference = new OpenApiReference{
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
@@ -60,36 +95,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-var configuration = builder.Configuration;
-var myConfig = new AppConfiguration();
-configuration.Bind(myConfig);
-builder.Services.AddSingleton(myConfig);
-builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache();
-builder.Services.AddDbContext<TicketContext>(option =>
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        IConfiguration config = configuration;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = configuration["JWTSection:Issuer"],
-            ValidAudience = configuration["JWTSection:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSection:Key"]))
-
-        };
-    });
-
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -99,14 +106,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
-});
-
-// Configure repositories
-builder.Services.AddScoped<IUserRepo, UserRepo>();
-
-// Configure services
-builder.Services.AddScoped<IUserService, UserService>();
-var app = builder.Build();
+});var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

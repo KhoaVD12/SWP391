@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessObject", "BusinessO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketAPI", "TicketAPI\TicketAPI.csproj", "{F1318CB9-BFA1-4BD2-8EE4-A9B35A98DE12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{6174DDC4-0608-4F8E-8664-0B5D05A79BA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F1318CB9-BFA1-4BD2-8EE4-A9B35A98DE12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1318CB9-BFA1-4BD2-8EE4-A9B35A98DE12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1318CB9-BFA1-4BD2-8EE4-A9B35A98DE12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6174DDC4-0608-4F8E-8664-0B5D05A79BA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6174DDC4-0608-4F8E-8664-0B5D05A79BA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6174DDC4-0608-4F8E-8664-0B5D05A79BA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6174DDC4-0608-4F8E-8664-0B5D05A79BA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

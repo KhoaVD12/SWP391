@@ -7,7 +7,7 @@ namespace DataAccessObject.Repo;
 
 public class UserRepo: RepoBase<User>, IUserRepo
 {
-    private new readonly TicketContext _context;
+    private readonly TicketContext _context;
     public UserRepo(TicketContext context) : base(context)
     {
         _context = context;

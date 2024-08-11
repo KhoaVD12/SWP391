@@ -19,30 +19,34 @@ public class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly AppConfiguration _configuration;
 
-    public UserService(IUserRepo repo, IOptions<AppConfiguration> configuration, IMapper mapper)
+    public UserService(IUserRepo repo, AppConfiguration configuration, IMapper mapper)
     {
         _repo = repo;
         _mapper = mapper;
-        _configuration = configuration.Value;
+        _configuration = configuration;
     }
 
-    public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginform)
+    public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginForm)
     {
         var response = new ServiceResponse<string>();
         try
         {
-            var passHash = HashPass.HashWithSHA256(loginform.Password);
-            var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginform.Email, passHash);
+            if (loginForm == null)
+            {
+                throw new ArgumentNullException(nameof(loginForm));
+            }
+        
+            var passHash = HashPass.HashWithSHA256(loginForm.Password);
+            var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginForm.Email, passHash);
             if (user == null)
             {
                 response.Success = false;
-                response.Message = "Invalid username or password";
+                response.Message = "Invalid email or password.";
                 return response;
             }
 
-            var auth = user.Role;
-            var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key,
-                DateTime.Now);
+
+            var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
             response.Data = token;
             response.Success = true;
             response.Message = "Login successful.";
@@ -57,7 +61,7 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = "Error";
+            response.Message = "An error occurred.";
             response.ErrorMessages = new List<string> { ex.Message };
         }
 
