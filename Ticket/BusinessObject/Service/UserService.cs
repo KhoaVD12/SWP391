@@ -1,95 +1,86 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using AutoMapper;
-using BusinessObject.Commons;
 using BusinessObject.IService;
-using BusinessObject.Models;
 using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
-using Microsoft.Extensions.Options;
 
 namespace BusinessObject.Service;
 
-public class UserService : IUserService
+public class UserService   : IUserService
 {
-    private readonly IUserRepo _repo;
+    private readonly IUserRepo _userRepo;
     private readonly IMapper _mapper;
-    private readonly AppConfiguration _configuration;
 
-    public UserService(IUserRepo repo, AppConfiguration configuration, IMapper mapper)
+    public UserService(IUserRepo userRepo, IMapper mapper)
     {
-        _repo = repo;
+        _userRepo = userRepo;
         _mapper = mapper;
-        _configuration = configuration;
     }
 
-    public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginForm)
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsers(int page, int pageSize, string search, string sort)
     {
-        var response = new ServiceResponse<string>();
+        var response = new ServiceResponse<PaginationModel<UserDTO>>();
+
         try
         {
-            if (loginForm == null)
+            var users = await _userRepo.GetAllUsers();
+            if (!string.IsNullOrEmpty(search))
             {
-                throw new ArgumentNullException(nameof(loginForm));
-            }
-        
-            var passHash = HashPass.HashWithSHA256(loginForm.Password);
-            var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginForm.Email, passHash);
-            if (user == null)
-            {
-                response.Success = false;
-                response.Message = "Invalid email or password.";
-                return response;
+                users = users
+                    .Where(u => u != null && (u.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                                              u.Email.Contains(search, StringComparison.OrdinalIgnoreCase)));
             }
 
+            users = sort.ToLower() switch
+            {
+                "name" => users.OrderBy(u => u?.Name),
+                "email" => users.OrderBy(u => u?.Email),
+                "role" => users.OrderBy(u => u?.Role),
+                "status" => users.OrderBy(u => u?.Status),
+                _ => users.OrderBy(u => u?.Id).ToList()
+            };
+            var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
 
-            var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
-            response.Data = token;
+            var paginationModel =
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+            response.Data = paginationModel;
             response.Success = true;
-            response.Message = "Login successful.";
-            return response;
-        }
-        catch (DbException ex)
-        {
-            response.Success = false;
-            response.Message = "Database error occurred.";
-            response.ErrorMessages = new List<string> { ex.Message };
         }
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = "An error occurred.";
-            response.ErrorMessages = new List<string> { ex.Message };
+            response.Message = $"Failed to retrieve users: {ex.Message}";
         }
 
         return response;
     }
 
-    public async Task<ServiceResponse<CreateUserDto>> CreateStaff(CreateUserDto userObject)
+    public async Task<ServiceResponse<CreateUserDto>> CreateUserAsync(CreateUserDto userObject)
     {
         var response = new ServiceResponse<CreateUserDto>();
         try
         {
             // Check if email already exists
-            var userAccount = await _repo.CheckEmailAddressExisted(userObject.Email);
+            var userAccount = await _userRepo.CheckEmailAddressExisted(userObject.Email);
             if (userAccount != null)
             {
                 response.Success = false;
-                response.Message = "Email is already existed";
+                response.Message = "Email already exists.";
                 return response;
             }
 
             // Prevent creation of additional admin accounts
             if (userObject.Role == Role.Admin)
             {
-                var existingAdmin = await _repo.GetUserByRoleAsync(Role.Admin);
+                var existingAdmin = await _userRepo.GetUserByRoleAsync(Role.Admin);
                 if (existingAdmin != null)
                 {
                     response.Success = false;
-                    response.Message = "An Admin already exists and cannot create another Admin.";
+                    response.Message = "An admin already exists and cannot create another admin.";
                     return response;
                 }
             }
@@ -100,7 +91,7 @@ public class UserService : IUserService
             userAccountRegister.Status = "Active"; // Default status
 
             // Save the user
-            await _repo.AddAsync(userAccountRegister);
+            await _userRepo.AddAsync(userAccountRegister);
 
             // Prepare the response
             var accountRegisteredDto = _mapper.Map<CreateUserDto>(userAccountRegister);
@@ -112,15 +103,216 @@ public class UserService : IUserService
         {
             response.Success = false;
             response.Message = "Database error occurred.";
-            response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
+            response.ErrorMessages = new List<string> { e.Message};
         }
         catch (Exception e)
         {
             response.Success = false;
             response.Message = "An error occurred.";
-            response.ErrorMessages = new List<string> { e.Message, e.InnerException?.Message };
+            response.ErrorMessages = new List<string> { e.Message };
         }
 
         return response;
+    }
+
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByStaff(int page, int pageSize, string search, string sort)
+    {
+        var response = new ServiceResponse<PaginationModel<UserDTO>>();
+
+        try
+        {
+            var users = await _userRepo.GetAllUsersStaff();
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users
+                    .Where(u => u != null && (u.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                                              u.Email.Contains(search, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            users = sort.ToLower() switch
+            {
+                "name" => users.OrderBy(u => u?.Name),
+                "email" => users.OrderBy(u => u?.Email),
+                "status" => users.OrderBy(u => u?.Status),
+                _ => users.OrderBy(u => u?.Id).ToList()
+            };
+            var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
+
+            var paginationModel =
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); // Adjust pageSize as needed
+
+            response.Data = paginationModel;
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Failed to retrieve staff users: {ex.Message}";
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersBySponsor(int page, int pageSize, string search, string sort)
+    {
+        var response = new ServiceResponse<PaginationModel<UserDTO>>();
+
+        try
+        {
+            var users = await _userRepo.GetAllUsersSponsor();
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users
+                    .Where(u => u != null && (u.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                                              u.Email.Contains(search, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            users = sort.ToLower() switch
+            {
+                "name" => users.OrderBy(u => u?.Name),
+                "email" => users.OrderBy(u => u?.Email),
+                "status" => users.OrderBy(u => u?.Status),
+                _ => users.OrderBy(u => u?.Id).ToList()
+            };
+            var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
+
+            var paginationModel =
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+
+            response.Data = paginationModel;
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Failed to retrieve staff users: {ex.Message}";
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByOrganizer(int page, int pageSize, string search, string sort)
+    {
+        var response = new ServiceResponse<PaginationModel<UserDTO>>();
+
+        try
+        {
+            var users = await _userRepo.GetAllUsersOrganizer();
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users
+                    .Where(u => u != null && (u.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                                              u.Email.Contains(search, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            users = sort.ToLower() switch
+            {
+                "name" => users.OrderBy(u => u?.Name),
+                "email" => users.OrderBy(u => u?.Email),
+                "status" => users.OrderBy(u => u?.Status),
+                _ => users.OrderBy(u => u?.Id).ToList()
+            };
+            var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
+
+            var paginationModel =
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+
+            response.Data = paginationModel;
+            response.Success = true;
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Failed to retrieve staff users: {ex.Message}";
+        }
+
+        return response;
+    }
+
+
+    public async Task<ServiceResponse<UserDTO>> GetUserById(int id)
+    {
+        var serviceResponse = new ServiceResponse<UserDTO>();
+
+        try
+        {
+            var user = await _userRepo.GetUserById(id);
+            if (user == null)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "User not found";
+            }
+            else
+            {
+                var userDto = _mapper.Map<UserDTO>(user);
+                serviceResponse.Data = userDto;
+                serviceResponse.Success = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            serviceResponse.Success = false;
+            serviceResponse.Message = ex.Message;
+        }
+
+        return serviceResponse;
+    }
+
+    public async Task<ServiceResponse<string>> UpdateUser(UserUpdateDTO userUpdate)
+    {
+        var serviceResponse = new ServiceResponse<string>();
+
+        try
+        {
+            var userEntity = _mapper.Map<User>(userUpdate);
+            await _userRepo.UpdateUser(userEntity);
+
+            serviceResponse.Success = true;
+            serviceResponse.Message = "User updated successfully";
+        }
+        catch (Exception ex)
+        {
+            serviceResponse.Success = false;
+            serviceResponse.Message = $"Failed to update user: {ex.Message}";
+        }
+
+        return serviceResponse;
+    }
+
+    public async Task<ServiceResponse<UserDTO>> ChangeStatusCollection(int userId, UserStatusDTO statusReq)
+    {
+        var result = new ServiceResponse<UserDTO>();
+        try
+        {
+            var user = await _userRepo.GetUserById(userId);
+            if (user == null)
+            {
+                result.Success = false;
+                result.Message = "User not found";
+                return result;
+            }
+
+            user.Status = statusReq.Status;
+            await _userRepo.UpdateAsync(user);
+
+            result.Success = true;
+            result.Data = new UserDTO
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Status = user.Status
+            };
+            result.Message = "Status change successfully!";
+        }
+        catch (Exception e)
+        {
+            result.Success = false;
+            result.Message = e.InnerException != null
+                ? e.InnerException.Message + "\n" + e.StackTrace
+                : e.Message + "\n" + e.StackTrace;
+        }
+
+        return result;
     }
 }
