@@ -10,7 +10,7 @@ using DataAccessObject.IRepo;
 
 namespace BusinessObject.Service;
 
-public class UserService   : IUserService
+public class UserService : IUserService
 {
     private readonly IUserRepo _userRepo;
     private readonly IMapper _mapper;
@@ -21,7 +21,8 @@ public class UserService   : IUserService
         _mapper = mapper;
     }
 
-    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsers(int page, int pageSize, string search, string sort)
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsers(int page, int pageSize, string search,
+        string sort)
     {
         var response = new ServiceResponse<PaginationModel<UserDTO>>();
 
@@ -46,7 +47,7 @@ public class UserService   : IUserService
             var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
 
             var paginationModel =
-                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize);
             response.Data = paginationModel;
             response.Success = true;
         }
@@ -103,7 +104,7 @@ public class UserService   : IUserService
         {
             response.Success = false;
             response.Message = "Database error occurred.";
-            response.ErrorMessages = new List<string> { e.Message};
+            response.ErrorMessages = new List<string> { e.Message };
         }
         catch (Exception e)
         {
@@ -115,7 +116,8 @@ public class UserService   : IUserService
         return response;
     }
 
-    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByStaff(int page, int pageSize, string search, string sort)
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByStaff(int page, int pageSize,
+        string search, string sort)
     {
         var response = new ServiceResponse<PaginationModel<UserDTO>>();
 
@@ -153,7 +155,8 @@ public class UserService   : IUserService
         return response;
     }
 
-    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersBySponsor(int page, int pageSize, string search, string sort)
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersBySponsor(int page, int pageSize,
+        string search, string sort)
     {
         var response = new ServiceResponse<PaginationModel<UserDTO>>();
 
@@ -177,7 +180,7 @@ public class UserService   : IUserService
             var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
 
             var paginationModel =
-                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize);
 
             response.Data = paginationModel;
             response.Success = true;
@@ -191,7 +194,8 @@ public class UserService   : IUserService
         return response;
     }
 
-    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByOrganizer(int page, int pageSize, string search, string sort)
+    public async Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByOrganizer(int page, int pageSize,
+        string search, string sort)
     {
         var response = new ServiceResponse<PaginationModel<UserDTO>>();
 
@@ -215,7 +219,7 @@ public class UserService   : IUserService
             var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
 
             var paginationModel =
-                await Pagination.GetPaginationEnum(userDtOs, page, pageSize); 
+                await Pagination.GetPaginationEnum(userDtOs, page, pageSize);
 
             response.Data = paginationModel;
             response.Success = true;
