@@ -15,16 +15,18 @@ public class AttendeeService : IAttendeeService
 {
     private readonly IConfiguration _configuration;
     private readonly IAttendeeRepo _attendeeRepo;
+    private readonly IEventRepo _eventRepo;
     private readonly IMapper _mapper;
     private readonly IMemoryCache _memoryCache;
 
     public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IConfiguration configuration,
-        IMemoryCache memoryCache)
+        IMemoryCache memoryCache, IEventRepo eventRepo)
     {
         _mapper = mapper;
         _attendeeRepo = attendeeRepo;
         _configuration = configuration;
         _memoryCache = memoryCache;
+        _eventRepo = eventRepo;
     }
 
     public async Task<ServiceResponse<RegisterAttendeeDTO>> RegisterAttendeeAsync(
@@ -119,15 +121,36 @@ public class AttendeeService : IAttendeeService
 
     public async Task<ServiceResponse<IEnumerable<AttendeeDto>>> GetAttendeesByEventAsync(int eventId)
     {
-        var attendees = await _attendeeRepo.GetAttendeesByEventAsync(eventId);
-        var attendeeDtos = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
+        var response = new ServiceResponse<IEnumerable<AttendeeDto>>();
 
-        return new ServiceResponse<IEnumerable<AttendeeDto>>
+        try
         {
-            Data = attendeeDtos,
-            Success = true,
-            Message = "Attendees retrieved successfully."
-        };
+            // Check if the event exists
+            var eventEntity = await _eventRepo.GetByIdAsync(eventId);
+            if (eventEntity == null)
+            {
+                response.Success = false;
+                response.Message = "Event not found.";
+                return response;
+            }
+
+            // Get attendees for the event
+            var attendees = await _attendeeRepo.GetAttendeesByEventAsync(eventId);
+            var attendeeDtos = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
+
+            // Return the list of attendees
+            response.Data = attendeeDtos;
+            response.Success = true;
+            response.Message = "Attendees retrieved successfully.";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = "Error retrieving attendees.";
+            response.ErrorMessages = new List<string> { ex.Message };
+        }
+
+        return response;
     }
 
     public async Task<ServiceResponse<IEnumerable<AttendeeDto>>> SearchAttendeesAsync(int eventId, string searchTerm)

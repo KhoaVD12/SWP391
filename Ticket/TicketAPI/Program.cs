@@ -4,11 +4,13 @@ using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Mappers;
 using BusinessObject.Service;
+using CloudinaryDotNet;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TicketAPI.Middleware;
@@ -24,6 +26,16 @@ builder.Services.AddMemoryCache();
 // Configure DbContext
 builder.Services.AddDbContext<TicketContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+
+builder.Services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
+builder.Services.AddSingleton(provider =>
+{
+    var config = provider.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+    return new Cloudinary(new Account(
+        config.CloudName,
+        config.ApiKey,
+        config.ApiSecret));
+});
 
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
@@ -75,7 +87,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-});     
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -122,7 +134,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
-});var app = builder.Build();
+});
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -130,6 +143,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

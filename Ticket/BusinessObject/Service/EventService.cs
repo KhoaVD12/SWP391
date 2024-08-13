@@ -4,11 +4,10 @@ using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BusinessObject.Responses;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Http;
 
 namespace BusinessObject.Service
 {
@@ -17,12 +16,16 @@ namespace BusinessObject.Service
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
         private readonly AppConfiguration _appConfiguration;
-        public EventService(IEventRepo repo, AppConfiguration configuration, IMapper mapper)
+        private readonly Cloudinary _cloudinary;
+
+        public EventService(IEventRepo repo, AppConfiguration configuration, IMapper mapper, Cloudinary cloudinary)
         {
             _eventRepo = repo;
             _mapper = mapper;
+            _cloudinary = cloudinary;
             _appConfiguration = configuration;
         }
+
         public async Task<IEnumerable<ViewEventDTO>> GetAllEvents()
         {
             try
@@ -31,37 +34,80 @@ namespace BusinessObject.Service
                 var map = _mapper.Map<IEnumerable<ViewEventDTO>>(result);
                 return map;
             }
-            catch (Exception e) { throw new Exception(e.Message); }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
-        public async Task<CreateEventDTO> CreateEvent(CreateEventDTO eventDTO)
-        {
 
+        public async Task<ServiceResponse<CreateEventDTO>> CreateEvent(CreateEventDTO eventDTO)
+        {
+            var result = new ServiceResponse<CreateEventDTO>();
             try
             {
-                var createResult = _mapper.Map<Event>(eventDTO);
-                createResult.StartDate = DateOnly.FromDateTime(eventDTO.StartDate);
-                createResult.EndDate = DateOnly.FromDateTime(eventDTO.EndDate);
-                createResult.Status = "Pending";
-                var checkExistTitle = await _eventRepo.CheckExistByTitle(createResult.Title);
-                if (checkExistTitle)
+                if (eventDTO.Title != null)
                 {
-                    throw new Exception("Title Existed!!");
-                }
-                if (createResult.StartDate >= createResult.EndDate)
-                {
-                    throw new Exception("Start Date can not be bigger than or equal End Date");
-                }
-                await _eventRepo.AddAsync(createResult);
+                    var eventExist = await _eventRepo.CheckExistByTitle(eventDTO.Title);
+                    if (eventExist != null)
+                    {
+                        result.Success = false;
+                        result.Message = "Event with the same name already exist!";
+                    }
+                    else
+                    {
+                        {
+                            var imageURl = await UploadImageCollection(eventDTO.ImageUrl);
 
-                var res = _mapper.Map<CreateEventDTO>(createResult);
+                            var Event = new Event
+                            {
+                                Title = eventDTO.Title,
+                                ImageUrl = imageURl,
+                                StartDate = DateOnly.FromDateTime(eventDTO.StartDate),
+                                EndDate = DateOnly.FromDateTime(eventDTO.EndDate),
+                                Status = "Pending"
+                            };
+                            await _eventRepo.AddAsync(Event);
 
-                return res;
+                            var res = _mapper.Map<CreateEventDTO>(Event);
+
+                            result.Data = res;
+                        }
+
+                        result.Success = true;
+                        result.Message = "Create Event successfully!";
+                    }
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new Exception(ex.Message);
+                result.Success = false;
+                result.Message = e.InnerException != null
+                    ? e.InnerException.Message + "\n" + e.StackTrace
+                    : e.Message + "\n" + e.StackTrace;
             }
+
+            return result;
         }
+
+        public async Task<string> UploadImageCollection(IFormFile file)
+        {
+            if (file.Length <= 0) throw new Exception("Failed to upload image");
+            await using var stream = file.OpenReadStream();
+            var upLoadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(file.Name, stream),
+                Transformation = new Transformation().Crop("fill").Gravity("face")
+            };
+            var uploadResult = await _cloudinary.UploadAsync(upLoadParams);
+
+            if (uploadResult.Url != null)
+            {
+                return uploadResult.Url.ToString();
+            }
+
+            throw new Exception("Failed to upload image");
+        }
+
         public async Task<ViewEventDTO> GetEventById(int id)
         {
             try
@@ -75,18 +121,19 @@ namespace BusinessObject.Service
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<bool> DeleteEvent(int id)
         {
             try
             {
                 return await _eventRepo.DeleteEvent(id);
-
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<ViewEventDTO> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
             try
@@ -94,7 +141,6 @@ namespace BusinessObject.Service
                 var exist = await _eventRepo.GetEventById(id);
                 if (exist != null)
                 {
-
                     var updateResult = _mapper.Map<Event>(exist);
                     updateResult.StartDate = DateOnly.FromDateTime(eventDTO.StartDate);
                     updateResult.EndDate = DateOnly.FromDateTime(eventDTO.EndDate);
@@ -107,8 +153,8 @@ namespace BusinessObject.Service
             {
                 throw new Exception(ex.Message);
             }
+
             return null;
         }
-
     }
 }

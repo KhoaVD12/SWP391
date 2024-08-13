@@ -56,5 +56,14 @@ namespace DataAccessObject.Repo
         {
             return await _context.Events.AnyAsync(e => e.Title == inputString);
         }
+
+        public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
+        {
+            return await _context.Attendees
+                .Where(a => a.EventId == eventId)
+                .Include(a => a.AttendeeDetails)
+                .Include(a => a.Event)
+                .ToListAsync();
+        }
     }
 }

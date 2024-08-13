@@ -29,7 +29,8 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<Attendee, AttendeeDto>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Name))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Email))
-            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Phone)).ReverseMap();
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Phone))
+            .ReverseMap();
 
         CreateMap<CreateEventDTO, Event>()
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.StartDate)))
@@ -47,7 +48,7 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<Venue, CreateVenueDTO>().ReverseMap();
 
         CreateMap<CreateTicketDTO, Ticket>().ReverseMap();
-        
+
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
