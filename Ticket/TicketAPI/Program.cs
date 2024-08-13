@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Mappers;
@@ -18,6 +19,7 @@ var configuration = builder.Configuration;
 var myConfig = new AppConfiguration();
 configuration.Bind(myConfig);
 builder.Services.AddSingleton(myConfig);
+builder.Services.AddMemoryCache();
 
 // Configure DbContext
 builder.Services.AddDbContext<TicketContext>(options =>
@@ -25,10 +27,12 @@ builder.Services.AddDbContext<TicketContext>(options =>
 
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IAttendeeRepo, AttendeeRepo>();
 
 // Configure services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAttendeeService, AttendeeService>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
@@ -60,7 +64,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Configure Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});     
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
