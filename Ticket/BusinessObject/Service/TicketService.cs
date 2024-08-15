@@ -28,16 +28,16 @@ namespace BusinessObject.Service
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponse<CreateTicketDTO>> CreateTicket(CreateTicketDTO ticketDTO)
+        public async Task<ServiceResponse<ViewTicketDTO>> CreateTicket(CreateTicketDTO ticketDTO)
         {
-            var res = new ServiceResponse<CreateTicketDTO>();
+            var res = new ServiceResponse<ViewTicketDTO>();
             try
             {
                 var createResult = _mapper.Map<Ticket>(ticketDTO);
 
                 await _ticketRepo.CreateTicket(createResult);
 
-                var result = _mapper.Map<CreateTicketDTO>(ticketDTO);
+                var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
 
                 res.Success = true;
                 res.Message = "Ticket created successfully";
@@ -124,12 +124,13 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewTicketDTO>> UpdateTicket(int id, ViewTicketDTO ticketDTO)
+        public async Task<ServiceResponse<ViewTicketDTO>> UpdateTicket(int id, CreateTicketDTO ticketDTO)
         {
             var res = new ServiceResponse<ViewTicketDTO>();
             try
             {
-                var updateResult = _mapper.Map<Ticket>(ticketDTO);
+                var updateResult=_mapper.Map<Ticket>(ticketDTO);
+                updateResult.Id= id;
                 await _ticketRepo.UpdateTicket(id, updateResult);
                 var result = _mapper.Map<ViewTicketDTO>(updateResult);
                 res.Success = true;

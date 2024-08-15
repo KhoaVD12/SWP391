@@ -27,9 +27,9 @@ namespace BusinessObject.Service
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponse<CreateBoothDTO>> CreateBooth(CreateBoothDTO boothDTO)
+        public async Task<ServiceResponse<ViewBoothDTO>> CreateBooth(CreateBoothDTO boothDTO)
         {
-            var res = new ServiceResponse<CreateBoothDTO>();
+            var res = new ServiceResponse<ViewBoothDTO>();
             try
             {
                 var createResult = _mapper.Map<Booth>(boothDTO);
@@ -42,7 +42,7 @@ namespace BusinessObject.Service
                     return res;
                 }
                 await _boothRepo.CreateBooth(createResult);
-                var mapp = _mapper.Map<CreateBoothDTO>(createResult);
+                var mapp = _mapper.Map<ViewBoothDTO>(createResult);
                 res.Success = true;
                 res.Message = "Booth created successfully";
                 res.Data = mapp;
@@ -136,12 +136,13 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, ViewBoothDTO boothDTO)
+        public async Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, CreateBoothDTO boothDTO)
         {
             var res = new ServiceResponse<ViewBoothDTO>();
             try
             {
                 var updateResult = _mapper.Map<Booth>(boothDTO);
+                updateResult.Id = id;
                 await _boothRepo.UpdateBooth(id, updateResult);
                 var result = _mapper.Map<ViewBoothDTO>(updateResult);
                 res.Success = true;

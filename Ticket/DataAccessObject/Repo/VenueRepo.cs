@@ -40,11 +40,14 @@ namespace DataAccessObject.Repo
                 throw new Exception("Id not found");
             }
         }
-        public async Task UpdateVenue(Venue newVenue)
+        public async Task UpdateVenue(int id, Venue newVenue)
         {
-            var exist = await _context.Venues.FindAsync(newVenue.Id);
+            var exist = await _context.Venues.FindAsync(id);
             if (exist != null)
             {
+                exist.Description = newVenue.Description;
+                exist.Name = newVenue.Name;
+                exist.Status = newVenue.Status;
                 _context.Venues.Update(exist);
                 await _context.SaveChangesAsync();
             }
@@ -53,9 +56,10 @@ namespace DataAccessObject.Repo
                 throw new Exception("Id Not Found");
             }
         }
-        public Task<Venue> GetVenueById(int id)
+        public async Task<Venue> GetVenueById(int id)
         {
-            return _context.Set<Venue>().Where(v => v.Id == id).SingleOrDefaultAsync();
+            return await _context.Set<Venue>().Where(v => v.Id == id).SingleOrDefaultAsync();
         }
+        
     }
 }

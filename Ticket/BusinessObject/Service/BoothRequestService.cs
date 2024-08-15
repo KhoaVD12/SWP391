@@ -27,9 +27,9 @@ namespace BusinessObject.Service
             _boothRequestRepo = repo;
         }
 
-        public async Task<ServiceResponse<CreateBoothRequestDTO>> CreateBoothRequest(CreateBoothRequestDTO boothRequestDTO)
+        public async Task<ServiceResponse<ViewBoothRequestDTO>> CreateBoothRequest(CreateBoothRequestDTO boothRequestDTO)
         { 
-            var res=new ServiceResponse<CreateBoothRequestDTO>();
+            var res=new ServiceResponse<ViewBoothRequestDTO>();
             try
             {
                 var createResult=_mapper.Map<BoothRequest>(boothRequestDTO);
@@ -42,7 +42,7 @@ namespace BusinessObject.Service
                     return res;
                 }
                 await _boothRequestRepo.CreateBoothRequest(createResult);
-                var result = _mapper.Map<CreateBoothRequestDTO>(createResult);
+                var result = _mapper.Map<ViewBoothRequestDTO>(createResult);
                 res.Success = true;
                 res.Message = "Request created successfully";
                 res.Data = result;
@@ -133,13 +133,14 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewBoothRequestDTO>> UpdateBoothRequest(int id, ViewBoothRequestDTO boothRequestDTO)
+        public async Task<ServiceResponse<ViewBoothRequestDTO>> UpdateBoothRequest(int id, CreateBoothRequestDTO boothRequestDTO)
         {
             var res= new ServiceResponse<ViewBoothRequestDTO>();
             try
             {
                 var updateResult = _mapper.Map<BoothRequest>(boothRequestDTO);
                 updateResult.RequestDate = DateTime.Now;
+                updateResult.Id= id;
                 await _boothRequestRepo.UpdateBoothRequest(id, updateResult);
                 var result = _mapper.Map<ViewBoothRequestDTO>(updateResult);
                 res.Success = true;
