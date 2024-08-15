@@ -46,7 +46,7 @@ namespace TicketAPI.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateVenue(int id, ViewVenueDTO venueDTO)
+        public async Task<IActionResult> UpdateVenue(int id, CreateVenueDTO venueDTO)
         {
             var result = await _venueService.UpdateVenue(id, venueDTO);
             return Ok(result);

@@ -12,10 +12,10 @@ namespace BusinessObject.IService
 {
     public interface IVenueService
     {
-        Task <ServiceResponse<CreateVenueDTO>>  CreateVenue(CreateVenueDTO venueDTO);
+        Task <ServiceResponse<ViewVenueDTO>>  CreateVenue(CreateVenueDTO venueDTO);
         Task<ServiceResponse<PaginationModel<ViewVenueDTO>>>  GetAllVenues(int page, int pageSize, string search, string sort);
         Task <ServiceResponse<bool>> DeleteVenue(int id);
-        Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, ViewVenueDTO newVenue);
+        Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, CreateVenueDTO newVenue);
         Task<ServiceResponse<ViewVenueDTO>> GetVenueById(int id);
     }
 }

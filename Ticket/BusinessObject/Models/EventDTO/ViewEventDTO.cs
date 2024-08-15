@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace BusinessObject.Models.EventDTO
 {
     public class ViewEventDTO
     {
+        public int Id { get; set; }
         public string? Title { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -19,7 +21,7 @@ namespace BusinessObject.Models.EventDTO
         public string? Description { get; set; }
 
         public int VenueId { get; set; }
-
+        public IFormFile ImageUrl { get; set; }
         public string? Status { get; set; }
     }
 }

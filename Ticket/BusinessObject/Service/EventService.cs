@@ -94,9 +94,9 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<CreateEventDTO>> CreateEvent(CreateEventDTO eventDTO)
+        public async Task<ServiceResponse<ViewEventDTO>> CreateEvent(CreateEventDTO eventDTO)
         {
-            var result = new ServiceResponse<CreateEventDTO>();
+            var result = new ServiceResponse<ViewEventDTO>();
             try
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
@@ -139,7 +139,7 @@ namespace BusinessObject.Service
                     await _eventRepo.AddAsync(Event);
 
                     // Map to DTO
-                    var res = _mapper.Map<CreateEventDTO>(Event);
+                    var res = _mapper.Map<ViewEventDTO>(Event);
 
                     result.Data = res;
                     result.Success = true;
@@ -194,7 +194,7 @@ namespace BusinessObject.Service
             }
             return res;
         }
-        public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, ViewEventDTO eventDTO)
+        public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, CreateEventDTO eventDTO)
         {
             var res = new ServiceResponse<ViewEventDTO>();
             try

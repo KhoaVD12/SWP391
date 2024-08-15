@@ -57,7 +57,7 @@ namespace TicketAPI.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDTO)
+        public async Task<IActionResult> UpdateEvent(int id, CreateEventDTO eventDTO)
         {
             var result = await _eventService.UpdateEvent(id, eventDTO);
             return Ok(result);
