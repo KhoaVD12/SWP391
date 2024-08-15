@@ -9,6 +9,7 @@ namespace BusinessObject.Models.TicketDTO
     public class ViewTicketDTO
     {
         public int Id { get; set; }
+
         public decimal Price { get; set; }
 
         public int EventId { get; set; }
