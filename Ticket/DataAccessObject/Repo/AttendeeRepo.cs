@@ -1,17 +1,18 @@
 using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessObject.Repo;
 
 public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
-{
-    private readonly TicketContext _context;
-
-    public AttendeeRepo(TicketContext context) : base(context)
-    {
-        _context = context;
-    }
+{ private readonly TicketContext _context;
+ 
+     public AttendeeRepo(TicketContext context) : base(context)
+     {
+         _context = context;
+     }
+   
 
     public async Task<Attendee?> GetAttendeeByEventAndEmailAsync(int eventId, string email)
     {
@@ -32,10 +33,10 @@ public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
     {
         return await _context.Attendees
             .Include(a => a.AttendeeDetails)
-            .Where(a => a.EventId == eventId && 
+            .Where(a => a.EventId == eventId &&
                         (a.AttendeeDetails.Any(ad => ad.Name.Contains(searchTerm) || 
                                                      ad.Email.Contains(searchTerm)) ||
-                         a.CheckInStatus.Contains(searchTerm)))
+                         a.CheckInStatus.ToString().Contains(searchTerm))) 
             .ToListAsync();
     }
 
@@ -47,9 +48,15 @@ public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
             return false;
         }
 
-        attendee.CheckInStatus = status;
+        attendee.CheckInStatus = CheckInStatus.CheckedIn;
         _context.Attendees.Update(attendee);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<Attendee> GetAttendeeByCheckInCodeAsync(string checkInCode)
+    {
+        return await _context.Attendees
+            .FirstOrDefaultAsync(a => a.CheckInCode == checkInCode);
     }
 }

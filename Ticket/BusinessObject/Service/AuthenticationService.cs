@@ -6,6 +6,7 @@ using BusinessObject.Models;
 using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 
 namespace BusinessObject.Service;
@@ -44,7 +45,9 @@ public class AuthenticationService : IAuthenticationService
 
 
             var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
+            var roleName = response.Role.ToString();
             response.Data = token;
+            response.Role = user.Role;
             response.Success = true;
             response.Message = "Login successful.";
             return response;

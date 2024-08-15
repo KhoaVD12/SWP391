@@ -5,6 +5,7 @@ using BusinessObject.Models.AttendeeDto;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -36,8 +37,11 @@ public class AttendeeService : IAttendeeService
 
         try
         {
-            var existingAttendee = await _attendeeRepo.GetAttendeeByEventAndEmailAsync(registerAttendeeDto.EventId,
+            // Check if the attendee is already registered for the event
+            var existingAttendee = await _attendeeRepo.GetAttendeeByEventAndEmailAsync(
+                registerAttendeeDto.EventId,
                 registerAttendeeDto.AttendeeDetails.First().Email);
+
             if (existingAttendee != null)
             {
                 response.Success = false;
@@ -48,24 +52,26 @@ public class AttendeeService : IAttendeeService
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.CheckInStatus = "Pending";
+            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Use enum for status
+
+            // Generate check-in code
+            string checkInCode = GenerateCheckInCode();
+            attendee.CheckInCode = checkInCode; // Store the check-in code in the Attendee entity
 
             // Save to the database
             await _attendeeRepo.AddAsync(attendee);
 
-            // Generate check-in code
-            string checkInCode = GenerateCheckInCode();
-
-            string formattedDate = attendee.RegistrationDate.ToString("f");
-
             // Send email
             foreach (var attendeeDetail in registerAttendeeDto.AttendeeDetails)
             {
-                await SendEmail.SendRegistrationEmail(_memoryCache, attendeeDetail.Email, attendeeDetail.Name,
-                    attendee.RegistrationDate, checkInCode);
+                await SendEmail.SendRegistrationEmail(
+                    _memoryCache,
+                    attendeeDetail.Email,
+                    attendeeDetail.Name,
+                    attendee.RegistrationDate,
+                    checkInCode);
             }
 
-            // Return success response
             response.Data = registerAttendeeDto;
             response.Success = true;
             response.Message = "Attendee registered and email sent successfully.";
@@ -74,7 +80,7 @@ public class AttendeeService : IAttendeeService
         {
             response.Success = false;
             response.Message = "Error registering attendee.";
-            response.ErrorMessages = [ex.Message];
+            response.ErrorMessages = new List<string> { ex.Message };
         }
 
         return response;
@@ -196,6 +202,28 @@ public class AttendeeService : IAttendeeService
             Success = success,
             Message = success ? "Check-in status updated successfully." : "Attendee not found."
         };
+    }
+
+    public async Task<ServiceResponse<bool>> CheckInAttendeeByCodeAsync(string checkInCode)
+    {
+        var response = new ServiceResponse<bool>();
+
+        // Find the attendee by check-in code
+        var attendee = await _attendeeRepo.GetAttendeeByCheckInCodeAsync(checkInCode);
+        if (attendee == null)
+        {
+            response.Success = false;
+            response.Message = "Attendee not found";
+            return response;
+        }
+
+        attendee.CheckInStatus = CheckInStatus.CheckedIn;
+        await _attendeeRepo.UpdateAsync(attendee);
+
+        response.Data = true;
+        response.Success = true;
+        response.Message = "Attendee checked in successfully.";
+        return response;
     }
 
     private string GenerateCheckInCode()
