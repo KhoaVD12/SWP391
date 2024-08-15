@@ -67,12 +67,6 @@ public class UserService : IUserService
         {
             // Check if email already exists
             var userAccount = await _userRepo.CheckEmailAddressExisted(userObject.Email);
-            if (userAccount != null)
-            {
-                response.Success = false;
-                response.Message = "Email already exists.";
-                return response;
-            }
 
             // Prevent creation of additional admin accounts
             if (userObject.Role == Role.Admin)
