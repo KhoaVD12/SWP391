@@ -59,9 +59,8 @@ namespace TicketAPI.Controllers
 
             return Ok(result);
         }
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTicket(int id, ViewTicketDTO ticketDTO)
+        public async Task<IActionResult>UpdateTicket(int id, CreateTicketDTO ticketDTO)
         {
             var result = await _ticketService.UpdateTicket(id, ticketDTO);
             if (!result.Success)

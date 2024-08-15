@@ -35,7 +35,7 @@ namespace TicketAPI.Controllers
             return Ok(result);
         }
         [HttpPut]
-        public async Task<IActionResult>UpdateBoothRequest(int id, ViewBoothRequestDTO boothRequestDTO)
+        public async Task<IActionResult>UpdateBoothRequest(int id, CreateBoothRequestDTO boothRequestDTO)
         {
             var result = await _boothRequestService.UpdateBoothRequest(id, boothRequestDTO);
             return Ok(result);

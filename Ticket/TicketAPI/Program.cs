@@ -49,6 +49,7 @@ builder.Services.AddScoped<IBoothRepo, BoothRepo>();
 builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
 builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
 builder.Services.AddScoped<IBoothRequestRepo, BoothRequestRepo>();
+builder.Services.AddScoped<IGiftRepo, GiftRepo>();
 // Configure services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -60,6 +61,7 @@ builder.Services.AddScoped<IBoothService, BoothService>();
 builder.Services.AddScoped<IBoothRequestService, BoothRequestService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IGiftService, GiftService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 

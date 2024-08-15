@@ -211,6 +211,7 @@ namespace BusinessObject.Service
             return res;
         }
 
+
         public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO)
         {
             var res = new ServiceResponse<ViewEventDTO>();

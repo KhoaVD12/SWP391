@@ -8,7 +8,7 @@ namespace BusinessObject.Models.BoothDTO
 {
     public class ViewBoothDTO
     {
-
+        public int Id { get; set; }
         public int SponsorId { get; set; }
 
         public int EventId { get; set; }
