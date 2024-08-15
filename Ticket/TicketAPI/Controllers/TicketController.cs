@@ -1,9 +1,11 @@
 ﻿using BusinessObject.IService;
 using BusinessObject.Models.TicketDTO;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TicketAPI.Controllers
 {
+    [EnableCors("Allow")]
     [ApiController]
     [Route("api/[controller]")]
     public class TicketController:ControllerBase

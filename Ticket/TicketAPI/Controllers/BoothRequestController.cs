@@ -1,9 +1,12 @@
 ﻿using BusinessObject.IService;
 using BusinessObject.Models.BoothRequestDTO;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TicketAPI.Controllers
 {
+    [EnableCors("Allow")]
+
     [ApiController]
     [Route("api/[controller]")]
     public class BoothRequestController:ControllerBase
