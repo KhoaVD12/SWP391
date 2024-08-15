@@ -2,8 +2,16 @@
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
+using BusinessObject.Responses;
+using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BusinessObject.Responses;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
@@ -25,19 +33,62 @@ namespace BusinessObject.Service
             _cloudinary = cloudinary;
             _appConfiguration = configuration;
         }
-
-        public async Task<IEnumerable<ViewEventDTO>> GetAllEvents()
+        public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize, string search, string sort)
         {
+            var res = new ServiceResponse<PaginationModel<ViewEventDTO>>();
             try
             {
-                var result = await _eventRepo.GetEvent();
-                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(result);
-                return map;
+                var events = await _eventRepo.GetEvent();
+                if (!string.IsNullOrEmpty(search))
+                {
+                    events = events.Where(e => e != null && (e.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                        ;
+                }
+                events = sort.ToLower().Trim() switch
+                {
+                    "title" => events.OrderBy(e => e?.Title),
+                    "startdate" => events.OrderBy(e => e?.StartDate),
+                    "enddate"=>events.OrderBy(e=>e?.EndDate),
+                    _ => events.OrderBy(e => e.Id).ToList()
+                };
+
+                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
+                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                res.Data = paging;
+                res.Success = true;
+             }
+            catch (Exception e) 
+            { 
+                res.Success=false;
+                res.Message = $"Fail to get Event: {e.Message}";
             }
-            catch (Exception e)
+            return res;
+        }
+        
+        public async Task<ServiceResponse<ViewEventDTO>> GetEventById(int id)
+        {
+             var res = new ServiceResponse<ViewEventDTO>();
+            try
             {
-                throw new Exception(e.Message);
+                var result = await _eventRepo.GetEventById(id);
+                if(result != null)
+                {
+                    var mapp = _mapper.Map<ViewEventDTO>(result);
+                    res.Success = true;
+                    res.Data= mapp;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Event not Found";
+                }
             }
+            catch (Exception ex)
+            {
+                res.Success= false;
+                res.Message=ex.Message;
+            }
+            return res;
         }
 
         public async Task<ServiceResponse<CreateEventDTO>> CreateEvent(CreateEventDTO eventDTO)
@@ -108,53 +159,45 @@ namespace BusinessObject.Service
             throw new Exception("Failed to upload image");
         }
 
-        public async Task<ViewEventDTO> GetEventById(int id)
+        
+        public async Task<ServiceResponse<bool>> DeleteEvent(int id)
         {
+            var res= new ServiceResponse<bool>();
             try
             {
-                var result = await _eventRepo.GetEventById(id);
-                var mapp = _mapper.Map<ViewEventDTO>(result);
-                return mapp;
+                await _eventRepo.DeleteEvent(id);
+                res.Success = true;
+                res.Message = "Event Deleted successfully";
+
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                res.Success=false; 
+                res.Message=$"Fail to delete Event:{ex.Message}";
             }
+            return res;
         }
-
-        public async Task<bool> DeleteEvent(int id)
+        public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
+            var res = new ServiceResponse<ViewEventDTO>();
             try
             {
-                return await _eventRepo.DeleteEvent(id);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<ViewEventDTO> UpdateEvent(int id, ViewEventDTO eventDTO)
-        {
-            try
-            {
-                var exist = await _eventRepo.GetEventById(id);
-                if (exist != null)
-                {
-                    var updateResult = _mapper.Map<Event>(exist);
+                    var updateResult = _mapper.Map<Event>(eventDTO);
                     updateResult.StartDate = DateOnly.FromDateTime(eventDTO.StartDate);
                     updateResult.EndDate = DateOnly.FromDateTime(eventDTO.EndDate);
-                    await _eventRepo.UpdateEvent(updateResult);
-                    var res = _mapper.Map<ViewEventDTO>(updateResult);
-                    return res;
-                }
+                    await _eventRepo.UpdateEvent(id, updateResult);
+                    var result = _mapper.Map<ViewEventDTO>(updateResult);
+                    res.Success=true;
+                    res.Message = "Event updated successfully";
+                    res.Data=result;
+                
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                res.Success=false;
+                res.Message = $"Fail to update Event:{ex.Message}";
             }
-
-            return null;
+            return res;
         }
     }
 }

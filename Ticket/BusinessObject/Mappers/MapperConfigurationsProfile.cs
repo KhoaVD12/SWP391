@@ -46,11 +46,15 @@ public class MapperConfigurationsProfile : Profile
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToDateTime(TimeOnly.MinValue)));
 
         CreateMap<Venue, CreateVenueDTO>().ReverseMap();
+        CreateMap<Venue, ViewVenueDTO>().ReverseMap();
 
         CreateMap<CreateTicketDTO, Ticket>().ReverseMap();
-
+        CreateMap<ViewTicketDTO, Ticket>().ReverseMap();
+        
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
+        CreateMap<ViewBoothDTO,Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
+        CreateMap<ViewBoothRequestDTO, BoothRequest>().ReverseMap();
     }
 }
