@@ -44,7 +44,7 @@ namespace BusinessObject.Service
                 var events = await _eventRepo.GetEvent();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    events = events.Where(e => e != null && (e.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                    events = events.Where(e => (e.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
                         ;
                 }
                 events = sort.ToLower().Trim() switch

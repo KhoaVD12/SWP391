@@ -20,7 +20,7 @@ namespace TicketAPI.Controllers
         [HttpPost("Event")]
         [ProducesResponseType(typeof(ServiceResponse<CreateEventDTO>), StatusCodes.Status200OK)]
         [SwaggerResponse(200, "Create a new event", typeof(ServiceResponse<CreateEventDTO>))]
-        public async Task<IActionResult> CreateEvent([FromForm]CreateEventDTO eventDto)
+        public async Task<IActionResult> CreateEvent([FromForm] CreateEventDTO eventDto)
 
         {
             var result = await _eventService.CreateEvent(eventDto);
@@ -28,26 +28,32 @@ namespace TicketAPI.Controllers
             {
                 return BadRequest(result);
             }
+
             return Ok(result);
         }
+
         [HttpGet]
-        public async Task<IActionResult> GetEvent(int page, int pageSize, string search, string sort)
+        public async Task<IActionResult> GetEvent([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+            [FromQuery] string search = "", [FromQuery] string sort = "")
         {
-            var result = await _eventService.GetAllEvents(page,pageSize,search,sort);
+            var result = await _eventService.GetAllEvents(page, pageSize, search, sort);
             return Ok(result);
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEventById(int id)
         {
             var result = await _eventService.GetEventById(id);
             return Ok(result);
         }
+
         [HttpDelete]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var result = await _eventService.DeleteEvent(id);
             return Ok(result);
         }
+
         [HttpPut]
         public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
