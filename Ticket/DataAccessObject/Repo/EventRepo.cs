@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessObject.Enums;
 
 namespace DataAccessObject.Repo
 {
@@ -62,6 +63,12 @@ namespace DataAccessObject.Repo
         public async Task<Event?> CheckExistByTitle(string inputString)
         {
             return await _context.Events.FirstOrDefaultAsync(e => e.Title == inputString);
+        }
+
+        public async Task<IEnumerable<Event>> GetEventsByStatus(string status)
+        {
+            return await _context.Events
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
