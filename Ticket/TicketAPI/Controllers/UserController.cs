@@ -32,7 +32,7 @@ public class UserController : ControllerBase
     }
 
     
-    [HttpPost("user")]
+    [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto registerObject)
     {
         var result = await _userService.CreateUserAsync(registerObject);

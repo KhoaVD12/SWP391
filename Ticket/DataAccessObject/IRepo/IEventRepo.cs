@@ -14,6 +14,6 @@ namespace DataAccessObject.IRepo
         public Task<Event> GetEventById(int id);
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
-        Task<bool> CheckExistByTitle(string inputString);
+        Task<Event?> CheckExistByTitle(string inputString);
     }
 }
