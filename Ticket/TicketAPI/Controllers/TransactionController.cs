@@ -55,4 +55,35 @@ public class TransactionController : ControllerBase
         if (!result.Success) return BadRequest(result.Message);
         return Ok(result.Message);
     }
+
+    [HttpPut("transactions/{transactionId}/status")]
+    public async Task<IActionResult> UpdateTransactionStatus(int transactionId, [FromBody] string status)
+    {
+        var result = await _transactionService.UpdateTransactionStatusAsync(transactionId, status);
+
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get the total amount spent by an attendee.
+    /// </summary>
+    /// <param name="attendeeId">The ID of the attendee.</param>
+    /// <returns>A ServiceResponse containing the total amount.</returns>
+    [HttpGet("total-amount/{attendeeId}")]
+    public async Task<IActionResult> GetTotalAmountByAttendee(int attendeeId)
+    {
+        var response = await _transactionService.GetTotalAmountByAttendeeAsync(attendeeId);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
 }

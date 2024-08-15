@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessObject.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace BusinessObject.Models.EventDTO
@@ -17,5 +18,6 @@ namespace BusinessObject.Models.EventDTO
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public IFormFile ImageFile { get; set; } 
+        public string Status { get; set; }
     }
 }

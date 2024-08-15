@@ -26,6 +26,7 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<User, UserUpdateDTO>().ReverseMap();
         CreateMap<User, UserStatusDTO>().ReverseMap();
         CreateMap<AttendeeDetailDto, AttendeeDetail>().ReverseMap();
+        CreateMap<UpdateAttendeeDto, AttendeeDetail>().ReverseMap();
         CreateMap<RegisterAttendeeDTO, Attendee>()
             .ForMember(dest => dest.AttendeeDetails, opt => opt.MapFrom(src => src.AttendeeDetails)).ReverseMap();
         CreateMap<Attendee, AttendeeDto>()
