@@ -16,5 +16,6 @@ namespace BusinessObject.IService
         Task<ServiceResponse<PaginationModel<ViewVenueDTO>>>  GetAllVenues(int page, int pageSize, string search, string sort);
         Task <ServiceResponse<bool>> DeleteVenue(int id);
         Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, ViewVenueDTO newVenue);
+        Task<ServiceResponse<ViewVenueDTO>> GetVenueById(int id);
     }
 }

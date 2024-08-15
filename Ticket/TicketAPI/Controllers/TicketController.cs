@@ -19,6 +19,12 @@ namespace TicketAPI.Controllers
             var result=await _ticketService.GetAllTickets(page, pageSize, sort);
             return Ok(result);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult>GetTicketById(int ticketId)
+        {
+            var result=await _ticketService.GetTicketById(ticketId);
+            return Ok(result);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateTicket(CreateTicketDTO ticketDTO)
         {
