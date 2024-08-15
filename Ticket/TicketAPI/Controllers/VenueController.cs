@@ -25,6 +25,12 @@ namespace TicketAPI.Controllers
             var result = await _venueService.GetAllVenues(page, pageSize, search, sort);
             return Ok(result);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult>GetVenueById(int id)
+        {
+            var result=await _venueService.GetVenueById(id);
+            return Ok(result);
+        }
         [HttpDelete]
         public async Task<IActionResult> DeleteVenue(int id)
         {

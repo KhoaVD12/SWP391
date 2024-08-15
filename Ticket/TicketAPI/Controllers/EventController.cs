@@ -14,7 +14,7 @@ namespace TicketAPI.Controllers
         {
             _eventService = eventService;
         }
-        [HttpPost("Event")]
+        [HttpPost]
         public async Task<IActionResult> CreateEvent([FromForm]CreateEventDTO eventDto)
 
         {
@@ -42,7 +42,7 @@ namespace TicketAPI.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
-            var result = await _eventService.UpdateEvent(id, eventDto);
+            var result = await _eventService.UpdateEvent(id, eventDTO);
             return Ok(result);
         }
     }

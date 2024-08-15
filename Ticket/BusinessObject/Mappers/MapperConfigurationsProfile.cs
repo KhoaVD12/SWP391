@@ -55,5 +55,6 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<ViewBoothDTO,Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
+        CreateMap<ViewBoothRequestDTO, BoothRequest>().ReverseMap();
     }
 }

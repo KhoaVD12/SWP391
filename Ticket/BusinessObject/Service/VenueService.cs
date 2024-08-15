@@ -104,6 +104,32 @@ namespace BusinessObject.Service
             return res;
         }
 
+        public async Task<ServiceResponse<ViewVenueDTO>> GetVenueById(int id)
+        {
+            var res=new ServiceResponse<ViewVenueDTO>();
+            try
+            {
+                var result = await _venueRepo.GetVenueById(id);
+                if (result != null)
+                {
+                    var map = _mapper.Map<ViewVenueDTO>(result);
+                    res.Success = true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Venue not Found";
+                }
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
+            }
+            return res;
+        }
+
         public async Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, ViewVenueDTO newVenue)
         {
             var res = new ServiceResponse<ViewVenueDTO>();
