@@ -4,15 +4,8 @@ namespace DataAccessObject.Enums;
 
 public enum Role
 {
-    [EnumMember(Value = "Admin")]
-    Admin,
-
-    [EnumMember(Value = "Staff")]
-    Staff,
-
-    [EnumMember(Value = "Sponsor")]
-    Sponsor,
-
-    [EnumMember(Value = "Organizer")]
-    Organizer,
+    Admin = 0,
+    Organizer = 1,
+    Staff = 2,
+    Sponsor = 3,
 }

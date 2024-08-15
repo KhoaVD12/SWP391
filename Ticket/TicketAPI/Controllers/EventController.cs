@@ -9,14 +9,16 @@ namespace TicketAPI.Controllers
     public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;
+
         public EventController(IEventService eventService)
         {
             _eventService = eventService;
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateEvent(CreateEventDTO eventDTO)
+        [HttpPost("Event")]
+        public async Task<IActionResult> CreateEvent([FromForm]CreateEventDTO eventDto)
+
         {
-            var result = await _eventService.CreateEvent(eventDTO);
+            var result = await _eventService.CreateEvent(eventDto);
             return Ok(result);
         }
         [HttpGet]
@@ -40,7 +42,7 @@ namespace TicketAPI.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
-            var result = await _eventService.UpdateEvent(id, eventDTO);
+            var result = await _eventService.UpdateEvent(id, eventDto);
             return Ok(result);
         }
     }
