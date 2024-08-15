@@ -13,7 +13,7 @@ namespace DataAccessObject.IRepo
         public Task<IEnumerable<Event>> GetEvent();
         public Task<Event> GetEventById(int id);
         public Task<bool> DeleteEvent(int id);
-        public Task UpdateEvent(Event e);
+        public Task UpdateEvent(int id, Event e);
         Task<bool> CheckExistByTitle(string inputString);
     }
 }

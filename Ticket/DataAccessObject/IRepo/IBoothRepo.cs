@@ -10,5 +10,10 @@ namespace DataAccessObject.IRepo
     public interface IBoothRepo:IGenericRepo<Booth>
     {
         Task CreateBooth(Booth booth);
+        Task<IEnumerable<Booth>> GetBooth();
+        Task<Booth> GetBoothById(int id);
+        Task<bool> DeleteBooth(int id);
+        Task UpdateBooth(int id, Booth booth);
+        Task<bool> CheckExistByName(string inputString);
     }
 }
