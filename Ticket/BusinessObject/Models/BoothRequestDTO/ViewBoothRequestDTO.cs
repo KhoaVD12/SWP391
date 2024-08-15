@@ -8,6 +8,7 @@ namespace BusinessObject.Models.BoothRequestDTO
 {
     public class ViewBoothRequestDTO
     {
+        public int Id { get; set; }
         public int SponsorId { get; set; }
 
         public int BoothId { get; set; }

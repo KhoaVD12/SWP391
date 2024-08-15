@@ -109,6 +109,7 @@ namespace TicketAPI.Controllers
             return Ok(result);
         }
 
+
         /// <summary>
         /// Update an existing event.
         /// </summary>

@@ -27,16 +27,16 @@ namespace BusinessObject.Service
             _venueRepo = venueRepo;
             _appConfiguration = configuration;
         }
-        public async Task<ServiceResponse<CreateVenueDTO>> CreateVenue(CreateVenueDTO venueDTO)
+        public async Task<ServiceResponse<ViewVenueDTO>> CreateVenue(CreateVenueDTO venueDTO)
         {
-            var res = new ServiceResponse<CreateVenueDTO>();
+            var res = new ServiceResponse<ViewVenueDTO>();
             try
             {
                 var mapp = _mapper.Map<Venue>(venueDTO);
 
                 await _venueRepo.CreateVenue(mapp);
 
-                var result = _mapper.Map<CreateVenueDTO>(mapp);
+                var result = _mapper.Map<ViewVenueDTO>(mapp);
 
                 res.Success = true;
                 res.Data = result;
@@ -130,21 +130,18 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, ViewVenueDTO newVenue)
+        public async Task<ServiceResponse<ViewVenueDTO>> UpdateVenue(int id, CreateVenueDTO newVenue)
         {
             var res = new ServiceResponse<ViewVenueDTO>();
             try
             {
-                var exist = await _venueRepo.GetVenueById(id);
-                if (exist != null)
-                {
                     var mapp = _mapper.Map<Venue>(newVenue);
-                    await _venueRepo.UpdateVenue(mapp);
+                    mapp.Id = id;
+                    await _venueRepo.UpdateVenue(id, mapp);
                     var result = _mapper.Map<ViewVenueDTO>(mapp);
                     res.Success = true;
                     res.Message = "Venue updated successfully";
                     res.Data = result;
-                }
             }
             catch (Exception e)
             {
