@@ -1,11 +1,13 @@
 ﻿using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Responses;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace TicketAPI.Controllers
 {
+    [EnableCors("Allow")]
     [ApiController]
     [Route("api/[controller]")]
     public class EventController : ControllerBase

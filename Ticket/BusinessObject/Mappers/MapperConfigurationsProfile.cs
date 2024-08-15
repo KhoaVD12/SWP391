@@ -4,7 +4,9 @@ using BusinessObject.Models.AttendeeDto;
 using BusinessObject.Models.BoothDTO;
 using BusinessObject.Models.BoothRequestDTO;
 using BusinessObject.Models.EventDTO;
+using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TicketDTO;
+using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Models.UserDTO;
 using BusinessObject.Models.VenueDTO;
 using DataAccessObject.Entities;
@@ -50,13 +52,17 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<CreateTicketDTO, Ticket>().ReverseMap();
         CreateMap<ViewTicketDTO, Ticket>().ReverseMap();
-        
+
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
-        CreateMap<ViewBoothDTO,Booth>().ReverseMap();
+        CreateMap<ViewBoothDTO, Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
         CreateMap<ViewBoothRequestDTO, BoothRequest>().ReverseMap();
 
+        CreateMap<Transaction, CreateTransactionDto>().ReverseMap();
+        CreateMap<Transaction, TransactionDto>().ReverseMap();
 
+        CreateMap<Payment, CreatePaymentMethodDto>().ReverseMap();
+        CreateMap<Payment, PaymentMethodDto>().ReverseMap();
     }
 }
