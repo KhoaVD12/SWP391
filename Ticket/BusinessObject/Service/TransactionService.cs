@@ -1,5 +1,7 @@
 using AutoMapper;
 using BusinessObject.IService;
+using BusinessObject.Mappers;
+using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Responses;
 using DataAccessObject.Entities;
@@ -187,5 +189,36 @@ public class TransactionService : ITransactionService
             response.ErrorMessages = new List<string> { ex.Message };
         }
         return response;
+    }
+
+    public async Task<ServiceResponse<Transaction>> UpdateTransactionStatusAsync(int transactionId, string status)
+    {
+        var response = new ServiceResponse<Transaction>();
+
+        try
+        {
+            var transaction = await _transactionRepo.UpdateTransactionStatusAsync(transactionId, status);
+
+            if (transaction == null)
+            {
+                response.Success = false;
+                response.Message = "Transaction not found.";
+            }
+            else
+            {
+                response.Data = transaction;
+                response.Success = true;
+                response.Message = "Transaction status updated successfully.";
+            }
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = "An error occurred while updating the transaction status.";
+            response.ErrorMessages = new List<string> { ex.Message };
+        }
+
+        return response;
+
     }
 }

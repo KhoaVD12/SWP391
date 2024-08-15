@@ -7,6 +7,7 @@ using BusinessObject.Mappers;
 using BusinessObject.Service;
 using CloudinaryDotNet;
 using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -84,10 +85,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Configure Authorization
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
-    options.AddPolicy("Sponsor", policy => policy.RequireRole("Sponsor"));
-    options.AddPolicy("Organizer", policy => policy.RequireRole("Organizer"));
+    options.AddPolicy("Admin", policy => policy.RequireRole(Role.Admin.ToString()));
+    options.AddPolicy("Staff", policy => policy.RequireRole(Role.Staff.ToString()));
+    options.AddPolicy("Sponsor", policy => policy.RequireRole(Role.Sponsor.ToString()));
+    options.AddPolicy("Organizer", policy => policy.RequireRole(Role.Organizer.ToString()));
 });
 
 // Configure Swagger

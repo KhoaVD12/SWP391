@@ -1,6 +1,7 @@
 ﻿using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Responses;
+using DataAccessObject.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -143,12 +144,11 @@ namespace TicketAPI.Controllers
         }
 
         /// <summary>
-        /// Change the status of an event to active.
+        /// Change the status of an event by admin.
         /// </summary>
         /// <param name="statusDto">Event status details.</param>
         /// <returns>A response indicating the status change.</returns>
         [HttpPost("ChangeEventStatus")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeEventStatus([FromBody] ChangeEventStatusDTO statusDto)
         {
             var result = await _eventService.ChangeEventStatus(statusDto);
@@ -160,19 +160,18 @@ namespace TicketAPI.Controllers
             return Ok(result);
         }
 
-        /*[HttpPost("CreateEventWithTickets")]
-        [ProducesResponseType(typeof(ServiceResponse<CreateEventWithTicketsDTO>), StatusCodes.Status200OK)]
-        [SwaggerResponse(200, "Create event with a single ticket", typeof(ServiceResponse<CreateEventWithTicketsDTO>))]
-        public async Task<IActionResult> CreateEventWithTickets(
-            [FromForm] CreateEventWithTicketsDTO eventWithTicketsDto)
+        [HttpGet("status/{status}")]
+        public async Task<IActionResult> GetEventsByStatus( string status, [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
         {
-            var result = await _eventService.CreateEventWithTickets(eventWithTicketsDto);
+            var result = await _eventService.GetEventsByStatus(status, page, pageSize);
             if (!result.Success)
             {
-                return BadRequest(result);
+                return BadRequest(result.Message);
             }
 
             return Ok(result);
-        }*/
+        }
+
+        
     }
 }

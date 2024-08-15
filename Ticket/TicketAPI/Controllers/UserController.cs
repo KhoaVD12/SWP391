@@ -108,7 +108,7 @@ public class UserController : ControllerBase
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> ChangeStatus(int id, [FromBody] UserStatusDTO statusDto)
     {
-        var result = await _userService.ChangeStatusCollection(id, statusDto);
+        var result = await _userService.ChangeStatus(id, statusDto);
         return result.Success ? Ok(result) : BadRequest(result.Message);
     }
 }
