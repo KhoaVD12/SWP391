@@ -4,9 +4,10 @@ using BusinessObject.Models.AttendeeDto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TicketAPI.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
-public class AttendeeController  : ControllerBase
+public class AttendeeController : ControllerBase
 {
     private readonly IAttendeeService _attendeeService;
 
@@ -18,7 +19,6 @@ public class AttendeeController  : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAttendee([FromBody] RegisterAttendeeDTO registerAttendeeDto)
     {
-
         var result = await _attendeeService.RegisterAttendeeAsync(registerAttendeeDto);
         if (!result.Success)
         {
@@ -54,6 +54,7 @@ public class AttendeeController  : ControllerBase
         {
             return NotFound();
         }
+
         return Ok(attendee);
     }
 
@@ -91,5 +92,17 @@ public class AttendeeController  : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpPost("checkin/qr")]
+    public async Task<IActionResult> CheckInByQrCode([FromBody] string qrCode)
+    {
+        var result = await _attendeeService.CheckInAttendeeByCodeAsync(qrCode);
+        if (!result.Success)
+        {
+            return BadRequest(result.Message);
+        }
+
+        return Ok(result.Message);
     }
 }

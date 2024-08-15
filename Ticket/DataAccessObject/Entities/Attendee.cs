@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccessObject.Enums;
 
 namespace DataAccessObject.Entities;
 
@@ -9,11 +10,12 @@ public partial class Attendee
 
     public DateTime RegistrationDate { get; set; }
 
-    public string CheckInStatus { get; set; } = null!;
+    public CheckInStatus CheckInStatus { get; set; }
 
     public int TicketId { get; set; }
 
     public int EventId { get; set; }
+    public string CheckInCode { get; set; } = null!;
 
     public virtual ICollection<AttendeeDetail> AttendeeDetails { get; set; } = new List<AttendeeDetail>();
 

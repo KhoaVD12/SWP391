@@ -1,4 +1,5 @@
 using BusinessObject.Models.AttendeeDto;
+using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Responses;
 
 namespace BusinessObject.IService;
@@ -12,4 +13,5 @@ public interface IAttendeeService
     Task<ServiceResponse<IEnumerable<AttendeeDto>>> SearchAttendeesAsync(int eventId, string searchTerm);
     Task<ServiceResponse<string>> ExportAttendeesToCsvAsync(int eventId);
     Task<ServiceResponse<bool>> UpdateCheckInStatusAsync(int attendeeId, string status);
+    Task<ServiceResponse<bool>> CheckInAttendeeByCodeAsync(string checkInCode);
 }

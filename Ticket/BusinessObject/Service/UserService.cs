@@ -45,7 +45,7 @@ public class UserService : IUserService
                 _ => users.OrderBy(u => u?.Id).ToList()
             };
             var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
-
+                                                        
             var paginationModel =
                 await Pagination.GetPaginationEnum(userDtOs, page, pageSize);
             response.Data = paginationModel;
