@@ -39,12 +39,19 @@ namespace DataAccessObject.Repo
             }
 
         }
-        public async Task UpdateEvent(Event e)
+        public async Task UpdateEvent(int id, Event e)
         {
-            var exist = await _context.Events.FindAsync(e.Id);
+            var exist = await _context.Events.FindAsync(id);
             if (exist != null)
             {
-                _context.Events.Update(e);
+                exist.Title = e.Title;
+                exist.StartDate= e.StartDate;
+                exist.EndDate= e.EndDate;
+                exist.VenueId = e.VenueId;
+                exist.Description = e.Description;
+                exist.OrganizerId= e.OrganizerId;
+                exist.Status = e.Status;
+                _context.Events.Update(exist);
                 await _context.SaveChangesAsync();
             }
             else

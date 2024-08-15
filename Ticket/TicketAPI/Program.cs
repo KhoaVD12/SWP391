@@ -47,6 +47,7 @@ builder.Services.AddScoped<ITicketRepo, TicketRepo>();
 builder.Services.AddScoped<IBoothRepo, BoothRepo>();
 builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
 builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
+builder.Services.AddScoped<IBoothRequestRepo, BoothRequestRepo>();
 // Configure services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IBoothService, BoothService>();
+builder.Services.AddScoped<IBoothRequestService, BoothRequestService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
