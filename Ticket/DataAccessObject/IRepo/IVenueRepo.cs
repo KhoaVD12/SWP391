@@ -9,6 +9,10 @@ namespace DataAccessObject.IRepo
 {
     public interface IVenueRepo : IGenericRepo<Venue>
     {
-        Task<Venue> CreateVenue(Venue venue);
+        Task CreateVenue(Venue venue);
+        Task<IEnumerable<Venue>> GetAllVenues();
+        Task<bool> DeleteVenue(int id);
+        Task UpdateVenue(Venue newVenue);
+        Task<Venue> GetVenueById(int id);
     }
 }

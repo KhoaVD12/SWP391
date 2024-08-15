@@ -14,37 +14,33 @@ namespace TicketAPI.Controllers
         {
             _eventService = eventService;
         }
-
         [HttpPost("Event")]
         public async Task<IActionResult> CreateEvent([FromForm]CreateEventDTO eventDto)
+
         {
             var result = await _eventService.CreateEvent(eventDto);
             return Ok(result);
         }
-
-        [HttpGet("Event")]
-        public async Task<IActionResult> GetEvent()
+        [HttpGet]
+        public async Task<IActionResult> GetEvent(int page, int pageSize, string search, string sort)
         {
-            var result = await _eventService.GetAllEvents();
+            var result = await _eventService.GetAllEvents(page,pageSize,search,sort);
             return Ok(result);
         }
-
-        [HttpGet("Event/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetEventById(int id)
         {
             var result = await _eventService.GetEventById(id);
             return Ok(result);
         }
-
-        [HttpDelete("Event")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var result = await _eventService.DeleteEvent(id);
             return Ok(result);
         }
-
-        [HttpPut("Event")]
-        public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateEvent(int id, ViewEventDTO eventDTO)
         {
             var result = await _eventService.UpdateEvent(id, eventDto);
             return Ok(result);

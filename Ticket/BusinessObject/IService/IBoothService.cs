@@ -1,4 +1,6 @@
 ﻿using BusinessObject.Models.BoothDTO;
+using BusinessObject.Models.EventDTO;
+using BusinessObject.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,10 @@ namespace BusinessObject.IService
 {
     public interface IBoothService
     {
-        Task<CreateBoothDTO> CreateBooth(CreateBoothDTO boothDTO);
+        public Task<ServiceResponse<PaginationModel<ViewBoothDTO>>> GetAllBooths(int page, int pageSize, string search, string sort);
+        public Task<ServiceResponse<ViewBoothDTO>> GetBoothById(int id);
+        public Task<ServiceResponse<CreateBoothDTO>> CreateBooth(CreateBoothDTO boothDTO);
+        public Task<ServiceResponse<bool>> DeleteBooth(int id);
+        public Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, ViewBoothDTO boothDTO);
     }
 }

@@ -13,10 +13,28 @@ namespace TicketAPI.Controllers
         {
             _venueService = venueService;
         }
-        [HttpPost("Create")]
+        [HttpPost]
         public async Task<IActionResult> CreateVenue(CreateVenueDTO venueDTO)
         {
             var result = await _venueService.CreateVenue(venueDTO);
+            return Ok(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllVenue(int page, int pageSize, string search, string sort)
+        {
+            var result = await _venueService.GetAllVenues(page, pageSize, search, sort);
+            return Ok(result);
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteVenue(int id)
+        {
+            var result = await _venueService.DeleteVenue(id);
+            return Ok(result); 
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateVenue(int id, ViewVenueDTO venueDTO)
+        {
+            var result = await _venueService.UpdateVenue(id, venueDTO);
             return Ok(result);
         }
     }

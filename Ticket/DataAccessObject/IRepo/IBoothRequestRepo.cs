@@ -13,5 +13,7 @@ namespace DataAccessObject.IRepo
         Task<IEnumerable<BoothRequest>> GetAllBoothRequest();
         Task<bool> CheckExistByBoothId(int boothId);
         Task<bool> DeleteBoothRequest(int id);
+        Task UpdateBoothRequest(int id, BoothRequest boothRequest);
+        Task<BoothRequest> GetBoothRequestById(int id);
     }
 }
