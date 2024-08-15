@@ -12,7 +12,7 @@ namespace DataAccessObject.IRepo
         Task CreateVenue(Venue venue);
         Task<IEnumerable<Venue>> GetAllVenues();
         Task<bool> DeleteVenue(int id);
-        Task UpdateVenue(Venue newVenue);
+        Task UpdateVenue(int id, Venue newVenue);
         Task<Venue> GetVenueById(int id);
     }
 }

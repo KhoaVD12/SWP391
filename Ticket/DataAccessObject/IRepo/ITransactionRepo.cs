@@ -8,4 +8,5 @@ public interface ITransactionRepo  : IGenericRepo<Transaction>
     Task<IEnumerable<Transaction>> GetTransactionsByAttendeeIdAsync(int attendeeId);
     Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
     Task<decimal> GetTotalAmountByAttendeeIdAsync(int attendeeId);
+    Task<Transaction?> UpdateTransactionStatusAsync(int transactionId, string status);
 }

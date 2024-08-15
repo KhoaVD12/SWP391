@@ -83,7 +83,7 @@ public class UserService : IUserService
             // Map the DTO to the User entity
             var userAccountRegister = _mapper.Map<User>(userObject);
             userAccountRegister.Password = HashPass.HashWithSHA256(userObject.Password);
-            userAccountRegister.Status = "Active"; // Default status
+            userAccountRegister.Status = Status.ACTIVE; // Default status
 
             // Save the user
             await _userRepo.AddAsync(userAccountRegister);
@@ -277,7 +277,7 @@ public class UserService : IUserService
         return serviceResponse;
     }
 
-    public async Task<ServiceResponse<UserDTO>> ChangeStatusCollection(int userId, UserStatusDTO statusReq)
+    public async Task<ServiceResponse<UserDTO>> ChangeStatus(int userId, UserStatusDTO statusReq)
     {
         var result = new ServiceResponse<UserDTO>();
         try

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessObject.Enums;
 
 namespace DataAccessObject.IRepo
 {
@@ -15,5 +16,6 @@ namespace DataAccessObject.IRepo
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
         Task<Event?> CheckExistByTitle(string inputString);
+        Task<IEnumerable<Event>> GetEventsByStatus(string status);
     }
 }

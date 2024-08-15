@@ -4,6 +4,7 @@ using BusinessObject.Models.AttendeeDto;
 using BusinessObject.Models.BoothDTO;
 using BusinessObject.Models.BoothRequestDTO;
 using BusinessObject.Models.EventDTO;
+using BusinessObject.Models.GiftDTO;
 using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TicketDTO;
 using BusinessObject.Models.TransactionDTO;
@@ -26,6 +27,7 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<User, UserUpdateDTO>().ReverseMap();
         CreateMap<User, UserStatusDTO>().ReverseMap();
         CreateMap<AttendeeDetailDto, AttendeeDetail>().ReverseMap();
+        CreateMap<UpdateAttendeeDto, AttendeeDetail>().ReverseMap();
         CreateMap<RegisterAttendeeDTO, Attendee>()
             .ForMember(dest => dest.AttendeeDetails, opt => opt.MapFrom(src => src.AttendeeDetails)).ReverseMap();
         CreateMap<Attendee, AttendeeDto>()
@@ -70,5 +72,8 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<Payment, CreatePaymentMethodDto>().ReverseMap();
         CreateMap<Payment, PaymentMethodDto>().ReverseMap();
+
+        CreateMap<CreateGiftDTO, Gift>().ReverseMap();
+        CreateMap<ViewGiftDTO, Gift>().ReverseMap();
     }
 }

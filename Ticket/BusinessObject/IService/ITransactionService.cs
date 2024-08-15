@@ -1,5 +1,7 @@
+using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Responses;
+using DataAccessObject.Entities;
 
 namespace BusinessObject.IService;
 
@@ -15,4 +17,6 @@ public interface ITransactionService
         DateTime endDate);
 
     Task<ServiceResponse<decimal>> GetTotalAmountByAttendeeAsync(int attendeeId);
+    Task<ServiceResponse<Transaction>> UpdateTransactionStatusAsync(int transactionId, string status);
+    
 }

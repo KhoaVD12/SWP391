@@ -13,8 +13,8 @@ namespace BusinessObject.IService
     {
         public Task<ServiceResponse<PaginationModel<ViewBoothDTO>>> GetAllBooths(int page, int pageSize, string search, string sort);
         public Task<ServiceResponse<ViewBoothDTO>> GetBoothById(int id);
-        public Task<ServiceResponse<CreateBoothDTO>> CreateBooth(CreateBoothDTO boothDTO);
+        public Task<ServiceResponse<ViewBoothDTO>> CreateBooth(CreateBoothDTO boothDTO);
         public Task<ServiceResponse<bool>> DeleteBooth(int id);
-        public Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, ViewBoothDTO boothDTO);
+        public Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, CreateBoothDTO boothDTO);
     }
 }

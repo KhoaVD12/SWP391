@@ -2,14 +2,26 @@ using System.Runtime.Serialization;
 
 namespace DataAccessObject.Enums;
 
-public enum Status
+public class Status
 {
-    [EnumMember(Value = "Active")]
-    Active,
+public static readonly string ACTIVE = "Active";
+public static readonly string INACTIVE = "Inactive";
+}
 
-    [EnumMember(Value = "Inactive")]
-    Inactive,
+public class TransactionStatus
+{
+    public static readonly string PENDING = "Pending";
+    public static readonly string COMPLETED = "Completed";
+    public static readonly string FAILED = "Failed";
+    public static readonly string CANCELLED = "cancelled";
+}
 
-    [EnumMember(Value = "Pending")]
-    Pending
+public class PaymentStatus
+{
+    public static readonly string PENDING = "Pending";
+    public static readonly string SUCCESSFUL = "Successful";
+    public static readonly string FAILED = "Failed";
+    public static readonly string CANCELLED = "Cancelled";
+    public static readonly string EXPIRED = "Expired";
+    public static readonly string REFUND = "Refund";
 }

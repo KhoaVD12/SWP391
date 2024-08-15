@@ -8,6 +8,7 @@ using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using DataAccessObject.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace BusinessObject.Service
@@ -97,6 +98,21 @@ namespace BusinessObject.Service
         public async Task<ServiceResponse<CreateEventDTO>> CreateEvent(CreateEventDTO eventDTO)
         {
             var result = new ServiceResponse<CreateEventDTO>();
+
+            if (eventDTO.StartDate.Date < DateTime.UtcNow.Date)
+            {
+                result.Success = false;
+                result.Message = "StartDate cannot be in the past.";
+                return result;
+            }
+
+            if (eventDTO.EndDate.Date < eventDTO.StartDate.Date)
+            {
+                result.Success = false;
+                result.Message = "EndDate cannot be before StartDate.";
+                return result;
+            }
+
             try
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
@@ -132,7 +148,7 @@ namespace BusinessObject.Service
                         OrganizerId = eventDTO.OrganizerId,
                         VenueId = eventDTO.VenueId,
                         Description = eventDTO.Description,
-                        Status = "Pending"
+                        Status = EventStatus.PENDING
                     };
 
                     // Save the event to the database
@@ -195,6 +211,7 @@ namespace BusinessObject.Service
             return res;
         }
 
+
         public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO)
         {
             var res = new ServiceResponse<ViewEventDTO>();
@@ -222,7 +239,7 @@ namespace BusinessObject.Service
                     eventToUpdate.ImageUrl = imageUrl;
                 }
 
-                await _eventRepo.UpdateEvent(id, eventToUpdate);
+                await _eventRepo.UpdateAsync(eventToUpdate);
 
                 var result = _mapper.Map<ViewEventDTO>(eventToUpdate);
                 res.Success = true;
@@ -251,16 +268,8 @@ namespace BusinessObject.Service
                     return response;
                 }
 
-                // Only allow changing to "Active" from "Pending"
-                if (eventToUpdate.Status != "Pending" || statusDTO.Status != "Active")
-                {
-                    response.Success = false;
-                    response.Message = "Invalid status change.";
-                    return response;
-                }
-
                 eventToUpdate.Status = statusDTO.Status;
-                await _eventRepo.UpdateEvent(eventToUpdate.Id, eventToUpdate);
+                await _eventRepo.UpdateAsync(eventToUpdate);
 
                 response.Success = true;
                 response.Message = "Event status updated successfully.";
@@ -301,7 +310,7 @@ namespace BusinessObject.Service
                 {
                     EventId = eventEntity.Id,
                     Price = dto.Ticket.Price,
-                    Quantity = dto.Ticket.Quantity, 
+                    Quantity = dto.Ticket.Quantity,
                     TicketSaleEndDate = dto.Ticket.TicketSaleEndDate
                 };
                 await _ticketRepo.AddAsync(ticket);
@@ -314,6 +323,29 @@ namespace BusinessObject.Service
             {
                 result.Success = false;
                 result.Message = ex.Message;
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsByStatus(string status, int page,
+            int pageSize)
+        {
+            var result = new ServiceResponse<PaginationModel<ViewEventDTO>>();
+
+            try
+            {
+                var events = await _eventRepo.GetEventsByStatus(status);
+                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
+                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                result.Data = paging;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                result.ErrorMessages = [ex.Message];
             }
 
             return result;

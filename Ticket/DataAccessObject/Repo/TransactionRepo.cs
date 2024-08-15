@@ -35,4 +35,16 @@ public class TransactionRepo : RepoBase<Transaction>, ITransactionRepo
             .Where(t => t.AttendeeId == attendeeId)
             .SumAsync(t => t.Amount);
     }
+
+    public async Task<Transaction?> UpdateTransactionStatusAsync(int transactionId, string status)
+    {
+        var transaction = await _context.Transactions.FindAsync(transactionId);
+
+        if (transaction == null) return null;
+
+        transaction.Status = status;
+        await _context.SaveChangesAsync();
+
+        return transaction;
+    }
 }

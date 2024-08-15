@@ -12,7 +12,7 @@ public interface IUserService
     Task<ServiceResponse<PaginationModel<UserDTO>>> GetAllUsersByOrganizer(int page, int pageSize, string search, string sort);
     Task<ServiceResponse<UserDTO>> GetUserById(int id);
     Task<ServiceResponse<string>> UpdateUser(UserUpdateDTO userUpdate);
-    Task<ServiceResponse<UserDTO>> ChangeStatusCollection(int userId,
+    Task<ServiceResponse<UserDTO>> ChangeStatus(int userId,
         UserStatusDTO statusReq);
 
 }
