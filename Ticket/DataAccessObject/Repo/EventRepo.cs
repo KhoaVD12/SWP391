@@ -59,9 +59,9 @@ namespace DataAccessObject.Repo
                 throw new Exception("Id Not Found");
             }
         }
-        public async Task<bool> CheckExistByTitle(string inputString)
+        public async Task<Event?> CheckExistByTitle(string inputString)
         {
-            return await _context.Events.AnyAsync(e => e.Title == inputString);
+            return await _context.Events.FirstOrDefaultAsync(e => e.Title == inputString);
         }
 
         public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
