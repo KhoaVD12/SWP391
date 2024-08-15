@@ -45,7 +45,7 @@ public class UserService : IUserService
                 _ => users.OrderBy(u => u?.Id).ToList()
             };
             var userDtOs = _mapper.Map<IEnumerable<UserDTO>>(users);
-
+                                                        
             var paginationModel =
                 await Pagination.GetPaginationEnum(userDtOs, page, pageSize);
             response.Data = paginationModel;
@@ -67,12 +67,6 @@ public class UserService : IUserService
         {
             // Check if email already exists
             var userAccount = await _userRepo.CheckEmailAddressExisted(userObject.Email);
-            if (userAccount != null)
-            {
-                response.Success = false;
-                response.Message = "Email already exists.";
-                return response;
-            }
 
             // Prevent creation of additional admin accounts
             if (userObject.Role == Role.Admin)

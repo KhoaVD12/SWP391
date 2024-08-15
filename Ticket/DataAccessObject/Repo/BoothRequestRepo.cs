@@ -43,5 +43,26 @@ namespace DataAccessObject.Repo
                 throw new Exception("Id Not Found");
             }
         }
+        public async Task UpdateBoothRequest(int id, BoothRequest boothRequest)
+        {
+            var exist = await _context.BoothRequests.FindAsync(id);
+            if(exist != null)
+            {
+                exist.SponsorId=boothRequest.SponsorId;
+                exist.RequestDate=boothRequest.RequestDate;
+                exist.Status=boothRequest.Status;
+                exist.BoothId=boothRequest.BoothId;
+                _context.BoothRequests.Update(exist);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("Id Not Found");
+            }
+        }
+        public async Task<BoothRequest> GetBoothRequestById(int id)
+        {
+            return await _context.Set<BoothRequest>().Where(b => b.Id == id).SingleOrDefaultAsync();
+        }
     }
 }

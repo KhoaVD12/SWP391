@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace TicketAPI.Controllers;
 
 [EnableCors("Allow")]
-[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class UserController : ControllerBase

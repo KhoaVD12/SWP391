@@ -14,16 +14,34 @@ namespace TicketAPI.Controllers
             _boothRequestService = service;
         }
         [HttpGet]
-        public async Task<IEnumerable<ViewBoothRequestDTO>> GetAllBoothRequest()
+        public async Task<IActionResult> GetAllBoothRequests(int page, int pageSize, string search, string sort)
         {
-            var result=await _boothRequestService.GetAllBoothRequest();
-            return result;
+            var result=await _boothRequestService.GetAllBoothRequests(page,pageSize,search,sort);
+            return Ok(result);
         }
         [HttpPost]
-        public async Task<CreateBoothRequestDTO> CreateBoothRequest(CreateBoothRequestDTO requestDTO)
+        public async Task<IActionResult> CreateBoothRequest(CreateBoothRequestDTO requestDTO)
         {
             var result=await _boothRequestService.CreateBoothRequest(requestDTO);   
-            return result;
+            return Ok(result);
+        }
+        [HttpDelete]
+        public async Task<IActionResult>DeleteBoothRequest(int id)
+        {
+            var result = await _boothRequestService.DeleteBoothRequest(id);
+            return Ok(result);
+        }
+        [HttpPut]
+        public async Task<IActionResult>UpdateBoothRequest(int id, ViewBoothRequestDTO boothRequestDTO)
+        {
+            var result = await _boothRequestService.UpdateBoothRequest(id, boothRequestDTO);
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult>GetBoothRequestById(int id)
+        {
+            var result=await _boothRequestService.GetBoothRequestById(id);
+            return Ok(result);
         }
     }
 }
