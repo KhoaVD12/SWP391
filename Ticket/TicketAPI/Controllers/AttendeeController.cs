@@ -1,11 +1,13 @@
 using System.Text;
 using BusinessObject.IService;
 using BusinessObject.Models.AttendeeDto;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TicketAPI.Controllers;
 
 [ApiController]
+[EnableCors("Allow")]
 [Route("api/[controller]")]
 public class AttendeeController : ControllerBase
 {

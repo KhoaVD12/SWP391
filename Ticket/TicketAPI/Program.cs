@@ -40,7 +40,6 @@ builder.Services.AddSingleton(provider =>
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAttendeeRepo, AttendeeRepo>();
-
 builder.Services.AddScoped<IEventRepo, EventRepo>();
 builder.Services.AddScoped<IVenueRepo, VenueRepo>();
 builder.Services.AddScoped<ITicketRepo, TicketRepo>();
@@ -52,12 +51,13 @@ builder.Services.AddScoped<IBoothRequestRepo, BoothRequestRepo>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAttendeeService, AttendeeService>();
-
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IBoothService, BoothService>();
 builder.Services.AddScoped<IBoothRequestService, BoothRequestService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
