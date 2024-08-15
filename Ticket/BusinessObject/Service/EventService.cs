@@ -21,16 +21,19 @@ namespace BusinessObject.Service
 {
     public class EventService : IEventService
     {
+        private readonly IUserRepo _userRepo;
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
         private readonly AppConfiguration _appConfiguration;
         private readonly Cloudinary _cloudinary;
 
-        public EventService(IEventRepo repo, AppConfiguration configuration, IMapper mapper, Cloudinary cloudinary)
+        public EventService(IEventRepo repo, AppConfiguration configuration, IMapper mapper, Cloudinary cloudinary,
+            IUserRepo userRepo)
         {
             _eventRepo = repo;
             _mapper = mapper;
             _cloudinary = cloudinary;
+            _userRepo = userRepo;
             _appConfiguration = configuration;
         }
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize, string search, string sort)
@@ -96,37 +99,51 @@ namespace BusinessObject.Service
             var result = new ServiceResponse<CreateEventDTO>();
             try
             {
-                if (eventDTO.Title != null)
+                if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
+                    // Check if the event title already exists
                     var eventExist = await _eventRepo.CheckExistByTitle(eventDTO.Title);
                     if (eventExist != null)
                     {
                         result.Success = false;
-                        result.Message = "Event with the same name already exist!";
+                        result.Message = "Event with the same name already exists!";
+                        return result;
                     }
-                    else
+
+                    // Check if the organizer exists
+                    var organizerExist = await _userRepo.GetByIdAsync(eventDTO.OrganizerId);
+                    if (organizerExist == null)
                     {
-                        {
-                            var imageURl = await UploadImageCollection(eventDTO.ImageUrl);
-
-                            var Event = new Event
-                            {
-                                Title = eventDTO.Title,
-                                ImageUrl = imageURl,
-                                StartDate = DateOnly.FromDateTime(eventDTO.StartDate),
-                                EndDate = DateOnly.FromDateTime(eventDTO.EndDate),
-                                Status = "Pending"
-                            };
-                            await _eventRepo.AddAsync(Event);
-
-                            var res = _mapper.Map<CreateEventDTO>(Event);
-
-                            result.Data = res;
-                        }
-
-                        result.Success = true;
-                        result.Message = "Create Event successfully!";
+                        result.Success = false;
+                        result.Message = "Organizer not found!";
+                        return result;
                     }
+
+                    // Upload image if provided
+                    var imageUrl = await UploadImageCollection(eventDTO.ImageUrl);
+
+                    // Create the event entity
+                    var Event = new Event
+                    {
+                        Title = eventDTO.Title,
+                        ImageUrl = imageUrl,
+                        StartDate = DateOnly.FromDateTime(eventDTO.StartDate),
+                        EndDate = DateOnly.FromDateTime(eventDTO.EndDate),
+                        OrganizerId = eventDTO.OrganizerId,
+                        VenueId = eventDTO.VenueId,
+                        Description = eventDTO.Description,
+                        Status = "Pending"
+                    };
+
+                    // Save the event to the database
+                    await _eventRepo.AddAsync(Event);
+
+                    // Map to DTO
+                    var res = _mapper.Map<CreateEventDTO>(Event);
+
+                    result.Data = res;
+                    result.Success = true;
+                    result.Message = "Event created successfully!";
                 }
             }
             catch (Exception e)

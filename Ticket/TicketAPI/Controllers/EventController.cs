@@ -1,6 +1,8 @@
 ﻿using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
+using BusinessObject.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace TicketAPI.Controllers
 {
@@ -14,11 +16,18 @@ namespace TicketAPI.Controllers
         {
             _eventService = eventService;
         }
-        [HttpPost]
+
+        [HttpPost("Event")]
+        [ProducesResponseType(typeof(ServiceResponse<CreateEventDTO>), StatusCodes.Status200OK)]
+        [SwaggerResponse(200, "Create a new event", typeof(ServiceResponse<CreateEventDTO>))]
         public async Task<IActionResult> CreateEvent([FromForm]CreateEventDTO eventDto)
 
         {
             var result = await _eventService.CreateEvent(eventDto);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
         [HttpGet]
