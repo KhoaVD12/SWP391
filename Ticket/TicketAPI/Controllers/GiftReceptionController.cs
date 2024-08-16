@@ -1,0 +1,59 @@
+﻿using BusinessObject.IService;
+using BusinessObject.Models.GiftReceptionDTO;
+using Microsoft.AspNetCore.Mvc;
+
+namespace TicketAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GiftReceptionController:ControllerBase
+    {
+        private readonly IGiftReceptionService _giftReceptionService;
+        public GiftReceptionController(IGiftReceptionService giftReceptionService)
+        {
+            _giftReceptionService = giftReceptionService;
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllReceptions([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string sort = "")
+        {
+            var result = await _giftReceptionService.GetReceptions(page,pageSize,sort);
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetReceptionById(int id)
+        {
+            var result=await _giftReceptionService.GetReceptionById(id);
+            if(!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpGet("attendee/{attendeeId}/giftReceptions")]
+        public async Task<IActionResult> GetReceptionByAttendeeId(int attendeeId)
+        {
+            var result = await _giftReceptionService.GetReceptionByAttendeeId(attendeeId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpGet("gift/{giftId}/giftReceptions")]
+        public async Task<IActionResult> GetReceptionByGiftId(int giftId)
+        {
+            var result = await _giftReceptionService.GetReceptionByGiftId(giftId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateReception(CreateGiftReceptionDTO receptionDTO)
+        {
+            var result = await _giftReceptionService.CreateReception(receptionDTO);
+            return Ok(result);
+        }
+    }
+}
