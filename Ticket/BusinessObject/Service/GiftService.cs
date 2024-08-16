@@ -2,6 +2,7 @@
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Models.GiftDTO;
+using BusinessObject.Models.GiftReceptionDTO;
 using BusinessObject.Models.VenueDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
@@ -22,11 +23,13 @@ namespace BusinessObject.Service
         private readonly IMapper _mapper;
         private readonly AppConfiguration _appConfiguration;
         private readonly IGiftRepo _giftRepo;
-        public GiftService(IGiftRepo repo, AppConfiguration configuration, IMapper mapper)
+        private readonly IGiftReceptionService _giftReceptionService;
+        public GiftService(IGiftRepo repo, AppConfiguration configuration, IMapper mapper, IGiftReceptionService giftReceptionService)
         {
             _appConfiguration = configuration;
             _mapper = mapper;
             _giftRepo = repo;
+            _giftReceptionService = giftReceptionService;
         }
 
         public async Task<ServiceResponse<ViewGiftDTO>> CreateGift(CreateGiftDTO giftDTO)
@@ -37,7 +40,16 @@ namespace BusinessObject.Service
                 var mapp = _mapper.Map<Gift>(giftDTO);
 
                 await _giftRepo.CreateGift(mapp);
-
+                foreach(var reception in giftDTO.ReceptionDTO)
+                {
+                    var receptionDto = new CreateGiftReceptionDTO
+                    {
+                        AttendeeId = reception.AttendeeId,
+                        GiftId = mapp.Id,
+                        ReceptionDate = DateTime.Now,
+                    };
+                    await _giftReceptionService.CreateReception(receptionDto);
+                }
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
 
                 res.Success = true;
