@@ -37,23 +37,15 @@ public class MapperConfigurationsProfile : Profile
             .ReverseMap();
 
         CreateMap<CreateEventDTO, Event>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.StartDate)))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.EndDate)))
-            .ReverseMap() // Automatically maps from Event to CreateEventDTO
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToDateTime(TimeOnly.MinValue)))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToDateTime(TimeOnly.MinValue)));
+            .ReverseMap();
+
         CreateMap<ViewEventDTO, Event>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.StartDate)))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.EndDate)))
-            .ReverseMap() // Automatically maps from Event to CreateEventDTO
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.ToDateTime(TimeOnly.MinValue)))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToDateTime(TimeOnly.MinValue)));
+            .ReverseMap(); // Automatically maps from Event to CreateEventDTO
         CreateMap<UpdateEventDTO, Event>()
             .ForMember(dest => dest.Id, opt => opt.Ignore()) // Cannot update the Id
             .ForMember(dest => dest.OrganizerId, opt => opt.Ignore()) // Cannot update the OrganizerId
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.StartDate)))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => DateOnly.FromDateTime(src.EndDate)))
-            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()); // Image will be handled separately.ReverseMap();
+            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+            .ReverseMap(); // Image will be handled separately.ReverseMap();
 
         CreateMap<Venue, CreateVenueDTO>().ReverseMap();
         CreateMap<Venue, ViewVenueDTO>().ReverseMap();
