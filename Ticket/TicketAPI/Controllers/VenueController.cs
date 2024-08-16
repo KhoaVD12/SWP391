@@ -25,7 +25,8 @@ namespace TicketAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllVenue(int page, int pageSize, string search, string sort)
+        public async Task<IActionResult> GetAllVenue([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+            [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result = await _venueService.GetAllVenues(page, pageSize, search, sort);
             return Ok(result);

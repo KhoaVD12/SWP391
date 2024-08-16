@@ -17,7 +17,8 @@ namespace TicketAPI.Controllers
             _boothRequestService = service;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllBoothRequests(int page, int pageSize, string search, string sort)
+        public async Task<IActionResult> GetAllBoothRequests([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+            [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result=await _boothRequestService.GetAllBoothRequests(page,pageSize,search,sort);
             return Ok(result);
