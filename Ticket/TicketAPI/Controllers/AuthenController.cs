@@ -32,7 +32,8 @@ namespace TicketAPI.Controllers
                 {
                     success = result.Success,
                     message = result.Message,
-                    token = result.Data,
+                    token = result.DataToken,
+                    role = result.Role,
                 }
             );
         }

@@ -10,11 +10,11 @@ public partial class Event
     public string Title { get; set; } = null!;
     public string? ImageUrl { get; set; }
 
-    public DateOnly StartDate { get; set; }
+    public DateTime StartDate { get; set; }
 
     public int OrganizerId { get; set; }
 
-    public DateOnly EndDate { get; set; }
+    public DateTime EndDate { get; set; }
 
     public string? Description { get; set; }
 
