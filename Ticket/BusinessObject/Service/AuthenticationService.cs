@@ -24,9 +24,9 @@ public class AuthenticationService : IAuthenticationService
         _configuration = configuration;
     }
 
-    public async Task<ServiceResponse<string>> LoginAsync(LoginResquestDto loginForm)
+    public async Task<TokenResponse<string>> LoginAsync(LoginResquestDto loginForm)
     {
-        var response = new ServiceResponse<string>();
+        var response = new TokenResponse<string>();
         try
         {
             if (loginForm == null)
@@ -43,12 +43,12 @@ public class AuthenticationService : IAuthenticationService
                 return response;
             }
 
-
+            var auth = user.Role.ToString();
             var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
-            response.Data = token;
+            response.DataToken = token;
             response.Success = true;
             response.Message = "Login successful.";
-            return response;
+            response.Role = auth;
         }
         catch (DbException ex)
         {

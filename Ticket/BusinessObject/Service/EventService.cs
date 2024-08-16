@@ -43,19 +43,29 @@ namespace BusinessObject.Service
                 if (!string.IsNullOrEmpty(search))
                 {
                     events = events.Where(e => (e.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
-                    ;
                 }
 
                 events = sort.ToLower().Trim() switch
                 {
-                    "title" => events.OrderBy(e => e?.Title),
                     "startdate" => events.OrderBy(e => e?.StartDate),
                     "enddate" => events.OrderBy(e => e?.EndDate),
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
-
-                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                var eventList = events.Select(e => new ViewEventDTO
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    OrganizerId = e.OrganizerId,
+                    OrganizerName = e.Organizer.Name, // Access the organizer's name
+                    VenueId = e.VenueId,
+                    VenueName = e.Venue.Name, // Access the venue's name
+                    StartDate = e.StartDate, // Convert DateOnly to DateTime
+                    EndDate = e.EndDate, // Convert DateOnly to DateTime
+                    Image = e.ImageUrl,
+                    Status = e.Status
+                }).ToList();
+                var paging = await Pagination.GetPaginationEnum(eventList, page, pageSize);
                 res.Data = paging;
                 res.Success = true;
             }
@@ -74,17 +84,28 @@ namespace BusinessObject.Service
             try
             {
                 var eventEntity = await _eventRepo.GetEventById(id);
-                if (eventEntity != null)
+                if (eventEntity == null)
                 {
-                    var mappedEvent = _mapper.Map<ViewEventDTO>(eventEntity);
-                    res.Data = mappedEvent;
-                    res.Success = true;
+                    return null!;
                 }
-                else
+
+                var eventDetails = new ViewEventDTO()
                 {
-                    res.Success = false;
-                    res.Message = "Event not found";
-                }
+                    Id = eventEntity.Id,
+                    Title = eventEntity.Title,
+                    Description = eventEntity.Description,
+                    OrganizerId = eventEntity.OrganizerId,
+                    OrganizerName = eventEntity.Organizer.Name, // Access the organizer's name
+                    VenueId = eventEntity.VenueId,
+                    VenueName = eventEntity.Venue.Name, // Access the venue's name
+                    StartDate = eventEntity.StartDate, // Convert DateOnly to DateTime
+                    EndDate = eventEntity.EndDate, // Convert DateOnly to DateTime
+                    Image = eventEntity.ImageUrl,
+                    Status = eventEntity.Status
+                };
+
+                res.Data = eventDetails;
+                res.Success = true;
             }
             catch (Exception ex)
             {
@@ -95,9 +116,9 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<CreateEventDTO>> CreateEvent(CreateEventDTO eventDTO)
+        public async Task<ServiceResponse<ViewEventDTO>> CreateEvent(CreateEventDTO eventDTO)
         {
-            var result = new ServiceResponse<CreateEventDTO>();
+            var result = new ServiceResponse<ViewEventDTO>();
 
             if (eventDTO.StartDate.Date < DateTime.UtcNow.Date)
             {
@@ -143,8 +164,8 @@ namespace BusinessObject.Service
                     {
                         Title = eventDTO.Title,
                         ImageUrl = imageUrl,
-                        StartDate = DateOnly.FromDateTime(eventDTO.StartDate),
-                        EndDate = DateOnly.FromDateTime(eventDTO.EndDate),
+                        StartDate = eventDTO.StartDate,
+                        EndDate = eventDTO.EndDate,
                         OrganizerId = eventDTO.OrganizerId,
                         VenueId = eventDTO.VenueId,
                         Description = eventDTO.Description,
@@ -154,10 +175,22 @@ namespace BusinessObject.Service
                     // Save the event to the database
                     await _eventRepo.AddAsync(Event);
 
-                    // Map to DTO
-                    var res = _mapper.Map<CreateEventDTO>(Event);
 
-                    result.Data = res;
+                    // Map to DTO
+                    var newEvent = new ViewEventDTO()
+                    {
+                        Id = Event.Id,
+                        Title = Event.Title,
+                        Image = Event.ImageUrl,
+                        StartDate = Event.StartDate,
+                        EndDate = Event.EndDate,
+                        OrganizerId = Event.OrganizerId,
+                        VenueId = Event.VenueId,
+                        Description = Event.Description,
+                        Status = Event.Status
+                    };
+                    result.Data = newEvent;
+
                     result.Success = true;
                     result.Message = "Event created successfully!";
                 }
@@ -193,12 +226,22 @@ namespace BusinessObject.Service
         }
 
 
-        public async Task<ServiceResponse<bool>> DeleteEvent(int id)
+        public async Task<ServiceResponse<string>> DeleteEvent(int id)
         {
-            var res = new ServiceResponse<bool>();
+            var res = new ServiceResponse<string>();
             try
             {
-                await _eventRepo.DeleteEvent(id);
+                var eventExist = await _eventRepo.GetEventById(id);
+                if (eventExist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Event not found!";
+                }
+                else
+                {
+                    await _eventRepo.DeleteEvent(id);
+                }
+
                 res.Success = true;
                 res.Message = "Event deleted successfully.";
             }
@@ -229,8 +272,8 @@ namespace BusinessObject.Service
                 eventToUpdate.Title = eventDTO.Title;
                 eventToUpdate.Description = eventDTO.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId;
-                eventToUpdate.StartDate = DateOnly.FromDateTime(eventDTO.StartDate);
-                eventToUpdate.EndDate = DateOnly.FromDateTime(eventDTO.EndDate);
+                eventToUpdate.StartDate = eventDTO.StartDate;
+                eventToUpdate.EndDate = eventDTO.EndDate;
 
                 // If a new image is provided, upload it
                 if (eventDTO.ImageFile != null)
@@ -240,16 +283,30 @@ namespace BusinessObject.Service
                 }
 
                 await _eventRepo.UpdateAsync(eventToUpdate);
+                res.Data = new ViewEventDTO()
+                {
+                    Id = eventToUpdate.Id,
+                    Title = eventToUpdate.Title,
+                    Description = eventToUpdate.Description,
+                    OrganizerId = eventToUpdate.OrganizerId,
+                    OrganizerName = eventToUpdate.Organizer.Name, // Access the organizer's name
+                    VenueId = eventToUpdate.VenueId,
+                    VenueName = eventToUpdate.Venue.Name, // Access the venue's name
+                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime
+                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime
+                    Image = eventToUpdate.ImageUrl,
+                    Status = eventToUpdate.Status
+                };
 
-                var result = _mapper.Map<ViewEventDTO>(eventToUpdate);
                 res.Success = true;
                 res.Message = "Event updated successfully";
-                res.Data = result;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 res.Success = false;
-                res.Message = $"Failed to update event: {ex.Message}";
+                res.Message = e.InnerException != null
+                    ? e.InnerException.Message + "\n" + e.StackTrace
+                    : e.Message + "\n" + e.StackTrace;
             }
 
             return res;
@@ -295,8 +352,8 @@ namespace BusinessObject.Service
                 {
                     Title = dto.Title,
                     ImageUrl = await UploadImageCollection(dto.ImageUrl),
-                    StartDate = DateOnly.FromDateTime(dto.StartDate),
-                    EndDate = DateOnly.FromDateTime(dto.EndDate),
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
                     OrganizerId = dto.OrganizerId,
                     VenueId = dto.VenueId,
                     Description = dto.Description,

@@ -57,11 +57,11 @@ namespace TicketAPI.Controllers
 
         /// <summary>
         /// Get a list of events with pagination, search, and sort options.
-        /// </summary>
+        /// </summary>                                                                                                  
         /// <param name="page">Page number.</param>
         /// <param name="pageSize">Number of events per page.</param>
         /// <param name="search">Search keyword.</param>
-        /// <param name="sort">Sort by (e.g., "title", "startdate").</param>
+        /// <param name="sort">Sort by (e.g., "startdate", "enddate").</param>
         /// <returns>A paginated list of events.</returns>
         [HttpGet]
         public async Task<IActionResult> GetEvent([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
