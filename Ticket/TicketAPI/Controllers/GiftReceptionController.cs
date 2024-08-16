@@ -29,7 +29,7 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("attendee/{attendeeId}/giftReceptions")]
+        [HttpGet("attendee/{attendeeId}")]
         public async Task<IActionResult> GetReceptionByAttendeeId(int attendeeId)
         {
             var result = await _giftReceptionService.GetReceptionByAttendeeId(attendeeId);
@@ -39,7 +39,7 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("gift/{giftId}/giftReceptions")]
+        [HttpGet("gift/{giftId}")]
         public async Task<IActionResult> GetReceptionByGiftId(int giftId)
         {
             var result = await _giftReceptionService.GetReceptionByGiftId(giftId);
