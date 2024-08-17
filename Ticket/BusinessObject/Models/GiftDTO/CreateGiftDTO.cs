@@ -13,7 +13,6 @@ namespace BusinessObject.Models.GiftDTO
         public string? Description { get; set; }
         public int BoothId { get; set; }
         public int Quantity { get; set; }
-        public List<CreateGiftReceptionDTO> ReceptionDTO {  get; set; }
     }
     
 }

@@ -40,16 +40,7 @@ namespace BusinessObject.Service
                 var mapp = _mapper.Map<Gift>(giftDTO);
 
                 await _giftRepo.CreateGift(mapp);
-                foreach(var reception in giftDTO.ReceptionDTO)
-                {
-                    var receptionDto = new CreateGiftReceptionDTO
-                    {
-                        AttendeeId = reception.AttendeeId,
-                        GiftId = mapp.Id,
-                        ReceptionDate = DateTime.Now,
-                    };
-                    await _giftReceptionService.CreateReception(receptionDto);
-                }
+                
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
 
                 res.Success = true;
