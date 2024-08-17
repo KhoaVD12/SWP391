@@ -56,7 +56,7 @@ public class TransactionController : ControllerBase
         return Ok(result.Message);
     }
 
-    [HttpPut("transactions/{transactionId}/status")]
+    [HttpPut("{transactionId}/status")]
     public async Task<IActionResult> UpdateTransactionStatus(int transactionId, [FromBody] string status)
     {
         var result = await _transactionService.UpdateTransactionStatusAsync(transactionId, status);

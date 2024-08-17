@@ -66,9 +66,9 @@ public class AuthenticationService : IAuthenticationService
         return response;
     }
 
-    public async Task<ServiceResponse<ResetPassDTO>> ResetPass(ResetPassDTO dto)
+    public async Task<TokenResponse<ResetPassDTO>> ResetPass(ResetPassDTO dto)
     {
-        var response = new ServiceResponse<ResetPassDTO>();
+        var response = new TokenResponse<ResetPassDTO>();
         try
         {
             var userAccount = await _repo.GetUserByEmailAsync(dto.Email);

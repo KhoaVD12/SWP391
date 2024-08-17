@@ -44,15 +44,11 @@ namespace TicketAPI.Controllers
         [ProducesResponseType(typeof(ServiceResponse<CreateEventDTO>), StatusCodes.Status200OK)]
         [SwaggerResponse(200, "Create a new event", typeof(ServiceResponse<CreateEventDTO>))]
         public async Task<IActionResult> CreateEvent([FromForm] CreateEventDTO eventDto)
-
         {
             var result = await _eventService.CreateEvent(eventDto);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return !result.Success
+                ? Problem(detail: result.Message, statusCode: StatusCodes.Status400BadRequest)
+                : Ok(result.Data);
         }
 
         /// <summary>
@@ -87,10 +83,10 @@ namespace TicketAPI.Controllers
             var result = await _eventService.GetEventById(id);
             if (!result.Success)
             {
-                return BadRequest(result);
+                return NotFound(result.Message);
             }
 
-            return Ok(result);
+            return Ok(result.Data);
         }
 
         /// <summary>
@@ -104,7 +100,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.DeleteEvent(id);
             if (!result.Success)
             {
-                return BadRequest(result);
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
             }
 
             return Ok(result);
@@ -135,12 +131,9 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDto)
         {
             var result = await _eventService.UpdateEvent(id, eventDto);
-            if (result.Success)
-            {
-                return Ok(result.Data);
-            }
-
-            return BadRequest(result.Message);
+            return !result.Success
+                ? Problem(detail: result.Message, statusCode: StatusCodes.Status400BadRequest)
+                : Ok(result.Data);
         }
 
         /// <summary>
@@ -154,24 +147,23 @@ namespace TicketAPI.Controllers
             var result = await _eventService.ChangeEventStatus(statusDto);
             if (!result.Success)
             {
-                return BadRequest(result.Message);
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
             }
 
             return Ok(result);
         }
 
         [HttpGet("status/{status}")]
-        public async Task<IActionResult> GetEventsByStatus( string status, [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+        public async Task<IActionResult> GetEventsByStatus(string status, [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 5)
         {
             var result = await _eventService.GetEventsByStatus(status, page, pageSize);
             if (!result.Success)
             {
-                return BadRequest(result.Message);
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
             }
 
             return Ok(result);
         }
-
-        
     }
 }
