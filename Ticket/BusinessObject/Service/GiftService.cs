@@ -68,6 +68,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<bool>();
             try
             {
+                var exist = await _giftRepo.GetGiftById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 await _giftRepo.DeleteGift(id);
                 res.Success = true;
                 res.Message = "Gift Deleted successfully";
@@ -126,6 +133,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Gift not Found";
+                    return res;
                 }
             }
             catch (Exception e)
@@ -141,6 +149,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewGiftDTO>();
             try
             {
+                var exist = await _giftRepo.GetGiftById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 var mapp = _mapper.Map<Gift>(newVenue);
                 mapp.Id = id;
                 await _giftRepo.UpdateGift(id, mapp);
