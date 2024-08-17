@@ -21,6 +21,10 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateVenue(CreateVenueDTO venueDTO)
         {
             var result = await _venueService.CreateVenue(venueDTO);
+            if (result == null)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -29,6 +33,10 @@ namespace TicketAPI.Controllers
             [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result = await _venueService.GetAllVenues(page, pageSize, search, sort);
+            if (result == null)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
@@ -36,6 +44,10 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetVenueById(int id)
         {
             var result = await _venueService.GetVenueById(id);
+            if (result == null)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
@@ -43,6 +55,10 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> DeleteVenue(int id)
         {
             var result = await _venueService.DeleteVenue(id);
+            if (result == null)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -50,6 +66,10 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> UpdateVenue(int id, CreateVenueDTO venueDTO)
         {
             var result = await _venueService.UpdateVenue(id, venueDTO);
+            if (result == null)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
     }

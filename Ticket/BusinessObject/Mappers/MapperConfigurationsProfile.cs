@@ -66,10 +66,8 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<Payment, CreatePaymentMethodDto>().ReverseMap();
         CreateMap<Payment, PaymentMethodDto>().ReverseMap();
 
-        CreateMap<CreateGiftDTO, Gift>().
-            ForMember(dest => dest.GiftReceptions, opt => opt.MapFrom(src => src.ReceptionDTO)).ReverseMap();
-        CreateMap<ViewGiftDTO, Gift>().
-            ForMember(dest => dest.GiftReceptions, opt => opt.MapFrom(src => src.ReceptionDTO)).ReverseMap();
+        CreateMap<CreateGiftDTO, Gift>().ReverseMap();
+        CreateMap<ViewGiftDTO, Gift>().ReverseMap();
 
         CreateMap<CreateGiftReceptionDTO,GiftReception>().ReverseMap();
         CreateMap<ViewGiftReceptionDTO, GiftReception>().ReverseMap();
