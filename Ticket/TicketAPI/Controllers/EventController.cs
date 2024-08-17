@@ -1,4 +1,5 @@
-﻿using BusinessObject.IService;
+﻿using System.Net.Mime;
+using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Responses;
 using DataAccessObject.Enums;
@@ -78,6 +79,7 @@ namespace TicketAPI.Controllers
         /// <param name="id">Event ID.</param>
         /// <returns>An event.</returns>
         [HttpGet("{id}")]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<IActionResult> GetEventById(int id)
         {
             var result = await _eventService.GetEventById(id);

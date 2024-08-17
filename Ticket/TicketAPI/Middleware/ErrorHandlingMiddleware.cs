@@ -1,54 +1,57 @@
 using System.Net;
 using System.Text.Json;
 
-namespace TicketAPI.Middleware;
-
-public class ErrorHandlingMiddleware
+namespace TicketAPI.Middleware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+    public class ErrorHandlingMiddleware
     {
-        _next = next;
-        _logger = logger;
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
+
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
+
+        public async Task InvokeAsync(HttpContext httpContext)
+        {
+            try
+            {
+                await _next(httpContext);
+            }
+            catch (Exception ex)
+            {
+                // Log detailed error information
+                _logger.LogError(ex, "An unexpected error occurred");
+
+                // Prepare the error response
+                httpContext.Response.ContentType = "application/json";
+                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+                var response = new 
+                {
+                    message = "An unexpected error occurred. Please try again later.",
+                    details = ex.Message // Optionally include details for development purposes
+                };
+
+                // Serialize and write the response
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+                var jsonResponse = JsonSerializer.Serialize(response, options);
+                await httpContext.Response.WriteAsync(jsonResponse);
+            }
+        }
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public static class ExceptionHandlingMiddlewareExtensions
     {
-        try
+        public static IApplicationBuilder UseExceptionHandlingMiddleware(this IApplicationBuilder builder)
         {
-            // Proceed to the next middleware in the pipeline
-            await _next(context);
+            return builder.UseMiddleware<ErrorHandlingMiddleware>();
         }
-        catch (Exception ex)
-        {
-            // Log the exception
-            _logger.LogError(ex, "An unhandled exception occurred.");
-
-            // Handle the exception
-            await HandleExceptionAsync(context, ex);
-        }
-    }
-
-    private Task HandleExceptionAsync(HttpContext context, Exception ex)
-    {
-        // Set the status code and content type for the response
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-
-        // Create a response object
-        var response = new
-        {
-            StatusCode = context.Response.StatusCode,
-            Message = "An unexpected error occurred. Please try again later.",
-            Detailed = ex.Message // Optionally include more details in development
-        };
-
-        // Serialize the response to JSON
-        var jsonResponse = JsonSerializer.Serialize(response);
-
-        // Write the response
-        return context.Response.WriteAsync(jsonResponse);
     }
 }

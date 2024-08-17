@@ -5,34 +5,36 @@ using BusinessObject.Commons;
 using DataAccessObject.Entities;
 using Microsoft.IdentityModel.Tokens;
 
-namespace BusinessObject.Ultils;
-
-public static class GenerateJsonWebTokenString
+namespace BusinessObject.Ultils
 {
-    public static string GenerateJsonWebToken(this User user, AppConfiguration appSettingConfiguration, string secretKey, DateTime now)
+    public static class GenerateJsonWebTokenString
     {
-        
-        if (Encoding.UTF8.GetBytes(secretKey).Length < 32)
+        public static string GenerateJsonWebToken(this User user, AppConfiguration appSettingConfiguration,
+            string secretKey, DateTime now)
         {
-            // Adjust key length to 32 bytes (256 bits) using padding if necessary
-            secretKey = secretKey.PadRight(32, '0');
+            if (Encoding.UTF8.GetBytes(secretKey).Length < 32)
+            {
+                // Adjust key length to 32 bytes (256 bits) using padding if necessary
+                secretKey = secretKey.PadRight(32, '0');
+            }
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim("Id", user.Id.ToString()),
+                new Claim("Email", user.Email),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+            };
+            var token = new JwtSecurityToken(
+                issuer: appSettingConfiguration.JWTSection.Issuer,
+                audience: appSettingConfiguration.JWTSection.Audience,
+                claims: claims,
+                expires: now.AddHours(3),
+                signingCredentials: credentials);
+
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var claims = new[]
-        {
-            new Claim("Id", user.Id.ToString()),
-            new Claim("Email" ,user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-        };
-        var token = new JwtSecurityToken(
-            issuer: appSettingConfiguration.JWTSection.Issuer,
-            audience: appSettingConfiguration.JWTSection.Audience,
-            claims: claims,
-            expires: now.AddHours(3),
-            signingCredentials: credentials);
-
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
