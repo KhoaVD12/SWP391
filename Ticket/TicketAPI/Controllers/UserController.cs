@@ -20,7 +20,8 @@ public class UserController : ControllerBase
 
 
     [HttpGet]
-    public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+        [FromQuery] string search = "", [FromQuery] string sort = "")
     {
         var result = await _userService.GetAllUsers(page, pageSize, search, sort);
         if (!result.Success)
@@ -31,9 +32,9 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    
+
     [HttpPost]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto registerObject)
+    public async Task<ActionResult> CreateUser([FromBody] CreateUserDto registerObject)
     {
         var result = await _userService.CreateUserAsync(registerObject);
 
@@ -45,8 +46,10 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "0")]
     [HttpGet("staff")]
-    public async Task<IActionResult> GetAllUsersCustomer([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    public async Task<IActionResult> GetAllUsersCustomer([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+        [FromQuery] string search = "", [FromQuery] string sort = "")
     {
         var result = await _userService.GetAllUsersByStaff(page, pageSize, search, sort);
         if (!result.Success)
@@ -58,7 +61,8 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("sponsor")]
-    public async Task<IActionResult> GetAllUsersAdmin([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    public async Task<IActionResult> GetAllUsersAdmin([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+        [FromQuery] string search = "", [FromQuery] string sort = "")
     {
         var result = await _userService.GetAllUsersBySponsor(page, pageSize, search, sort);
         if (!result.Success)
@@ -70,7 +74,8 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("organizer")]
-    public async Task<IActionResult> GetAllUsersStaff([FromQuery] int page = 1,  [FromQuery] int pageSize = 5, [FromQuery] string search = "", [FromQuery] string sort = "")
+    public async Task<IActionResult> GetAllUsersStaff([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+        [FromQuery] string search = "", [FromQuery] string sort = "")
     {
         var result = await _userService.GetAllUsersByOrganizer(page, pageSize, search, sort);
         if (!result.Success)
