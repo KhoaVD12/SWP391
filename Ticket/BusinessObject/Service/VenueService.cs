@@ -7,6 +7,7 @@ using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using DataAccessObject.Repo;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -63,6 +64,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<bool>();
             try
             {
+                var exist = await _venueRepo.GetVenueById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 await _venueRepo.DeleteVenue(id);
                 res.Success = true;
                 res.Message = "Venue Deleted successfully";
@@ -120,6 +128,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Venue not Found";
+                    return res;
                 }
             }
             catch (Exception e)
@@ -135,7 +144,14 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewVenueDTO>();
             try
             {
-                    var mapp = _mapper.Map<Venue>(newVenue);
+                var exist = await _venueRepo.GetVenueById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
+                var mapp = _mapper.Map<Venue>(newVenue);
                     mapp.Id = id;
                     await _venueRepo.UpdateVenue(id, mapp);
                     var result = _mapper.Map<ViewVenueDTO>(mapp);

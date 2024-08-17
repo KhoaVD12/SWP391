@@ -5,6 +5,7 @@ using BusinessObject.Models.BoothDTO;
 using BusinessObject.Models.BoothRequestDTO;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Models.GiftDTO;
+using BusinessObject.Models.GiftReceptionDTO;
 using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TicketDTO;
 using BusinessObject.Models.TransactionDTO;
@@ -67,5 +68,9 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<CreateGiftDTO, Gift>().ReverseMap();
         CreateMap<ViewGiftDTO, Gift>().ReverseMap();
+
+        CreateMap<CreateGiftReceptionDTO,GiftReception>().ReverseMap();
+        CreateMap<ViewGiftReceptionDTO, GiftReception>().ReverseMap();
+
     }
 }

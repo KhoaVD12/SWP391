@@ -6,6 +6,7 @@ using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using DataAccessObject.Repo;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -67,6 +68,13 @@ namespace BusinessObject.Service
             var res=new ServiceResponse<bool>();
             try
             {
+                var exist = await _boothRequestRepo.GetBoothRequestById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 await _boothRequestRepo.DeleteBoothRequest(id);
                 res.Success = true;
                 res.Message = "Request Deleted successfully";
@@ -118,6 +126,7 @@ namespace BusinessObject.Service
                     var map = _mapper.Map<ViewBoothRequestDTO>(result);
                     res.Success = true;
                     res.Data = map;
+                    return res;
                 }
                 else
                 {
@@ -138,6 +147,13 @@ namespace BusinessObject.Service
             var res= new ServiceResponse<ViewBoothRequestDTO>();
             try
             {
+                var exist = await _boothRequestRepo.GetBoothRequestById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 var updateResult = _mapper.Map<BoothRequest>(boothRequestDTO);
                 updateResult.RequestDate = DateTime.Now;
                 updateResult.Id= id;

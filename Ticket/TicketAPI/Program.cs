@@ -50,6 +50,7 @@ builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
 builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
 builder.Services.AddScoped<IBoothRequestRepo, BoothRequestRepo>();
 builder.Services.AddScoped<IGiftRepo, GiftRepo>();
+builder.Services.AddScoped<IGiftReceptionRepo, GiftReceptionRepo>();
 // Configure services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -62,6 +63,7 @@ builder.Services.AddScoped<IBoothRequestService, BoothRequestService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
@@ -83,14 +85,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 // Configure Authorization
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Admin", policy => policy.RequireRole(Role.Admin.ToString()));
-    options.AddPolicy("Staff", policy => policy.RequireRole(Role.Staff.ToString()));
-    options.AddPolicy("Sponsor", policy => policy.RequireRole(Role.Sponsor.ToString()));
-    options.AddPolicy("Organizer", policy => policy.RequireRole(Role.Organizer.ToString()));
-});
-
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("Admin", policy => policy.RequireRole(Role.Admin.ToString()))
+    .AddPolicy("Staff", policy => policy.RequireRole(Role.Staff.ToString()))
+    .AddPolicy("Sponsor", policy => policy.RequireRole(Role.Sponsor.ToString()))
+    .AddPolicy("Organizer", policy => policy.RequireRole(Role.Organizer.ToString()));
 // Configure Swagger
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

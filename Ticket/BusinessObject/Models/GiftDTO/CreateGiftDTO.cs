@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessObject.Models.GiftReceptionDTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,4 +14,5 @@ namespace BusinessObject.Models.GiftDTO
         public int BoothId { get; set; }
         public int Quantity { get; set; }
     }
+    
 }

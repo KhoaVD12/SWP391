@@ -19,13 +19,22 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateGift(CreateGiftDTO giftDTO)
         {
             var result = await _giftService.CreateGift(giftDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllGifts(int page, int pageSize, string search, string sort)
+        public async Task<IActionResult> GetAllGifts([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+            [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result = await _giftService.GetAllGifts(page, pageSize, search, sort);
+            if (!result.Success )
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
@@ -33,20 +42,32 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetGiftById(int id)
         {
             var result = await _giftService.GetGiftById(id);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGift(int id)
         {
             var result = await _giftService.DeleteGift(id);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGift(int id, CreateGiftDTO giftDTO)
         {
             var result = await _giftService.UpdateGift(id, giftDTO);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
     }
