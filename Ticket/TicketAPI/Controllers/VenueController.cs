@@ -21,13 +21,22 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateVenue(CreateVenueDTO venueDTO)
         {
             var result = await _venueService.CreateVenue(venueDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllVenue(int page, int pageSize, string search, string sort)
+        public async Task<IActionResult> GetAllVenue([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
+            [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result = await _venueService.GetAllVenues(page, pageSize, search, sort);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
@@ -35,20 +44,32 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetVenueById(int id)
         {
             var result = await _venueService.GetVenueById(id);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVenue(int id)
         {
             var result = await _venueService.DeleteVenue(id);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVenue(int id, CreateVenueDTO venueDTO)
         {
             var result = await _venueService.UpdateVenue(id, venueDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
     }
