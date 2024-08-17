@@ -1,6 +1,8 @@
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Mappers;
@@ -15,6 +17,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerUI;
+using TicketAPI.Filters;
 using TicketAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,7 +98,8 @@ builder.Services.AddAuthorizationBuilder()
 // Configure Swagger
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -103,6 +109,8 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Title = "Ticket.API",
     });
+    c.OperationFilter<DefaultResponseOperationFilter>();
+    c.OperationFilter<SecurityRequirementsOperationFilter>();
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -160,8 +168,10 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("swagger/v1/swagger.json", "TicketApis v1");
     c.RoutePrefix = string.Empty;
 });
-
+app.UseHsts();
+app.UseExceptionHandlingMiddleware();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

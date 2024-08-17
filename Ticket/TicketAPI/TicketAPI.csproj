@@ -23,7 +23,9 @@
 </PackageReference>
 <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
 <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0"/>
+<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+<PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
 </ItemGroup>
 
 <ItemGroup>
