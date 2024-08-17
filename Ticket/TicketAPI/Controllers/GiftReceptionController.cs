@@ -17,7 +17,7 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetAllReceptions([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] string sort = "")
         {
             var result = await _giftReceptionService.GetReceptions(page,pageSize,sort);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }
@@ -57,7 +57,7 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateReception(CreateGiftReceptionDTO receptionDTO)
         {
             var result = await _giftReceptionService.CreateReception(receptionDTO);
-            if (result == null)
+            if (!result.Success)
             {
                 return BadRequest(result);
             }

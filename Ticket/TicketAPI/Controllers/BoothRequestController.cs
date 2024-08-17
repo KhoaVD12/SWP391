@@ -21,7 +21,7 @@ namespace TicketAPI.Controllers
             [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result=await _boothRequestService.GetAllBoothRequests(page,pageSize,search,sort);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }
@@ -31,27 +31,27 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateBoothRequest(CreateBoothRequestDTO requestDTO)
         {
             var result=await _boothRequestService.CreateBoothRequest(requestDTO);
-            if (result == null)
+            if (!result.Success)
             {
                 return BadRequest(result);
             }
             return Ok(result);
         }
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult>DeleteBoothRequest(int id)
         {
             var result = await _boothRequestService.DeleteBoothRequest(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return BadRequest(result);
             }
             return Ok(result);
         }
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult>UpdateBoothRequest(int id, CreateBoothRequestDTO boothRequestDTO)
         {
             var result = await _boothRequestService.UpdateBoothRequest(id, boothRequestDTO);
-            if (result == null)
+            if (!result.Success)
             {
                 return BadRequest(result);
             }
@@ -61,7 +61,7 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult>GetBoothRequestById(int id)
         {
             var result=await _boothRequestService.GetBoothRequestById(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }

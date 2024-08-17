@@ -19,7 +19,7 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateGift(CreateGiftDTO giftDTO)
         {
             var result = await _giftService.CreateGift(giftDTO);
-            if (result == null)
+            if (!result.Success)
             {
                 return BadRequest(result);
             }
@@ -31,7 +31,7 @@ namespace TicketAPI.Controllers
             [FromQuery] string search = "", [FromQuery] string sort = "")
         {
             var result = await _giftService.GetAllGifts(page, pageSize, search, sort);
-            if (result == null)
+            if (!result.Success )
             {
                 return NotFound(result);
             }
@@ -42,29 +42,29 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetGiftById(int id)
         {
             var result = await _giftService.GetGiftById(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }
             return Ok(result);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGift(int id)
         {
             var result = await _giftService.DeleteGift(id);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }
             return Ok(result);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGift(int id, CreateGiftDTO giftDTO)
         {
             var result = await _giftService.UpdateGift(id, giftDTO);
-            if (result == null)
+            if (!result.Success)
             {
                 return NotFound(result);
             }
