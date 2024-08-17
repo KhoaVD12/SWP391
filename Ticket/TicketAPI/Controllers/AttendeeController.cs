@@ -19,30 +19,30 @@ public class AttendeeController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAttendee([FromBody] RegisterAttendeeDTO registerAttendeeDto)
+    public async Task<ActionResult> RegisterAttendee([FromBody] RegisterAttendeeDTO registerAttendeeDto)
     {
         var result = await _attendeeService.RegisterAttendeeAsync(registerAttendeeDto);
         if (!result.Success)
         {
-            return BadRequest(result);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
-        return Ok(result);
+        return Ok(new { success = result.Success, message = result.Message });
     }
 
     [HttpPut("attendees/{id}")]
-    public async Task<IActionResult> UpdateAttendee(int id, UpdateAttendeeDto updateAttendeeDto)
+    public async Task<IActionResult> UpdateAttendee(int id, [FromBody] UpdateAttendeeDto updateAttendeeDto)
     {
         if (id != updateAttendeeDto.Id)
         {
-            return BadRequest("Attendee ID mismatch");
+            return BadRequest(new { success = false, message = "Attendee ID mismatch" });
         }
 
         var result = await _attendeeService.UpdateAttendeeAsync(updateAttendeeDto);
 
         if (!result.Success)
         {
-            return BadRequest(result);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
         return NoContent();
@@ -54,7 +54,7 @@ public class AttendeeController : ControllerBase
         var attendee = await _attendeeService.GetAttendeeDetailsAsync(id);
         if (attendee == null)
         {
-            return NotFound();
+            return NotFound(new { success = false, message = "Attendee not found" });
         }
 
         return Ok(attendee);
@@ -66,10 +66,10 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.GetAttendeesByEventAsync(eventId);
         if (!result.Success)
         {
-            return BadRequest(result);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
-        return Ok(result);
+        return Ok(result.Data);
     }
 
     [HttpGet("event/{eventId}/attendees/export")]
@@ -78,7 +78,7 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.ExportAttendeesToCsvAsync(eventId);
         if (!result.Success)
         {
-            return BadRequest(result);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
         return File(Encoding.UTF8.GetBytes(result.Data), "text/csv", "attendees.csv");
@@ -90,10 +90,10 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.UpdateCheckInStatusAsync(attendeeId, status);
         if (!result.Success)
         {
-            return BadRequest(result);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
-        return Ok(result);
+        return Ok(new { success = result.Success, message = result.Message });
     }
 
     [HttpPost("checkin/qr")]
@@ -102,9 +102,9 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.CheckInAttendeeByCodeAsync(qrCode);
         if (!result.Success)
         {
-            return BadRequest(result.Message);
+            return BadRequest(new { success = result.Success, message = result.Message });
         }
 
-        return Ok(result.Message);
+        return Ok(new { success = result.Success, message = result.Message });
     }
 }

@@ -19,23 +19,25 @@ namespace TicketAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginResquestDto login)
+        public async Task<ActionResult> Login(LoginResquestDto login)
         {
             var result = await _authenticationService.LoginAsync(login);
             if (!result.Success)
             {
-                return BadRequest(result);
-            }
-
-            return Ok(
-                new
+                return Unauthorized(new
                 {
                     success = result.Success,
-                    message = result.Message,
-                    token = result.DataToken,
-                    role = result.Role,
-                }
-            );
+                    message = result.Message
+                });
+            }
+
+            return Ok(new
+            {
+                success = result.Success,
+                message = result.Message,
+                token = result.DataToken,
+                role = result.Role,
+            });
         }
 
         [HttpPost("reset-password")]
@@ -44,10 +46,18 @@ namespace TicketAPI.Controllers
             var response = await _authenticationService.ResetPass(dto);
             if (!response.Success)
             {
-                return BadRequest(response);
+                return BadRequest(new
+                {
+                    success = response.Success,
+                    message = response.Message
+                });
             }
 
-            return Ok(response);
+            return Ok(new
+            {
+                success = response.Success,
+                message = response.Message
+            });
         }
     }
 }
