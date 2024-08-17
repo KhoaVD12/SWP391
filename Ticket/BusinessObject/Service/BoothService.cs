@@ -68,6 +68,13 @@ namespace BusinessObject.Service
             var res=new ServiceResponse<bool>();
             try
             {
+                var exist = await _boothRepo.GetBoothById(id);
+                if(exist ==null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 await _boothRepo.DeleteBooth(id);
                 res.Success = true;
                 res.Message = "Booth Deleted successfully";
@@ -126,6 +133,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Booth not Found";
+                    return res;
                 }
             }
             catch(Exception e)
@@ -141,6 +149,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewBoothDTO>();
             try
             {
+                var exist = await _boothRepo.GetBoothById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 var updateResult = _mapper.Map<Booth>(boothDTO);
                 updateResult.Id = id;
                 await _boothRepo.UpdateBooth(id, updateResult);

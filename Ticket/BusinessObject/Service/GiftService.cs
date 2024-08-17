@@ -2,6 +2,7 @@
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Models.GiftDTO;
+using BusinessObject.Models.GiftReceptionDTO;
 using BusinessObject.Models.VenueDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
@@ -22,11 +23,13 @@ namespace BusinessObject.Service
         private readonly IMapper _mapper;
         private readonly AppConfiguration _appConfiguration;
         private readonly IGiftRepo _giftRepo;
-        public GiftService(IGiftRepo repo, AppConfiguration configuration, IMapper mapper)
+        private readonly IGiftReceptionService _giftReceptionService;
+        public GiftService(IGiftRepo repo, AppConfiguration configuration, IMapper mapper, IGiftReceptionService giftReceptionService)
         {
             _appConfiguration = configuration;
             _mapper = mapper;
             _giftRepo = repo;
+            _giftReceptionService = giftReceptionService;
         }
 
         public async Task<ServiceResponse<ViewGiftDTO>> CreateGift(CreateGiftDTO giftDTO)
@@ -37,7 +40,7 @@ namespace BusinessObject.Service
                 var mapp = _mapper.Map<Gift>(giftDTO);
 
                 await _giftRepo.CreateGift(mapp);
-
+                
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
 
                 res.Success = true;
@@ -65,6 +68,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<bool>();
             try
             {
+                var exist = await _giftRepo.GetGiftById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 await _giftRepo.DeleteGift(id);
                 res.Success = true;
                 res.Message = "Gift Deleted successfully";
@@ -123,6 +133,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Gift not Found";
+                    return res;
                 }
             }
             catch (Exception e)
@@ -138,6 +149,13 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewGiftDTO>();
             try
             {
+                var exist = await _giftRepo.GetGiftById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
                 var mapp = _mapper.Map<Gift>(newVenue);
                 mapp.Id = id;
                 await _giftRepo.UpdateGift(id, mapp);
