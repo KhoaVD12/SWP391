@@ -80,6 +80,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Reception not Found";
+                    return res;
                 }
             }
             catch (Exception e)
@@ -106,6 +107,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Reception not Found";
+                    return res ;
                 }
             }
             catch (Exception e)
@@ -132,6 +134,7 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Reception not Found";
+                    return res ;
                 }
             }
             catch (Exception e)
