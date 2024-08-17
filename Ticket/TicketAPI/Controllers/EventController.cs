@@ -85,7 +85,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.GetEventById(id);
             if (!result.Success)
             {
-                return NotFound(result.Message);
+                return NotFound(result);
             }
 
             return Ok(result.Data);
@@ -102,7 +102,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.DeleteEvent(id);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
             }
 
             return Ok(result);
@@ -133,9 +133,12 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> UpdateEvent(int id, [FromForm] UpdateEventDTO eventDto)
         {
             var result = await _eventService.UpdateEvent(id, eventDto);
-            return !result.Success
-                ? Problem(detail: result.Message, statusCode: StatusCodes.Status400BadRequest)
-                : Ok(result.Data);
+            if (!result.Success)
+            {
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
+            }
+
+            return Ok(result.Data);
         }
 
         /// <summary>
@@ -162,7 +165,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.GetEventsByStatus(status, page, pageSize);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
+                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
             }
 
             return Ok(result);

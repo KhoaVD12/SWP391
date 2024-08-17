@@ -22,7 +22,7 @@ namespace DataAccessObject.Repo
         public async Task<IEnumerable<Event>> GetEvent()
         {
             return await _context.Events.Include(e => e.Organizer)
-                .Include(e => e.Venue).ToListAsync();
+                .Include(e => e.Venue).AsNoTracking().ToListAsync();
         }
 
         public async Task<Event> GetEventById(int id)

@@ -24,10 +24,10 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.RegisterAttendeeAsync(registerAttendeeDto);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return Ok(new { success = result.Success, message = result.Message });
+        return Ok(result);
     }
 
     [HttpPut("attendees/{id}")]
@@ -42,10 +42,10 @@ public class AttendeeController : ControllerBase
 
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return NoContent();
+        return Ok(result);
     }
 
     [HttpGet("attendees/{id}")]
@@ -66,10 +66,10 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.GetAttendeesByEventAsync(eventId);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return Ok(result.Data);
+        return Ok(result);
     }
 
     [HttpGet("event/{eventId}/attendees/export")]
@@ -78,7 +78,7 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.ExportAttendeesToCsvAsync(eventId);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
         return File(Encoding.UTF8.GetBytes(result.Data), "text/csv", "attendees.csv");
@@ -90,10 +90,10 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.UpdateCheckInStatusAsync(attendeeId, status);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return Ok(new { success = result.Success, message = result.Message });
+        return Ok(result);
     }
 
     [HttpPost("checkin/qr")]
@@ -102,9 +102,9 @@ public class AttendeeController : ControllerBase
         var result = await _attendeeService.CheckInAttendeeByCodeAsync(qrCode);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return Ok(new { success = result.Success, message = result.Message });
+        return Ok(result);
     }
 }
