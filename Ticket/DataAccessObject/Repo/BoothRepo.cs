@@ -31,9 +31,10 @@ namespace DataAccessObject.Repo
         }
         public async Task<bool> DeleteBooth(int id)
         {
-            var exist = await _context.Booths.FindAsync(id);
+            var exist = await _context.Booths.Include(b=>b.BoothRequests).FirstOrDefaultAsync(b=>b.Id==id);
             if (exist != null)
             {
+                _context.BoothRequests.RemoveRange(exist.BoothRequests);
                 _context.Booths.Remove(exist);
                 await _context.SaveChangesAsync();
                 return true;

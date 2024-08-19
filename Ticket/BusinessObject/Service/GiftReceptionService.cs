@@ -42,6 +42,12 @@ namespace BusinessObject.Service
                     res.Message = "Attendee or/and Gift not exist";
                     return res;
                 }
+                if(await _giftReceptionRepo.CheckMaxGiftQuantity(createResult.GiftId))
+                {
+                    res.Success = false;
+                    res.Message = "You reach Max Gift Quantities";
+                    return res;
+                }
                 createResult.ReceptionDate = DateTime.Now;
                 await _giftReceptionRepo.CreateGiftReception(createResult);
                 var result = _mapper.Map<ViewGiftReceptionDTO>(createResult);
@@ -64,15 +70,15 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewGiftReceptionDTO>> GetReceptionByAttendeeId(int attendeeId)
+        public async Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByAttendeeId(int attendeeId)
         {
-            var res = new ServiceResponse<ViewGiftReceptionDTO>();
+            var res = new ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>();
             try
             {
                 var result = await _giftReceptionRepo.GetReceptionByAttendeeId(attendeeId);
                 if (result != null)
                 {
-                    var map = _mapper.Map<ViewGiftReceptionDTO>(result);
+                    var map = _mapper.Map<IEnumerable<ViewGiftReceptionDTO>>(result);
                     res.Success = true;
                     res.Data = map;
                 }
@@ -91,15 +97,15 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<ViewGiftReceptionDTO>> GetReceptionByGiftId(int giftId)
+        public async Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByGiftId(int giftId)
         {
-            var res = new ServiceResponse<ViewGiftReceptionDTO>();
+            var res = new ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>();
             try
             {
                 var result = await _giftReceptionRepo.GetReceptionByGiftId(giftId);
                 if (result != null)
                 {
-                    var map = _mapper.Map<ViewGiftReceptionDTO>(result);
+                    var map = _mapper.Map<IEnumerable<ViewGiftReceptionDTO>>(result);
                     res.Success = true;
                     res.Data = map;
                 }

@@ -82,7 +82,7 @@ namespace BusinessObject.Service
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = $"Fail to delete Venue:{e.Message}";
+                res.Message = $"Fail to delete Gift:{e.Message}";
             }
             return res;
         }
@@ -112,7 +112,7 @@ namespace BusinessObject.Service
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = $"Fail to retrieve Venue:{e.Message}";
+                res.Message = $"Fail to retrieve Gift:{e.Message}";
             }
             return res;
         }

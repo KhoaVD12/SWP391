@@ -26,6 +26,15 @@ namespace DataAccessObject.Repo
         {
             return await _context.Gifts.AnyAsync(a => a.Id == giftId);
         }
+        public async Task<bool> CheckMaxGiftQuantity(int giftId)
+        {
+            var currentNumberOfGiftReceptions=await _context.GiftReceptions.Where(a => a.GiftId == giftId).CountAsync();
+            var giftMaxQuantity = await _context.Gifts
+                                        .Where(g => g.Id == giftId)
+                                        .Select(g => g.Quantity)
+                                        .FirstOrDefaultAsync();
+            return currentNumberOfGiftReceptions >= giftMaxQuantity;
+        }
 
         public async Task CreateGiftReception(GiftReception reception)
         {
@@ -33,24 +42,24 @@ namespace DataAccessObject.Repo
             await _context.SaveChangesAsync();
         }
 
-        public async Task<GiftReception> GetReceptionByAttendeeId(int attendeeId)
+        public async Task<IEnumerable<GiftReception>> GetReceptionByAttendeeId(int attendeeId)
         {
-            return await _context.Set<GiftReception>().Where(g => g.AttendeeId == attendeeId).SingleOrDefaultAsync();
+            return await _context.GiftReceptions.Where(g => g.AttendeeId == attendeeId).ToListAsync();
         }
 
-        public async Task<GiftReception> GetReceptionByGiftId(int giftId)
+        public async Task<IEnumerable<GiftReception>> GetReceptionByGiftId(int giftId)
         {
-            return await _context.Set<GiftReception>().Where(g => g.GiftId == giftId).SingleOrDefaultAsync();
+            return await _context.GiftReceptions.Where(g => g.GiftId == giftId).ToListAsync();
         }
 
         public async Task<GiftReception> GetReceptionById(int id)
         {
-            return await _context.Set<GiftReception>().Where(g => g.Id == id).SingleOrDefaultAsync();
+            return await _context.Set<GiftReception>().Where(g => g.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<GiftReception>> GetReceptions()
         {
-            return await _context.GiftReceptions.ToListAsync();
+            return await _context.GiftReceptions.Include(g=>g.Gift).ToListAsync();
         }
     }
 }

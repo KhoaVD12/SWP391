@@ -2,6 +2,7 @@
 using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Models.BoothDTO;
+using BusinessObject.Models.BoothRequestDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
@@ -20,11 +21,41 @@ namespace BusinessObject.Service
         private readonly IBoothRepo _boothRepo;
         private readonly AppConfiguration _appConfiguration;
         private readonly IMapper _mapper;
-        public BoothService(IBoothRepo repo, AppConfiguration appConfiguration, IMapper mapper)
+        private readonly IBoothRequestService _boothRequestService;
+        public BoothService(IBoothRepo repo, AppConfiguration appConfiguration, IMapper mapper, IBoothRequestService boothRequestService)
         {
             _boothRepo = repo;
             _appConfiguration = appConfiguration;
             _mapper = mapper;
+            _boothRequestService = boothRequestService;
+        }
+
+        public async Task<ServiceResponse<bool>> ChangeStatusBooth(int id, BoothStatusDTO boothStatusDTO)
+        {
+            var res = new ServiceResponse<bool>();
+            try
+            {
+                var exist = await _boothRepo.GetBoothById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
+                
+                exist.Status = boothStatusDTO.Status;
+                await _boothRepo.UpdateBooth(id, exist);
+                
+                res.Success = true;
+                res.Message = "Booth Status updated successfully";
+                res.Data = true;
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = $"Fail to update Booth Status:{ex.Message}";
+            }
+            return res;
         }
 
         public async Task<ServiceResponse<ViewBoothDTO>> CreateBooth(CreateBoothDTO boothDTO)
@@ -33,7 +64,6 @@ namespace BusinessObject.Service
             try
             {
                 var createResult = _mapper.Map<Booth>(boothDTO);
-                createResult.Status = "Pending";
                 var nameExist = await _boothRepo.CheckExistByName(createResult.Name);
                 if (nameExist)
                 {
@@ -41,8 +71,16 @@ namespace BusinessObject.Service
                     res.Message = "Name existed";
                     return res;
                 }
+                createResult.Status = "Pending";
                 await _boothRepo.CreateBooth(createResult);
                 var mapp = _mapper.Map<ViewBoothDTO>(createResult);
+                var boothRequestCreate = new CreateBoothRequestDTO
+                {
+                    SponsorId = mapp.SponsorId,
+                    BoothId=mapp.Id,
+                    RequestDate=DateTime.UtcNow,
+                };
+                await _boothRequestService.CreateBoothRequest(boothRequestCreate);
                 res.Success = true;
                 res.Message = "Booth created successfully";
                 res.Data = mapp;

@@ -14,7 +14,7 @@ namespace BusinessObject.IService
         Task<ServiceResponse<PaginationModel<ViewGiftReceptionDTO>>> GetReceptions(int page, int pageSize, string sort);
         Task<ServiceResponse<ViewGiftReceptionDTO>> CreateReception(CreateGiftReceptionDTO receptionDTO);
         Task<ServiceResponse<ViewGiftReceptionDTO>> GetReceptionById(int id);
-        Task<ServiceResponse<ViewGiftReceptionDTO>> GetReceptionByAttendeeId(int attendeeId);
-        Task<ServiceResponse<ViewGiftReceptionDTO>> GetReceptionByGiftId(int giftId);
+        Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByAttendeeId(int attendeeId);
+        Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByGiftId(int giftId);
     }
 }

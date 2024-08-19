@@ -18,7 +18,7 @@ namespace DataAccessObject.Repo
         }
         public async Task<IEnumerable<Gift>> GetAllGifts()
         {
-            return await _context.Gifts.ToListAsync();
+            return await _context.Gifts.Include(g=>g.Booth).ToListAsync();
         }
         public async Task<Gift> GetGiftById(int id)
         {

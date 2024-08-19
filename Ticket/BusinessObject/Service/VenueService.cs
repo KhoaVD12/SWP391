@@ -166,5 +166,33 @@ namespace BusinessObject.Service
             }
             return res;
         }
+
+        public async Task<ServiceResponse<bool>> ChangeVenueStatus(int id, VenueStatusDTO venueStatus)
+        {
+            var res = new ServiceResponse<bool>();
+            try
+            {
+                var exist = await _venueRepo.GetVenueById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
+                
+                exist.Status=venueStatus.Status;
+                await _venueRepo.UpdateVenue(id, exist);
+                
+                res.Success = true;
+                res.Message = "Venue Status updated successfully";
+                res.Data = true;
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = $"Fail to update Venue Status:{e.Message}";
+            }
+            return res;
+        }
     }
 }
