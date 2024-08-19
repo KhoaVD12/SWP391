@@ -88,7 +88,7 @@ namespace TicketAPI.Controllers
             }
 
             return Ok(result);
-        }                      
+        }
 
         /// <summary>
         /// Assigns a staff member to an event.
@@ -96,7 +96,7 @@ namespace TicketAPI.Controllers
         /// <param name="staffId">The ID of the staff member.</param>
         /// <param name="eventId">The ID of the event.</param>
         /// <returns>A response indicating the success or failure of the assignment.</returns>
-        [HttpPost("assign")]
+        [HttpPost("{eventId}/staff/{staffId}")]
         public async Task<IActionResult> AssignStaffToEvent(int staffId, int eventId)
         {
             var response = await _eventService.AssignStaffToEventAsync(staffId, eventId);
@@ -114,7 +114,7 @@ namespace TicketAPI.Controllers
         /// </summary>
         /// <param name="eventId">The ID of the event.</param>
         /// <returns>The staff member assigned to the event.</returns>
-        [HttpGet("getStaffByEvent")]
+        [HttpGet("{eventId}/staff")]
         public async Task<IActionResult> GetStaffByEvent(int eventId)
         {
             var response = await _eventService.GetStaffByEventAsync(eventId);
@@ -139,7 +139,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.DeleteEvent(id);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
+                return BadRequest(result);
             }
 
             return Ok(result);
@@ -172,24 +172,25 @@ namespace TicketAPI.Controllers
             var result = await _eventService.UpdateEvent(id, eventDto);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
+                return BadRequest(result);
             }
 
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         /// <summary>
         /// Change the status of an event by admin.
         /// </summary>
+        /// <param name="eventId">ID of the event to update.</param>
         /// <param name="statusDto">Event status details.</param>
         /// <returns>A response indicating the status change.</returns>
-        [HttpPost("ChangeEventStatus")]
-        public async Task<IActionResult> ChangeEventStatus([FromBody] ChangeEventStatusDTO statusDto)
+        [HttpPost("{eventId}/status")]
+        public async Task<IActionResult> ChangeEventStatus(int eventId, [FromBody] ChangeEventStatusDTO statusDto)
         {
-            var result = await _eventService.ChangeEventStatus(statusDto);
+            var result = await _eventService.ChangeEventStatus(eventId, statusDto);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result.Message });
+                return BadRequest(result);
             }
 
             return Ok(result);
@@ -202,7 +203,7 @@ namespace TicketAPI.Controllers
             var result = await _eventService.GetEventsByStatus(status, page, pageSize);
             if (!result.Success)
             {
-                return BadRequest(new { StatusCode = StatusCodes.Status400BadRequest, result });
+                return BadRequest(result);
             }
 
             return Ok(result);
