@@ -46,7 +46,6 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "0")]
     [HttpGet("staff")]
     public async Task<IActionResult> GetAllUsersCustomer([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
         [FromQuery] string search = "", [FromQuery] string sort = "")

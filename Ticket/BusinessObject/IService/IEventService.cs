@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BusinessObject.Responses;
+using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 
 namespace BusinessObject.IService
@@ -18,6 +19,9 @@ namespace BusinessObject.IService
 
         public Task<ServiceResponse<ViewEventDTO>> GetEventById(int id);
         public Task<ServiceResponse<ViewEventDTO>> CreateEvent(CreateEventDTO eventDTO);
+        Task<ServiceResponse<bool>> AssignStaffToEventAsync(int staffId, int eventId);
+        Task<ServiceResponse<EventStaffDTO?>> GetStaffByEventAsync(int eventId);
+
         public Task<ServiceResponse<string>> DeleteEvent(int id);
         public Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO);
         Task<ServiceResponse<bool>> ChangeEventStatus(ChangeEventStatusDTO statusDTO);

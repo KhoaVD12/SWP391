@@ -79,7 +79,6 @@ namespace TicketAPI.Controllers
         /// <param name="id">Event ID.</param>
         /// <returns>An event.</returns>
         [HttpGet("{id}")]
-        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<IActionResult> GetEventById(int id)
         {
             var result = await _eventService.GetEventById(id);
@@ -88,8 +87,46 @@ namespace TicketAPI.Controllers
                 return NotFound(result);
             }
 
-            return Ok(result.Data);
+            return Ok(result);
+        }                      
+
+        /// <summary>
+        /// Assigns a staff member to an event.
+        /// </summary>
+        /// <param name="staffId">The ID of the staff member.</param>
+        /// <param name="eventId">The ID of the event.</param>
+        /// <returns>A response indicating the success or failure of the assignment.</returns>
+        [HttpPost("assign")]
+        public async Task<IActionResult> AssignStaffToEvent(int staffId, int eventId)
+        {
+            var response = await _eventService.AssignStaffToEventAsync(staffId, eventId);
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
+
+        /// <summary>
+        /// Retrieves the staff member assigned to a specific event.
+        /// </summary>
+        /// <param name="eventId">The ID of the event.</param>
+        /// <returns>The staff member assigned to the event.</returns>
+        [HttpGet("getStaffByEvent")]
+        public async Task<IActionResult> GetStaffByEvent(int eventId)
+        {
+            var response = await _eventService.GetStaffByEventAsync(eventId);
+
+            if (!response.Success)
+            {
+                return NotFound(response);
+            }
+
+            return Ok(response);
+        }
+
 
         /// <summary>
         /// Delete an event by its ID.

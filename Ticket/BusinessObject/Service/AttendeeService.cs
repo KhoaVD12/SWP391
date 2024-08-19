@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using AutoMapper;
 using BusinessObject.IService;
@@ -34,6 +35,18 @@ public class AttendeeService : IAttendeeService
         RegisterAttendeeDTO registerAttendeeDto)
     {
         var response = new ServiceResponse<RegisterAttendeeDTO>();
+
+        var context = new ValidationContext(registerAttendeeDto, serviceProvider: null, items: null);
+        var validationResults = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(registerAttendeeDto, context, validationResults, true);
+
+        if (!isValid)
+        {
+            response.Success = false;
+            response.Message = "Validation failed.";
+            response.ErrorMessages = validationResults.Select(vr => vr.ErrorMessage).ToList();
+            return response;
+        }
 
         try
         {
@@ -132,7 +145,7 @@ public class AttendeeService : IAttendeeService
         try
         {
             // Check if the event exists
-            var eventEntity = await _eventRepo.GetByIdAsync(eventId);
+            var eventEntity = await _eventRepo.GetEventById(eventId);
             if (eventEntity == null)
             {
                 response.Success = false;
@@ -142,6 +155,13 @@ public class AttendeeService : IAttendeeService
 
             // Get attendees for the event
             var attendees = await _attendeeRepo.GetAttendeesByEventAsync(eventId);
+            if (!attendees.Any())
+            {
+                response.Success = false;
+                response.Message = "No attendees found for this event.";
+                return response;
+            }
+
             var attendeeDtos = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
 
             // Return the list of attendees
@@ -153,7 +173,7 @@ public class AttendeeService : IAttendeeService
         {
             response.Success = false;
             response.Message = "Error retrieving attendees.";
-            response.ErrorMessages = new List<string> { ex.Message };
+            response.ErrorMessages = [ex.Message];
         }
 
         return response;
