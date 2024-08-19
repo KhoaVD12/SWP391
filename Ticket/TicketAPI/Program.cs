@@ -56,7 +56,8 @@ builder.Services.AddHttpClient<IPayPalService, PayPalService>(client =>
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-var payOs = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment client"),
+var payOs = new PayOS(
+    configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment client"),
     configuration["Environment:PAYOS_API_KEY"] ?? throw new Exception("Cannot find environment api"),
     configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment sum"));
 builder.Services.AddScoped<PayOS>(_ => payOs);
@@ -107,12 +108,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]))
         };
     });
+builder.Services.AddAuthorization();
 // Configure Authorization
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("Admin", policy => policy.RequireRole(Role.Admin.ToString()))
-    .AddPolicy("Staff", policy => policy.RequireRole(Role.Staff.ToString()))
-    .AddPolicy("Sponsor", policy => policy.RequireRole(Role.Sponsor.ToString()))
-    .AddPolicy("Organizer", policy => policy.RequireRole(Role.Organizer.ToString()));
+
 // Configure Swagger
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -128,7 +126,6 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Ticket.API",
     });
     c.OperationFilter<DefaultResponseOperationFilter>();
-    c.OperationFilter<SecurityRequirementsOperationFilter>();
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -191,7 +188,7 @@ app.UseExceptionHandlingMiddleware();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AllowAll");
-app.UseAuthentication();
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
