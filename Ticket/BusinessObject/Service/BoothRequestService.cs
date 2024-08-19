@@ -28,6 +28,34 @@ namespace BusinessObject.Service
             _boothRequestRepo = repo;
         }
 
+        public async Task<ServiceResponse<bool>> ChangeBoothRequestStatus(int id, BoothRequestStatusDTO boothRequestStatus)
+        {
+            var res = new ServiceResponse<bool>();
+            try
+            {
+                var exist = await _boothRequestRepo.GetBoothRequestById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
+                
+                exist.Status=boothRequestStatus.Status;
+                await _boothRequestRepo.UpdateBoothRequest(id, exist);
+                
+                res.Success = true;
+                res.Message = "Request Status updated successfully";
+                res.Data = true;
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = $"Fail to update Request Status:{ex.Message}";
+            }
+            return res;
+        }
+
         public async Task<ServiceResponse<ViewBoothRequestDTO>> CreateBoothRequest(CreateBoothRequestDTO boothRequestDTO)
         { 
             var res=new ServiceResponse<ViewBoothRequestDTO>();
@@ -102,10 +130,19 @@ namespace BusinessObject.Service
                     "requestdate" => requests.OrderBy(r => r.RequestDate),
                     _=>requests.OrderBy(r => r.Id),
                 };
-                var mapp= _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(requests);
-                var paging = await Pagination.GetPaginationEnum(mapp, page, pageSize);
-                res.Data = paging;
-                res.Success = true;
+                if (requests != null && requests.Any())
+                {
+                    var mapp = _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(requests);
+                    var paging = await Pagination.GetPaginationEnum(mapp, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No request found";
+                    return res;
+                }
             }
             catch(Exception e)
             {

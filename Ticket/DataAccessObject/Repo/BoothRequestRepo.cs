@@ -23,7 +23,7 @@ namespace DataAccessObject.Repo
         }
         public async Task<IEnumerable<BoothRequest>> GetAllBoothRequest()
         {
-            return await _context.BoothRequests.ToListAsync();
+            return await _context.BoothRequests.Include(r => r.Booth).Include(r => r.Sponsor).ToListAsync();
         }
         public async Task<bool> CheckExistByBoothId(int boothId)
         {

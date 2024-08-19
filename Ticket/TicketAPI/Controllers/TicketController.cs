@@ -35,6 +35,17 @@ namespace TicketAPI.Controllers
 
             return Ok(result);
         }
+        [HttpGet("event/{eventId}")]
+        public async Task<IActionResult> GetTicketByEventId(int eventId)
+        {
+            var result = await _ticketService.GetTicketByEventId(eventId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateTicket(CreateTicketDTO ticketDTO)
