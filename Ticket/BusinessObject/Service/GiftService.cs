@@ -82,7 +82,7 @@ namespace BusinessObject.Service
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = $"Fail to delete Venue:{e.Message}";
+                res.Message = $"Fail to delete Gift:{e.Message}";
             }
             return res;
         }
@@ -104,15 +104,23 @@ namespace BusinessObject.Service
                     "name" => gifts.OrderBy(v => v?.Name),
                     _ => gifts.OrderBy(v => v.Id).ToList()
                 };
-                var result = _mapper.Map<IEnumerable<ViewGiftDTO>>(gifts);
-                var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
-                res.Data = paging;
-                res.Success = true;
+                if(gifts.Any()&&gifts!=null)
+                {
+                    var result = _mapper.Map<IEnumerable<ViewGiftDTO>>(gifts);
+                    var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No Gift found";
+                }
             }
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = $"Fail to retrieve Venue:{e.Message}";
+                res.Message = $"Fail to retrieve Gift:{e.Message}";
             }
             return res;
         }
@@ -143,7 +151,56 @@ namespace BusinessObject.Service
             }
             return res;
         }
+        public async Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftByBoothId(int boothId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewGiftDTO>>();
+            try
+            {
+                var result = await _giftRepo.GetGiftByBoothId(boothId);
+                if (result != null&&result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewGiftDTO>>(result);
+                    res.Success = true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Gift not Found";
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
+            }
+            return res;
+        }
+        public async Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftsBySponsorId(int sponsorId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewGiftDTO>>();
+            try
+            {
+                var gifts = await _giftRepo.GetGiftsBySponsorId(sponsorId);
+                if (!gifts.Any())
+                {
+                    res.Success = false;
+                    res.Message = "No gifts found for this sponsor.";
+                    return res;
+                }
 
+                var giftDtos = _mapper.Map<IEnumerable<ViewGiftDTO>>(gifts);
+                res.Data = giftDtos;
+                res.Success = true;
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = $"An error occurred: {e.Message}";
+            }
+            return res;
+        }
         public async Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newVenue)
         {
             var res = new ServiceResponse<ViewGiftDTO>();

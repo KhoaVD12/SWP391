@@ -10,6 +10,7 @@ namespace DataAccessObject.IRepo
     public interface ITicketRepo:IGenericRepo<Ticket>
     {
         Task<Ticket> GetTicketById(int id);
+        Task<IEnumerable<Ticket>> GetTicketByEventId(int eventId);
         Task<IEnumerable<Ticket>> GetTicket();
         Task CreateTicket(Ticket ticket);
         Task<bool> DeleteTicket(int id);

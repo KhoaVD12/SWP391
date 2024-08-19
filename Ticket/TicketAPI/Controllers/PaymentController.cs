@@ -24,7 +24,7 @@ public class PaymentController : ControllerBase
         var result = await _paymentService.GetAllPaymentMethodsAsync(page, pageSize, search);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
         return Ok(result);
@@ -36,10 +36,10 @@ public class PaymentController : ControllerBase
         var result = await _paymentService.GetPaymentMethodByIdAsync(id);
         if (!result.Success)
         {
-            return NotFound(new { success = result.Success, message = result.Message });
+            return NotFound(result);
         }
 
-        return Ok(result.Data);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -54,7 +54,7 @@ public class PaymentController : ControllerBase
         var result = await _paymentService.CreatePaymentMethodAsync(dto);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
         return CreatedAtAction(nameof(GetPaymentMethod), new { id = result.Data.Id },
@@ -72,10 +72,10 @@ public class PaymentController : ControllerBase
         var result = await _paymentService.UpdatePaymentMethodAsync(id, dto);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return NoContent();
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
@@ -84,10 +84,10 @@ public class PaymentController : ControllerBase
         var result = await _paymentService.DeletePaymentMethodAsync(id);
         if (!result.Success)
         {
-            return BadRequest(new { success = result.Success, message = result.Message });
+            return BadRequest(result);
         }
 
-        return Ok(new { success = result.Success, message = result.Message });
+        return Ok(result);
     }
 
     [HttpPost("create")]

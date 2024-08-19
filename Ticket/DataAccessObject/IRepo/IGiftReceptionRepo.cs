@@ -12,9 +12,11 @@ namespace DataAccessObject.IRepo
         Task CreateGiftReception(GiftReception reception);
         Task<IEnumerable<GiftReception>> GetReceptions();
         Task<GiftReception> GetReceptionById(int id);
-        Task<GiftReception> GetReceptionByGiftId(int giftId);
-        Task<GiftReception> GetReceptionByAttendeeId(int attendeeId);
+        Task<IEnumerable<GiftReception>> GetReceptionByGiftId(int giftId);
+        Task<IEnumerable<GiftReception>> GetReceptionByAttendeeId(int attendeeId);
         Task<bool> CheckAttendeeExist(int attendeeId);
         Task<bool> CheckGiftExist(int giftId);
+        Task<bool> CheckMaxGiftQuantity(int giftId);
+        Task<bool> DeleteGiftReception(int id);
     }
 }

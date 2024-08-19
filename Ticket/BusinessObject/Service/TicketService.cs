@@ -34,7 +34,13 @@ namespace BusinessObject.Service
             try
             {
                 var createResult = _mapper.Map<Ticket>(ticketDTO);
-
+                var existTicket = await _ticketRepo.GetTicketByEventId(createResult.EventId);
+                if(existTicket != null)
+                {
+                    res.Success = false;
+                    res.Message = "Ticket with this event ID has already existed";
+                    return res;
+                }
                 await _ticketRepo.CreateTicket(createResult);
 
                 var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
@@ -94,6 +100,33 @@ namespace BusinessObject.Service
                 res.Message = $"Fail to get Ticket: {ex.Message}";
             }
 
+            return res;
+        }
+
+        public async Task<ServiceResponse<IEnumerable<ViewTicketDTO>>> GetTicketByEventId(int eventId)
+        {
+            var res=new ServiceResponse<IEnumerable<ViewTicketDTO>>();
+            try
+            {
+                var result = await _ticketRepo.GetTicketByEventId(eventId);
+                if (result != null && result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewTicketDTO>>(result);
+                    res.Success= true;
+                    res.Data= map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No ticket with this Event Id";
+                    return res;
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = ex.Message;
+            }
             return res;
         }
 

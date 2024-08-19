@@ -91,7 +91,8 @@ namespace BusinessObject.Service
                 var venues = await _venueRepo.GetAllVenues();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)));
+                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)||
+                    x.Status.Contains(search, StringComparison.OrdinalIgnoreCase)));
 
                 }
                 venues = sort.ToLower() switch
@@ -99,10 +100,19 @@ namespace BusinessObject.Service
                     "name"=>venues.OrderBy(v=>v?.Name),
                     _=>venues.OrderBy(v=>v.Id).ToList()
                 };
-                var result = _mapper.Map<IEnumerable<ViewVenueDTO>>(venues);
-                var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
-                res.Data = paging;
-                res.Success=true;
+                if (venues.Any() && venues != null)
+                {
+                    var result = _mapper.Map<IEnumerable<ViewVenueDTO>>(venues);
+                    var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success=false;
+                    res.Message = "No Venue found";
+                    return res;
+                }
             }
             catch(Exception e)
             {
@@ -163,6 +173,34 @@ namespace BusinessObject.Service
             {
                 res.Success=false;
                 res.Message = $"Fail to update Venue:{e.Message}";
+            }
+            return res;
+        }
+
+        public async Task<ServiceResponse<bool>> ChangeVenueStatus(int id, VenueStatusDTO venueStatus)
+        {
+            var res = new ServiceResponse<bool>();
+            try
+            {
+                var exist = await _venueRepo.GetVenueById(id);
+                if (exist == null)
+                {
+                    res.Success = false;
+                    res.Message = "Id not found";
+                    return res;
+                }
+                
+                exist.Status=venueStatus.Status;
+                await _venueRepo.UpdateVenue(id, exist);
+                
+                res.Success = true;
+                res.Message = "Venue Status updated successfully";
+                res.Data = true;
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = $"Fail to update Venue Status:{e.Message}";
             }
             return res;
         }
