@@ -45,14 +45,23 @@ namespace DataAccessObject.Repo
         }
         public async Task UpdateBoothRequest(int id, BoothRequest boothRequest)
         {
-            var exist = await _context.BoothRequests.FindAsync(id);
+            var exist = await _context.BoothRequests.Include(b=>b.Booth).FirstOrDefaultAsync(b=>b.Id==id);
             if(exist != null)
             {
                 exist.SponsorId=boothRequest.SponsorId;
                 exist.RequestDate=boothRequest.RequestDate;
                 exist.Status=boothRequest.Status;
                 exist.BoothId=boothRequest.BoothId;
+                if(boothRequest.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Booth.Status = "Opened";
+                }
+                else
+                {
+                    throw new Exception("Invalid Status");
+                }
                 _context.BoothRequests.Update(exist);
+
                 await _context.SaveChangesAsync();
             }
             else
