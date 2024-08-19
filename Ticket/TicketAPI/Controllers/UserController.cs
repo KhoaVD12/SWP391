@@ -113,6 +113,6 @@ public class UserController : ControllerBase
     public async Task<IActionResult> ChangeStatus(int id, [FromBody] UserStatusDTO statusDto)
     {
         var result = await _userService.ChangeStatus(id, statusDto);
-        return result.Success ? Ok(result) : BadRequest(result.Message);
+        return result.Success ? Ok(result) : BadRequest(result);
     }
 }
