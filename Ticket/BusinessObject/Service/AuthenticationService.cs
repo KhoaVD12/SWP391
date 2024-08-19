@@ -43,7 +43,7 @@ public class AuthenticationService : IAuthenticationService
                 return response;
             }
 
-            var auth = user.Role.ToString();
+            var auth = user.Role;
             var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
             response.DataToken = token;
             response.Success = true;

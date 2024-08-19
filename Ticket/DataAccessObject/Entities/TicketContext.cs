@@ -253,7 +253,7 @@ public partial class TicketContext : DbContext
             Name = "Admin",
             Email = "admin@gmail.com",
             Password = hashedPassword,
-            Role = Role.Admin,
+            Role = "Admin",
             Status = "Active"
         };
 
