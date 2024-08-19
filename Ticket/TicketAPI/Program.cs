@@ -1,8 +1,7 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using BusinessObject.Commons;
 using BusinessObject.IService;
@@ -10,7 +9,6 @@ using BusinessObject.Mappers;
 using BusinessObject.Service;
 using CloudinaryDotNet;
 using DataAccessObject.Entities;
-using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,8 +17,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Net.payOS;
-using Swashbuckle.AspNetCore.Filters;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using TicketAPI.Filters;
 using TicketAPI.Middleware;
 
@@ -95,6 +91,7 @@ builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var config = (IConfiguration)configuration;
         var jwtSection = builder.Configuration.GetSection("JWTSection");
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -105,12 +102,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             ValidIssuer = jwtSection["Issuer"],
             ValidAudience = jwtSection["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTSection:Key"])),
+            RoleClaimType = ClaimTypes.Role
         };
     });
-builder.Services.AddAuthorization();
-// Configure Authorization
-
 // Configure Swagger
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -187,8 +182,10 @@ app.UseHsts();
 app.UseExceptionHandlingMiddleware();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("AllowAll");
-app.UseAuthentication(); 
+app.UseCors("Allow");
+
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();

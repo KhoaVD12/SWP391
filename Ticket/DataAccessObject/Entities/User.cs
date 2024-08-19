@@ -1,6 +1,4 @@
-﻿using DataAccessObject.Enums;
-
-namespace DataAccessObject.Entities;
+﻿namespace DataAccessObject.Entities;
 
 public class User
 {
@@ -12,8 +10,7 @@ public class User
 
     public string Password { get; set; } = null!;
 
-    public Role Role { get; set; } 
-
+    public string Role { get; set; } = null!;
     public string Status { get; set; } = null!;
 
     public virtual ICollection<BoothRequest> BoothRequests { get; set; } = new List<BoothRequest>();

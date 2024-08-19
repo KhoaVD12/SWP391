@@ -24,7 +24,7 @@ namespace BusinessObject.Ultils
             {
                 new Claim("Id", user.Id.ToString()),
                 new Claim("Email", user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim(ClaimTypes.Role, user.Role),
             };
             var token = new JwtSecurityToken(
                 issuer: appSettingConfiguration.JWTSection.Issuer,
