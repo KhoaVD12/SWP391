@@ -393,16 +393,25 @@ namespace BusinessObject.Service
             return res;
         }
 
-        public async Task<ServiceResponse<bool>> ChangeEventStatus(ChangeEventStatusDTO statusDTO)
+        public async Task<ServiceResponse<bool>> ChangeEventStatus(int eventId, ChangeEventStatusDTO statusDTO)
         {
             var response = new ServiceResponse<bool>();
+
             try
             {
-                var eventToUpdate = await _eventRepo.GetEventById(statusDTO.EventId);
+                var eventToUpdate = await _eventRepo.GetEventById(eventId);
                 if (eventToUpdate == null)
                 {
                     response.Success = false;
                     response.Message = "Event not found.";
+                    return response;
+                }
+
+                // Validate the status if needed (e.g., check if it's a valid status)
+                if (string.IsNullOrWhiteSpace(statusDTO.Status))
+                {
+                    response.Success = false;
+                    response.Message = "Invalid status value.";
                     return response;
                 }
 
@@ -415,6 +424,7 @@ namespace BusinessObject.Service
             }
             catch (Exception ex)
             {
+                // Log the exception details if needed
                 response.Success = false;
                 response.Message = $"Error: {ex.Message}";
             }
