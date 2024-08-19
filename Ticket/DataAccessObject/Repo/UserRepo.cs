@@ -45,7 +45,7 @@ public class UserRepo: RepoBase<User>, IUserRepo
         return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<User?> GetUserByRoleAsync(Role role)
+    public async Task<User?> GetUserByRoleAsync(string role)
     {
         return await _dbSet.FirstOrDefaultAsync(u => u.Role == role);
     }
@@ -63,21 +63,21 @@ public class UserRepo: RepoBase<User>, IUserRepo
     public async Task<IEnumerable<User?>> GetAllUsersSponsor()
     {
         return await _context.Users
-            .Where(u => u.Role == Role.Sponsor)
+            .Where(u => u.Role == Roles.SPONSOR)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<User?>> GetAllUsersStaff()
     {
         return await _context.Users
-            .Where(u => u.Role == Role.Staff)
+            .Where(u => u.Role == Roles.STAFF)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<User?>> GetAllUsersOrganizer()
     {
         return await _context.Users
-            .Where(u => u.Role == Role.Organizer)
+            .Where(u => u.Role == Roles.ORGANIZER)
             .ToListAsync();
     }
 
