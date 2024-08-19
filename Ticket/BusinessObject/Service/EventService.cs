@@ -75,7 +75,9 @@ namespace BusinessObject.Service
                 var eventEntity = await _eventRepo.GetEventById(id);
                 if (eventEntity == null)
                 {
-                    return null!;
+                    res.Success = false;
+                    res.Message = "Event not found.";
+                    return res;
                 }
 
 
@@ -195,6 +197,94 @@ namespace BusinessObject.Service
             }
 
             return result;
+        }
+
+        public async Task<ServiceResponse<bool>> AssignStaffToEventAsync(int staffId, int eventId)
+        {
+            var response = new ServiceResponse<bool>();
+
+            try
+            {
+                // Get the event by ID
+                var eventEntity = await _eventRepo.GetByIdAsync(eventId);
+
+                if (eventEntity == null)
+                {
+                    response.Success = false;
+                    response.Message = "Event not found.";
+                    return response;
+                }
+
+                // Assign the staff to the event
+                eventEntity.StaffId = staffId;
+
+                // Save changes to the database
+                await _eventRepo.UpdateAsync(eventEntity);
+
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Staff assigned to the event successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "Error assigning staff to the event.";
+                response.ErrorMessages = new List<string> { ex.Message };
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<EventStaffDTO?>> GetStaffByEventAsync(int eventId)
+        {
+            var response = new ServiceResponse<EventStaffDTO?>();
+
+            try
+            {
+                var eventEntity = await _eventRepo.GetEventById(eventId);
+
+                if (eventEntity?.StaffId == null)
+                {
+                    response.Success = false;
+                    response.Message = "Staff not assigned or event not found.";
+                    return response;
+                }
+
+                var staff = await _userRepo.GetByIdAsync(eventEntity.StaffId.Value);
+
+                var staffDto = new EventStaffDTO
+                {
+                    Id = staff.Id,
+                    Name = staff.Name,
+                    Email = staff.Email,
+                    AssignedEvents =
+                    [
+                        new EventDTO
+                        {
+                            Id = eventEntity.Id,
+                            Title = eventEntity.Title,
+                            ImageUrl = eventEntity.ImageUrl,
+                            StartDate = eventEntity.StartDate,
+                            EndDate = eventEntity.EndDate,
+                            VenueName = eventEntity.Venue.Name,
+                            Status = eventEntity.Status,
+                            Description = eventEntity.Description
+                        }
+                    ]
+                };
+
+                response.Data = staffDto;
+                response.Success = true;
+                response.Message = "Staff retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "Error retrieving staff for the event.";
+                response.ErrorMessages = [ex.Message];
+            }
+
+            return response;
         }
 
         public async Task<string> UploadImageCollection(IFormFile file)

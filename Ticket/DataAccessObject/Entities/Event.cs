@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataAccessObject.Entities;
 
@@ -14,6 +15,8 @@ public partial class Event
 
     public int OrganizerId { get; set; }
 
+    public int? StaffId { get; set; }
+
     public DateTime EndDate { get; set; }
 
     public string? Description { get; set; }
@@ -25,6 +28,8 @@ public partial class Event
     public virtual ICollection<Attendee> Attendees { get; set; } = new List<Attendee>();
 
     public virtual User Organizer { get; set; } = null!;
+    [ForeignKey("StaffId")]
+    public virtual User Staff { get; set; } = null!;
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 

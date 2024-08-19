@@ -28,7 +28,7 @@ namespace DataAccessObject.Repo
         public async Task<Event?> GetEventById(int id)
         {
             return await _context.Events
-                .Include(e => e.Organizer)
+                .Include(e => e.Organizer) 
                 .Include(e => e.Venue)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }

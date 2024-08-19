@@ -38,9 +38,9 @@ public partial class TicketContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Venue> Venues { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.Entity<Attendee>(entity =>
         {
             entity.ToTable("Attendee");
@@ -117,6 +117,8 @@ public partial class TicketContext : DbContext
 
             entity.HasIndex(e => e.VenueId, "IX_Event_VenueId");
 
+            entity.HasIndex(e => e.StaffId, "IX_Event_StaffId");
+
             entity.Property(e => e.Description).IsUnicode(false);
             entity.Property(e => e.Status).IsUnicode(false);
             entity.Property(e => e.Title).IsUnicode(false);
@@ -124,12 +126,18 @@ public partial class TicketContext : DbContext
             entity.HasOne(d => d.Organizer).WithMany(p => p.Events)
                 .HasForeignKey(d => d.OrganizerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Event_User");
+                .HasConstraintName("FK_Event_Organizer");
 
             entity.HasOne(d => d.Venue).WithMany(p => p.Events)
                 .HasForeignKey(d => d.VenueId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Event_Venue");
+
+            entity.HasOne(e => e.Staff)
+                .WithMany(u => u.AssignedEvents)
+                .HasForeignKey(e => e.StaffId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Event_Staff");
         });
 
         modelBuilder.Entity<Gift>(entity =>
@@ -232,6 +240,7 @@ public partial class TicketContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         // Hash the admin's password
@@ -251,5 +260,4 @@ public partial class TicketContext : DbContext
         // Seed the admin user
         modelBuilder.Entity<User>().HasData(adminUser);
     }
-
 }
