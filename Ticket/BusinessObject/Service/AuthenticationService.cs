@@ -50,12 +50,6 @@ public class AuthenticationService : IAuthenticationService
             response.Message = "Login successful.";
             response.Role = auth;
         }
-        catch (DbException ex)
-        {
-            response.Success = false;
-            response.Message = "Database error occurred.";
-            response.ErrorMessages = new List<string> { ex.Message };
-        }
         catch (Exception ex)
         {
             response.Success = false;

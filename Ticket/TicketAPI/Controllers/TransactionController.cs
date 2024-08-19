@@ -21,6 +21,7 @@ public class TransactionController : ControllerBase
     public async Task<IActionResult> GetTransactionsByAttendee(int attendeeId)
     {
         var transactions = await _transactionService.GetTransactionsByAttendeeAsync(attendeeId);
+        if (!transactions.Success) return BadRequest(transactions);
         return Ok(transactions);
     }
 
@@ -36,24 +37,24 @@ public class TransactionController : ControllerBase
     public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto dto)
     {
         var result = await _transactionService.CreateTransactionAsync(dto);
-        if (!result.Success) return BadRequest(result.Message);
-        return Ok(result.Data);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTransaction(int id, [FromBody] TransactionDto dto)
     {
         var result = await _transactionService.UpdateTransactionAsync(id, dto);
-        if (!result.Success) return BadRequest(result.Message);
-        return Ok(result.Data);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTransaction(int id)
     {
         var result = await _transactionService.DeleteTransactionAsync(id);
-        if (!result.Success) return BadRequest(result.Message);
-        return Ok(result.Message);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
     }
 
     [HttpPut("{transactionId}/status")]
