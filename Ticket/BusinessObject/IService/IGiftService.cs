@@ -16,5 +16,6 @@ namespace BusinessObject.IService
         Task<ServiceResponse<bool>> DeleteGift(int id);
         Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newVenue);
         Task<ServiceResponse<ViewGiftDTO>> GetGiftById(int id);
+        Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftByBoothId(int boothId);
     }
 }

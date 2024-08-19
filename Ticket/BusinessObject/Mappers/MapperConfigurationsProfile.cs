@@ -50,15 +50,21 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<Venue, CreateVenueDTO>().ReverseMap();
         CreateMap<Venue, ViewVenueDTO>().ReverseMap();
+        CreateMap<VenueStatusDTO, Venue>().ReverseMap();
 
         CreateMap<CreateTicketDTO, Ticket>().ReverseMap();
         CreateMap<ViewTicketDTO, Ticket>().ReverseMap();
 
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
         CreateMap<ViewBoothDTO, Booth>().ReverseMap();
+        CreateMap<BoothStatusDTO, Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
-        CreateMap<ViewBoothRequestDTO, BoothRequest>().ReverseMap();
+        CreateMap<BoothRequest, ViewBoothRequestDTO>()
+            .ForMember(dest => dest.BoothName, opt => opt.MapFrom(src => src.Booth.Name))
+            .ForMember(dest => dest.SponsorName, opt => opt.MapFrom(src => src.Sponsor.Name))
+            .ReverseMap();
+        CreateMap<BoothRequestStatusDTO, BoothRequest>().ReverseMap();
 
         CreateMap<Transaction, CreateTransactionDto>().ReverseMap();
         CreateMap<Transaction, TransactionDto>().ReverseMap();
@@ -67,10 +73,14 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<Payment, PaymentMethodDto>().ReverseMap();
 
         CreateMap<CreateGiftDTO, Gift>().ReverseMap();
-        CreateMap<ViewGiftDTO, Gift>().ReverseMap();
+        CreateMap<Gift, ViewGiftDTO>()
+            .ForMember(dest => dest.BoothName, opt => opt.MapFrom(src => src.Booth.Name))
+            .ReverseMap();
 
         CreateMap<CreateGiftReceptionDTO,GiftReception>().ReverseMap();
-        CreateMap<ViewGiftReceptionDTO, GiftReception>().ReverseMap();
+        CreateMap< GiftReception, ViewGiftReceptionDTO>()
+            .ForMember(dest => dest.GiftName, opt => opt.MapFrom(src => src.Gift.Name))
+            .ReverseMap();
 
     }
 }

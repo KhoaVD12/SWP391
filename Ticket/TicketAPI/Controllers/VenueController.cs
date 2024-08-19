@@ -26,8 +26,11 @@ namespace TicketAPI.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }
-
+        }                                                                                        
+        /// <param name="page">Page number.</param>
+        /// <param name="pageSize">Number of Booths per page.</param>
+        /// <param name="search">Search by Name, Status.</param>
+        /// <param name="sort">Sort by Name.</param>
         [HttpGet]
         public async Task<IActionResult> GetAllVenue([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
             [FromQuery] string search = "", [FromQuery] string sort = "")
@@ -66,6 +69,16 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> UpdateVenue(int id, CreateVenueDTO venueDTO)
         {
             var result = await _venueService.UpdateVenue(id, venueDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        [HttpPut("ChangeVenueStatus/{id}")]
+        public async Task<IActionResult> ChangeVenueStatus(int id, VenueStatusDTO venueDTO)
+        {
+            var result = await _venueService.ChangeVenueStatus(id, venueDTO);
             if (!result.Success)
             {
                 return BadRequest(result);
