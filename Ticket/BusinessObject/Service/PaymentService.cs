@@ -14,13 +14,17 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepo _paymentRepo;
     private readonly ITransactionRepo _transactionRepo;
+    private readonly TicketContext _context;
     private readonly IMapper _mapper;
+    private readonly IPayPalService _payPalService;
 
-    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo)
+    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo, IPayPalService payPalService, TicketContext context)
     {
         _paymentRepo = paymentRepo;
         _mapper = mapper;
         _transactionRepo = transactionRepo;
+        _payPalService = payPalService;
+        _context = context;
     }
 
     public async Task<ServiceResponse<PaginationModel<PaymentMethodDto>>> GetAllPaymentMethodsAsync(int page,
@@ -103,6 +107,75 @@ public class PaymentService : IPaymentService
             response.Success = false;
             response.Message = "An error occurred while creating the payment method.";
             response.ErrorMessages = new List<string> { ex.Message };
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<string>> CreatePayment(decimal amount, string currency, string returnUrl, string cancelUrl)
+    {
+        var response = new ServiceResponse<string>();
+
+        try
+        {
+            var payment = await _payPalService.CreatePayment(amount, currency, returnUrl, cancelUrl);
+            response.Data = payment;
+            response.Success = true;
+            response.Message = "Payment created successfully.";
+        }
+        catch (HttpRequestException ex)
+        {
+            // Log the full error response for troubleshooting
+            response.Success = false;
+            response.Message = $"Payment creation failed: {ex.Message}";
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<bool>> ExecutePayment(string paymentId, string payerId)
+    {
+        var response = new ServiceResponse<bool>();
+
+        try
+        {
+            var success = await _payPalService.ExecutePayment(paymentId, payerId);
+            var paymentDetails = await _payPalService.GetPaymentDetails(paymentId);
+            if (success)
+            {
+                var transaction = new Transaction
+                {
+                    AttendeeId = paymentDetails.AttendeeId, // This should be derived from your business logic
+                    Date = DateTime.UtcNow,
+                    Amount = paymentDetails.Amount, // The amount paid
+                    PaymentMethod = paymentDetails.PaymentMethodId, // ID of the payment method used (e.g., PayPal)
+                    Status = "Completed", // Set the status to reflect successful payment
+                    PaymentMethodNavigation = new Payment
+                    {
+                        Name = "PayPal", // The name of the payment method
+                        Status = "Success",
+                        PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                    }
+                };
+
+                _context.Transactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Payment executed and transaction recorded successfully.";
+            }
+            else
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = "Payment execution failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Payment execution failed: {ex.Message}";
         }
 
         return response;

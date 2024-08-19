@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -17,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Net.payOS;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using TicketAPI.Filters;
@@ -44,6 +46,21 @@ builder.Services.AddSingleton(provider =>
         config.ApiSecret));
 });
 
+builder.Services.AddHttpClient<IPayPalService, PayPalService>(client =>
+{
+    var configuration = builder.Configuration.GetSection("PayPal");
+    var mode = configuration["Mode"];
+    var baseAddress = mode == "live" ? "https://api.paypal.com" : "https://api-m.sandbox.paypal.com";
+
+    client.BaseAddress = new Uri(baseAddress);
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+var payOs = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment client"),
+    configuration["Environment:PAYOS_API_KEY"] ?? throw new Exception("Cannot find environment api"),
+    configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment sum"));
+builder.Services.AddScoped<PayOS>(_ => payOs);
+
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IAttendeeRepo, AttendeeRepo>();
@@ -69,6 +86,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
+builder.Services.AddScoped<IPayPalService, PayPalService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 

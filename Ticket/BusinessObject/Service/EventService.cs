@@ -51,21 +51,10 @@ namespace BusinessObject.Service
                     "enddate" => events.OrderBy(e => e?.EndDate),
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
-                var eventList = events.Select(e => new ViewEventDTO
-                {
-                    Id = e.Id,
-                    Title = e.Title,
-                    Description = e.Description,
-                    OrganizerId = e.OrganizerId,
-                    OrganizerName = e.Organizer.Name, // Access the organizer's name
-                    VenueId = e.VenueId,
-                    VenueName = e.Venue.Name, // Access the venue's name
-                    StartDate = e.StartDate, // Convert DateOnly to DateTime
-                    EndDate = e.EndDate, // Convert DateOnly to DateTime
-                    Image = e.ImageUrl,
-                    Status = e.Status
-                }).ToList();
-                var paging = await Pagination.GetPaginationEnum(eventList, page, pageSize);
+                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
+
+                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+
                 res.Data = paging;
                 res.Success = true;
             }
@@ -89,6 +78,7 @@ namespace BusinessObject.Service
                     return null!;
                 }
 
+
                 var eventDetails = new ViewEventDTO()
                 {
                     Id = eventEntity.Id,
@@ -105,6 +95,7 @@ namespace BusinessObject.Service
                 };
 
                 res.Data = eventDetails;
+
                 res.Success = true;
             }
             catch (Exception ex)

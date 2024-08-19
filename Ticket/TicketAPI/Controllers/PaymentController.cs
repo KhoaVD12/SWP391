@@ -89,4 +89,32 @@ public class PaymentController : ControllerBase
 
         return Ok(new { success = result.Success, message = result.Message });
     }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreatePayment(decimal amount)
+    {
+        var response = await _paymentService.CreatePayment(amount, "VND", "https://localhost:3000", "https://localhost:3000");
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPost("execute")]
+    public async Task<IActionResult> ExecutePayment(string paymentId, string payerId)
+    {
+        var response = await _paymentService.ExecutePayment(paymentId, payerId);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
+
+
 }
