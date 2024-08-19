@@ -181,54 +181,6 @@ public class PaymentService : IPaymentService
         return response;
     }
 
-    public async Task<ServiceResponse<string>> InitiatePaymentAsync(PaymentRequestDto request)
-    {
-        var response = new ServiceResponse<string>();
-        try
-        {
-            // Create a transaction record
-            var transaction = _mapper.Map<Transaction>(request);
-            transaction.Date = DateTime.UtcNow;
-            transaction.Status = TransactionStatus.PENDING;
-
-            await _transactionRepo.AddAsync(transaction);
-
-            // Create a payment session with the payment gateway
-            /*var paymentSession = await _paymentGateway.CreatePaymentSessionAsync(request);*/
-
-            // Update response with the payment session URL
-            /*
-            response.Data = paymentSession.Url;
-            */
-            response.Success = true;
-            response.Message = "Payment session created successfully.";
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = "An error occurred while initiating the payment.";
-            response.ErrorMessages = new List<string> { ex.Message };
-        }
-
-        return response;
-    }
-
-    public async Task<ServiceResponse<bool>> HandlePaymentCallbackAsync(PaymentCallbackDto callback)
-    {
-        var transaction = await _transactionRepo.GetByIdAsync(callback.TransactionId);
-
-        if (transaction == null)
-        {
-            return new ServiceResponse<bool> { Success = false, Message = "Transaction not found." };
-        }
-
-        // Map the payment status to transaction status
-        transaction.Status = StatusMapper.MapPaymentStatusToTransactionStatus(callback.PaymentStatus);
-        await _transactionRepo.UpdateAsync(transaction);
-
-        return new ServiceResponse<bool> { Success = true, Message = "Payment status updated successfully." };
-    }
-
     public async Task<ServiceResponse<PaymentMethodDto>> UpdatePaymentMethodAsync(int id, PaymentMethodDto dto)
     {
         var response = new ServiceResponse<PaymentMethodDto>();

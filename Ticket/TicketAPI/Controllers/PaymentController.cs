@@ -90,7 +90,7 @@ public class PaymentController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("create")]
+    /*[HttpPost("create")]
     public async Task<IActionResult> CreatePayment(decimal amount)
     {
         var response = await _paymentService.CreatePayment(amount, "VND", "https://localhost:3000", "https://localhost:3000");
@@ -114,7 +114,7 @@ public class PaymentController : ControllerBase
         }
 
         return Ok(response);
-    }
+    }*/
 
 
 }
