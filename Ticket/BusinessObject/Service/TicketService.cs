@@ -34,7 +34,13 @@ namespace BusinessObject.Service
             try
             {
                 var createResult = _mapper.Map<Ticket>(ticketDTO);
-
+                var existTicket = await _ticketRepo.GetTicketByEventId(createResult.EventId);
+                if(existTicket != null)
+                {
+                    res.Success = false;
+                    res.Message = "Ticket with this event ID has already existed";
+                    return res;
+                }
                 await _ticketRepo.CreateTicket(createResult);
 
                 var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
