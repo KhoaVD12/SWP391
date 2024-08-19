@@ -13,6 +13,7 @@ namespace BusinessObject.Models.GiftReceptionDTO
         public int AttendeeId { get; set; }
 
         public int GiftId { get; set; }
+        public string GiftName { get; set; }
 
         public DateTime ReceptionDate { get; set; }
     }

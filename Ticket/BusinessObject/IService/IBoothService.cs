@@ -16,5 +16,7 @@ namespace BusinessObject.IService
         public Task<ServiceResponse<ViewBoothDTO>> CreateBooth(CreateBoothDTO boothDTO);
         public Task<ServiceResponse<bool>> DeleteBooth(int id);
         public Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, CreateBoothDTO boothDTO);
+        public Task<ServiceResponse<bool>> ChangeStatusBooth(int id, BoothStatusDTO boothDTO);
+
     }
 }

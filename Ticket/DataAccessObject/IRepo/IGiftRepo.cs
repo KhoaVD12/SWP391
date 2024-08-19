@@ -14,5 +14,6 @@ namespace DataAccessObject.IRepo
         Task CreateGift(Gift gift);
         Task<bool> DeleteGift(int id);
         Task UpdateGift(int id, Gift gift);
+        Task<IEnumerable<Gift>> GetGiftByBoothId(int boothId);
     }
 }

@@ -57,6 +57,16 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
+        [HttpPut("ChangeRequestStatus/{id}")]
+        public async Task<IActionResult> ChangeBoothRequestStatus(int id, BoothRequestStatusDTO boothRequestStatusDTO)
+        {
+            var result = await _boothRequestService.ChangeBoothRequestStatus(id, boothRequestStatusDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult>GetBoothRequestById(int id)
         {

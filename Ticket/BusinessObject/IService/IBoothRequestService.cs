@@ -15,6 +15,7 @@ namespace BusinessObject.IService
         public Task<ServiceResponse<ViewBoothRequestDTO>> GetBoothRequestById(int id);
         public Task<ServiceResponse<ViewBoothRequestDTO>> CreateBoothRequest(CreateBoothRequestDTO boothRequestDTO);
         public Task<ServiceResponse<bool>> DeleteBoothRequest(int id);
+        public Task<ServiceResponse<bool>> ChangeBoothRequestStatus(int id, BoothRequestStatusDTO boothRequestStatus);
         public Task<ServiceResponse<ViewBoothRequestDTO>> UpdateBoothRequest(int id, CreateBoothRequestDTO boothRequestDTO);
     }
 }
