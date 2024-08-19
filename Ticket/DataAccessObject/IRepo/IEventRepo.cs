@@ -1,10 +1,4 @@
 ﻿using DataAccessObject.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataAccessObject.Enums;
 
 namespace DataAccessObject.IRepo
 {
@@ -12,7 +6,7 @@ namespace DataAccessObject.IRepo
     {
 
         public Task<IEnumerable<Event>> GetEvent();
-        public Task<Event> GetEventById(int id);
+        public Task<Event?> GetEventById(int id);
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
         Task<Event?> CheckExistByTitle(string inputString);

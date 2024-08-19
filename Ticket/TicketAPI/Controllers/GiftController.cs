@@ -61,6 +61,16 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("Sponsor/{sponsorId}")]
+        public async Task<IActionResult> GetGiftBySponsorId(int sponsorId)
+        {
+            var result = await _giftService.GetGiftsBySponsorId(sponsorId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGift(int id)

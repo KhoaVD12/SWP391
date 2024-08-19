@@ -177,7 +177,30 @@ namespace BusinessObject.Service
             }
             return res;
         }
+        public async Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftsBySponsorId(int sponsorId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewGiftDTO>>();
+            try
+            {
+                var gifts = await _giftRepo.GetGiftsBySponsorId(sponsorId);
+                if (!gifts.Any())
+                {
+                    res.Success = false;
+                    res.Message = "No gifts found for this sponsor.";
+                    return res;
+                }
 
+                var giftDtos = _mapper.Map<IEnumerable<ViewGiftDTO>>(gifts);
+                res.Data = giftDtos;
+                res.Success = true;
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = $"An error occurred: {e.Message}";
+            }
+            return res;
+        }
         public async Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newVenue)
         {
             var res = new ServiceResponse<ViewGiftDTO>();

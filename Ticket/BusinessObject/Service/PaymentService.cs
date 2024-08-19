@@ -14,13 +14,17 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepo _paymentRepo;
     private readonly ITransactionRepo _transactionRepo;
+    private readonly TicketContext _context;
     private readonly IMapper _mapper;
+    private readonly IPayPalService _payPalService;
 
-    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo)
+    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo, IPayPalService payPalService, TicketContext context)
     {
         _paymentRepo = paymentRepo;
         _mapper = mapper;
         _transactionRepo = transactionRepo;
+        _payPalService = payPalService;
+        _context = context;
     }
 
     public async Task<ServiceResponse<PaginationModel<PaymentMethodDto>>> GetAllPaymentMethodsAsync(int page,
@@ -108,52 +112,73 @@ public class PaymentService : IPaymentService
         return response;
     }
 
-    public async Task<ServiceResponse<string>> InitiatePaymentAsync(PaymentRequestDto request)
+    public async Task<ServiceResponse<string>> CreatePayment(decimal amount, string currency, string returnUrl, string cancelUrl)
     {
         var response = new ServiceResponse<string>();
+
         try
         {
-            // Create a transaction record
-            var transaction = _mapper.Map<Transaction>(request);
-            transaction.Date = DateTime.UtcNow;
-            transaction.Status = TransactionStatus.PENDING;
-
-            await _transactionRepo.AddAsync(transaction);
-
-            // Create a payment session with the payment gateway
-            /*var paymentSession = await _paymentGateway.CreatePaymentSessionAsync(request);*/
-
-            // Update response with the payment session URL
-            /*
-            response.Data = paymentSession.Url;
-            */
+            var payment = await _payPalService.CreatePayment(amount, currency, returnUrl, cancelUrl);
+            response.Data = payment;
             response.Success = true;
-            response.Message = "Payment session created successfully.";
+            response.Message = "Payment created successfully.";
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
+            // Log the full error response for troubleshooting
             response.Success = false;
-            response.Message = "An error occurred while initiating the payment.";
-            response.ErrorMessages = new List<string> { ex.Message };
+            response.Message = $"Payment creation failed: {ex.Message}";
         }
 
         return response;
     }
 
-    public async Task<ServiceResponse<bool>> HandlePaymentCallbackAsync(PaymentCallbackDto callback)
+    public async Task<ServiceResponse<bool>> ExecutePayment(string paymentId, string payerId)
     {
-        var transaction = await _transactionRepo.GetByIdAsync(callback.TransactionId);
+        var response = new ServiceResponse<bool>();
 
-        if (transaction == null)
+        try
         {
-            return new ServiceResponse<bool> { Success = false, Message = "Transaction not found." };
+            var success = await _payPalService.ExecutePayment(paymentId, payerId);
+            var paymentDetails = await _payPalService.GetPaymentDetails(paymentId);
+            if (success)
+            {
+                var transaction = new Transaction
+                {
+                    AttendeeId = paymentDetails.AttendeeId, // This should be derived from your business logic
+                    Date = DateTime.UtcNow,
+                    Amount = paymentDetails.Amount, // The amount paid
+                    PaymentMethod = paymentDetails.PaymentMethodId, // ID of the payment method used (e.g., PayPal)
+                    Status = "Completed", // Set the status to reflect successful payment
+                    PaymentMethodNavigation = new Payment
+                    {
+                        Name = "PayPal", // The name of the payment method
+                        Status = "Success",
+                        PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                    }
+                };
+
+                _context.Transactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                response.Data = true;
+                response.Success = true;
+                response.Message = "Payment executed and transaction recorded successfully.";
+            }
+            else
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = "Payment execution failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Payment execution failed: {ex.Message}";
         }
 
-        // Map the payment status to transaction status
-        transaction.Status = StatusMapper.MapPaymentStatusToTransactionStatus(callback.PaymentStatus);
-        await _transactionRepo.UpdateAsync(transaction);
-
-        return new ServiceResponse<bool> { Success = true, Message = "Payment status updated successfully." };
+        return response;
     }
 
     public async Task<ServiceResponse<PaymentMethodDto>> UpdatePaymentMethodAsync(int id, PaymentMethodDto dto)

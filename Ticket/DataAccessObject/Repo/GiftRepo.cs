@@ -20,6 +20,12 @@ namespace DataAccessObject.Repo
         {
             return await _context.Gifts.Include(g=>g.Booth).ToListAsync();
         }
+        public async Task<IEnumerable<Gift>> GetGiftsBySponsorId(int sponsorId)
+        {
+            return await _context.Gifts
+                .Where(g => g.Booth.SponsorId == sponsorId)
+                .ToListAsync();
+        }
         public async Task<Gift> GetGiftById(int id)
         {
             return await _context.Set<Gift>().Where(g => g.Id == id).SingleOrDefaultAsync();
