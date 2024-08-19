@@ -24,11 +24,7 @@ namespace TicketAPI.Controllers
             var result = await _authenticationService.LoginAsync(login);
             if (!result.Success)
             {
-                return Unauthorized(new
-                {
-                    success = result.Success,
-                    message = result.Message
-                });
+                return StatusCode(401, result);
             }
 
             return Ok(new
@@ -46,11 +42,7 @@ namespace TicketAPI.Controllers
             var response = await _authenticationService.ResetPass(dto);
             if (!response.Success)
             {
-                return BadRequest(new
-                {
-                    success = response.Success,
-                    message = response.Message
-                });
+                return StatusCode(401, response);
             }
 
             return Ok(new

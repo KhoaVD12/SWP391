@@ -24,6 +24,10 @@ namespace DataAccessObject.Repo
         {
             return await _context.Tickets.ToListAsync();
         }
+        public async Task<IEnumerable<Ticket>> GetTicketByEventId(int eventId)
+        {
+            return await _context.Set<Ticket>().Where(t => t.EventId == eventId).ToListAsync();
+        }
         public async Task CreateTicket(Ticket ticket)
         {
             await _context.Tickets.AddAsync(ticket);
