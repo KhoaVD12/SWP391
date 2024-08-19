@@ -17,5 +17,6 @@ namespace BusinessObject.IService
         Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newVenue);
         Task<ServiceResponse<ViewGiftDTO>> GetGiftById(int id);
         Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftByBoothId(int boothId);
+        Task<ServiceResponse<IEnumerable<ViewGiftDTO>>> GetGiftsBySponsorId(int sponsorId);
     }
 }

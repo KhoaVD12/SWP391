@@ -15,5 +15,6 @@ namespace DataAccessObject.IRepo
         Task<bool> DeleteGift(int id);
         Task UpdateGift(int id, Gift gift);
         Task<IEnumerable<Gift>> GetGiftByBoothId(int boothId);
+        Task<IEnumerable<Gift>> GetGiftsBySponsorId(int sponsorId);
     }
 }
