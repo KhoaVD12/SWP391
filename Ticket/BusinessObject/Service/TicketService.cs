@@ -97,6 +97,33 @@ namespace BusinessObject.Service
             return res;
         }
 
+        public async Task<ServiceResponse<IEnumerable<ViewTicketDTO>>> GetTicketByEventId(int eventId)
+        {
+            var res=new ServiceResponse<IEnumerable<ViewTicketDTO>>();
+            try
+            {
+                var result = await _ticketRepo.GetTicketByEventId(eventId);
+                if (result != null && result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewTicketDTO>>(result);
+                    res.Success= true;
+                    res.Data= map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No ticket with this Event Id";
+                    return res;
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = ex.Message;
+            }
+            return res;
+        }
+
         public async Task<ServiceResponse<ViewTicketDTO>> GetTicketById(int id)
         {
             var res = new ServiceResponse<ViewTicketDTO>();
