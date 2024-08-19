@@ -130,10 +130,19 @@ namespace BusinessObject.Service
                     "requestdate" => requests.OrderBy(r => r.RequestDate),
                     _=>requests.OrderBy(r => r.Id),
                 };
-                var mapp= _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(requests);
-                var paging = await Pagination.GetPaginationEnum(mapp, page, pageSize);
-                res.Data = paging;
-                res.Success = true;
+                if (requests != null && requests.Any())
+                {
+                    var mapp = _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(requests);
+                    var paging = await Pagination.GetPaginationEnum(mapp, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No request found";
+                    return res;
+                }
             }
             catch(Exception e)
             {

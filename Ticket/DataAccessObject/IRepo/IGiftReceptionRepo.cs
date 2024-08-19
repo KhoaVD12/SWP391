@@ -17,5 +17,6 @@ namespace DataAccessObject.IRepo
         Task<bool> CheckAttendeeExist(int attendeeId);
         Task<bool> CheckGiftExist(int giftId);
         Task<bool> CheckMaxGiftQuantity(int giftId);
+        Task<bool> DeleteGiftReception(int id);
     }
 }

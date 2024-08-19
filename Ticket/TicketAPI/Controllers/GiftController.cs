@@ -25,7 +25,10 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-
+        /// <param name="page">Page number.</param>
+        /// <param name="pageSize">Number of Booths per page.</param>
+        /// <param name="search">Search by Name.</param>
+        /// <param name="sort">Sort by Name, Quantity.</param>
         [HttpGet]
         public async Task<IActionResult> GetAllGifts([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
             [FromQuery] string search = "", [FromQuery] string sort = "")
@@ -42,6 +45,16 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetGiftById(int id)
         {
             var result = await _giftService.GetGiftById(id);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpGet("Booth/{boothId}")]
+        public async Task<IActionResult> GetGiftByBoothId(int boothId)
+        {
+            var result = await _giftService.GetGiftByBoothId(boothId);
             if (!result.Success)
             {
                 return NotFound(result);

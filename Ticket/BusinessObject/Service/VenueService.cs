@@ -91,7 +91,8 @@ namespace BusinessObject.Service
                 var venues = await _venueRepo.GetAllVenues();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)));
+                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)||
+                    x.Status.Contains(search, StringComparison.OrdinalIgnoreCase)));
 
                 }
                 venues = sort.ToLower() switch
@@ -99,10 +100,19 @@ namespace BusinessObject.Service
                     "name"=>venues.OrderBy(v=>v?.Name),
                     _=>venues.OrderBy(v=>v.Id).ToList()
                 };
-                var result = _mapper.Map<IEnumerable<ViewVenueDTO>>(venues);
-                var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
-                res.Data = paging;
-                res.Success=true;
+                if (venues.Any() && venues != null)
+                {
+                    var result = _mapper.Map<IEnumerable<ViewVenueDTO>>(venues);
+                    var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success=false;
+                    res.Message = "No Venue found";
+                    return res;
+                }
             }
             catch(Exception e)
             {

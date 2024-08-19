@@ -142,10 +142,19 @@ namespace BusinessObject.Service
                     "location"=>booths.OrderBy(b=>b.Location),
                     _=>booths.OrderBy(b=>b.Id).ToList(),
                 };
-                var map = _mapper.Map<IEnumerable<ViewBoothDTO>>(booths);
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
-                res.Data = paging;
-                res.Success = true;
+                if (booths!=null&& booths.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewBoothDTO>>(booths);
+                    var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "No Booth record";
+                    return res;
+                }
             }
             catch (Exception e)
             {

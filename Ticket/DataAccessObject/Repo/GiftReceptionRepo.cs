@@ -61,5 +61,19 @@ namespace DataAccessObject.Repo
         {
             return await _context.GiftReceptions.Include(g=>g.Gift).ToListAsync();
         }
+        public async Task<bool> DeleteGiftReception(int id)
+        {
+            var exist = await _context.GiftReceptions.FirstOrDefaultAsync(g => g.Id == id);
+            if (exist != null)
+            {
+                _context.GiftReceptions.Remove(exist);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                throw new Exception("Id not found");
+            }
+        }
     }
 }

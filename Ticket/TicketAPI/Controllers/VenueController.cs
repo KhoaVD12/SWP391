@@ -26,8 +26,11 @@ namespace TicketAPI.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }
-
+        }                                                                                        
+        /// <param name="page">Page number.</param>
+        /// <param name="pageSize">Number of Booths per page.</param>
+        /// <param name="search">Search by Name, Status.</param>
+        /// <param name="sort">Sort by Name.</param>
         [HttpGet]
         public async Task<IActionResult> GetAllVenue([FromQuery] int page = 1, [FromQuery] int pageSize = 5,
             [FromQuery] string search = "", [FromQuery] string sort = "")
