@@ -20,7 +20,7 @@ namespace BusinessObject.IService
         public Task<ServiceResponse<ViewEventDTO>> GetEventById(int id);
         public Task<ServiceResponse<ViewEventDTO>> CreateEvent(CreateEventDTO eventDTO);
         Task<ServiceResponse<bool>> AssignStaffToEventAsync(int staffId, int eventId);
-        Task<ServiceResponse<EventStaffDTO?>> GetStaffByEventAsync(int eventId);
+        Task<ServiceResponse<EventStaffDTO?>> GetEventByStaffAsync(int staffId);
 
         public Task<ServiceResponse<string>> DeleteEvent(int id);
         public Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO);

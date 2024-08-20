@@ -110,14 +110,14 @@ namespace TicketAPI.Controllers
         }
 
         /// <summary>
-        /// Retrieves the staff member assigned to a specific event.
+        /// Retrieves the events assigned to a specific staff member.
         /// </summary>
-        /// <param name="eventId">The ID of the event.</param>
-        /// <returns>The staff member assigned to the event.</returns>
-        [HttpGet("{eventId}/staff")]
-        public async Task<IActionResult> GetStaffByEvent(int eventId)
+        /// <param name="staffId">The ID of the staff.</param>
+        /// <returns>The events assigned to the staff member.</returns>
+        [HttpGet("{staffId}/events")]
+        public async Task<IActionResult> GetEventsByStaff(int staffId)
         {
-            var response = await _eventService.GetStaffByEventAsync(eventId);
+            var response = await _eventService.GetEventByStaffAsync(staffId);
 
             if (!response.Success)
             {

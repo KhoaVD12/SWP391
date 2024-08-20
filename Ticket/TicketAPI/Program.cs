@@ -41,16 +41,13 @@ builder.Services.AddSingleton(provider =>
         config.ApiKey,
         config.ApiSecret));
 });
-
-builder.Services.AddHttpClient<IPayPalService, PayPalService>(client =>
-{
-    var configuration = builder.Configuration.GetSection("PayPal");
-    var mode = configuration["Mode"];
-    var baseAddress = mode == "live" ? "https://api.paypal.com" : "https://api-m.sandbox.paypal.com";
-
-    client.BaseAddress = new Uri(baseAddress);
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-});
+builder.Services.AddSingleton(x =>
+    new PaypalClient(
+        builder.Configuration["PayPalOptions:ClientId"],
+        builder.Configuration["PayPalOptions:ClientSecret"],
+        builder.Configuration["PayPalOptions:Mode"]
+    )
+);
 
 var payOs = new PayOS(
     configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment client"),
@@ -83,7 +80,6 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
-builder.Services.AddScoped<IPayPalService, PayPalService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
