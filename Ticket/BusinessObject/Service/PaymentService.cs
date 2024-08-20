@@ -1,3 +1,4 @@
+using System.Globalization;
 using AutoMapper;
 using BusinessObject.IService;
 using BusinessObject.Mappers;
@@ -7,6 +8,7 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
+using Microsoft.Extensions.Configuration;
 
 namespace BusinessObject.Service;
 
@@ -14,17 +16,18 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepo _paymentRepo;
     private readonly ITransactionRepo _transactionRepo;
-    private readonly TicketContext _context;
+    private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
-    private readonly IPayPalService _payPalService;
+    private readonly PaypalClient _paypalClient;
 
-    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo, IPayPalService payPalService, TicketContext context)
+    public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo,
+        PaypalClient paypalClient, IConfiguration configuration)
     {
         _paymentRepo = paymentRepo;
         _mapper = mapper;
         _transactionRepo = transactionRepo;
-        _payPalService = payPalService;
-        _context = context;
+        _paypalClient = paypalClient;
+        _configuration = configuration;
     }
 
     public async Task<ServiceResponse<PaginationModel<PaymentMethodDto>>> GetAllPaymentMethodsAsync(int page,
@@ -112,74 +115,6 @@ public class PaymentService : IPaymentService
         return response;
     }
 
-    public async Task<ServiceResponse<string>> CreatePayment(decimal amount, string currency, string returnUrl, string cancelUrl)
-    {
-        var response = new ServiceResponse<string>();
-
-        try
-        {
-            var payment = await _payPalService.CreatePayment(amount, currency, returnUrl, cancelUrl);
-            response.Data = payment;
-            response.Success = true;
-            response.Message = "Payment created successfully.";
-        }
-        catch (HttpRequestException ex)
-        {
-            // Log the full error response for troubleshooting
-            response.Success = false;
-            response.Message = $"Payment creation failed: {ex.Message}";
-        }
-
-        return response;
-    }
-
-    public async Task<ServiceResponse<bool>> ExecutePayment(string paymentId, string payerId)
-    {
-        var response = new ServiceResponse<bool>();
-
-        try
-        {
-            var success = await _payPalService.ExecutePayment(paymentId, payerId);
-            var paymentDetails = await _payPalService.GetPaymentDetails(paymentId);
-            if (success)
-            {
-                var transaction = new Transaction
-                {
-                    AttendeeId = paymentDetails.AttendeeId, // This should be derived from your business logic
-                    Date = DateTime.UtcNow,
-                    Amount = paymentDetails.Amount, // The amount paid
-                    PaymentMethod = paymentDetails.PaymentMethodId, // ID of the payment method used (e.g., PayPal)
-                    Status = "Completed", // Set the status to reflect successful payment
-                    PaymentMethodNavigation = new Payment
-                    {
-                        Name = "PayPal", // The name of the payment method
-                        Status = "Success",
-                        PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                    }
-                };
-
-                _context.Transactions.Add(transaction);
-                await _context.SaveChangesAsync();
-
-                response.Data = true;
-                response.Success = true;
-                response.Message = "Payment executed and transaction recorded successfully.";
-            }
-            else
-            {
-                response.Data = false;
-                response.Success = false;
-                response.Message = "Payment execution failed.";
-            }
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = $"Payment execution failed: {ex.Message}";
-        }
-
-        return response;
-    }
 
     public async Task<ServiceResponse<PaymentMethodDto>> UpdatePaymentMethodAsync(int id, PaymentMethodDto dto)
     {
@@ -240,5 +175,104 @@ public class PaymentService : IPaymentService
         }
 
         return response;
+    }
+
+    public async Task<CreateOrderResponse> CreateOrderAsync(int attendeeId, decimal amount, string currency)
+    {
+        if (amount <= 0)
+        {
+            throw new ArgumentException("Amount must be greater than zero.");
+        }
+
+        if (string.IsNullOrWhiteSpace(currency) || currency.Length != 3)
+        {
+            throw new ArgumentException("Invalid currency code.");
+        }
+
+        decimal conversionRate = 1 / 24925m; // 1 USD = 24,925 VND
+
+        // Check if currency is VND and convert to USD for PayPal
+        if (currency.Equals("VND", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // Convert the amount from VND to USD
+            amount *= conversionRate;
+            currency = "USD";
+        }
+
+        amount = Math.Round(amount, 2);
+
+        var referenceId = Guid.NewGuid().ToString();
+
+        try
+        {
+            var orderResponse =
+                await _paypalClient.CreateOrder(amount.ToString(CultureInfo.InvariantCulture), currency, referenceId);
+
+            if (string.IsNullOrEmpty(orderResponse.id))
+            {
+                throw new Exception("Failed to create PayPal order.");
+            }
+
+            // Save Payment and Transaction in the database
+            var payment = new Payment
+            {
+                Name = "PayPal",
+                Status = PaymentStatus.PENDING,
+                PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            };
+
+            await _paymentRepo.AddAsync(payment);
+
+            var transaction = new Transaction
+            {
+                AttendeeId = attendeeId,
+                Date = DateTime.Now,
+                Amount = amount,
+                PaymentMethod = payment.Id,
+                Status = TransactionStatus.PENDING
+            };
+
+            await _transactionRepo.AddAsync(transaction);
+
+            return orderResponse;
+        }
+        catch (HttpRequestException httpEx)
+        {
+            throw new Exception("Failed to communicate with PayPal. Please try again later.", httpEx);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception details
+            throw new Exception("An error occurred while creating the order. Please try again later.", ex);
+        }
+    }
+
+    public async Task<CaptureOrderResponse> CaptureOrderAsync(string orderId, int transactionId)
+    {
+        // Capture the order in PayPal
+        var captureResponse = await _paypalClient.CaptureOrder(orderId);
+
+        if (captureResponse == null || captureResponse.status != TransactionStatus.COMPLETED)
+        {
+            throw new Exception("Payment capture failed or was not completed.");
+        }
+
+        // Update Payment and Transaction status in the database
+        var transaction = await _transactionRepo.GetByIdAsync(transactionId);
+        if (transaction != null)
+        {
+            transaction.Status = TransactionStatus.COMPLETED;
+
+            var payment = await _paymentRepo.GetByIdAsync(transaction.PaymentMethod);
+            if (payment != null)
+            {
+                payment.Status = PaymentStatus.SUCCESSFUL;
+
+                await _transactionRepo.UpdateAsync(transaction);
+                await _paymentRepo.UpdateAsync(payment);
+            }
+        }
+
+        return captureResponse;
     }
 }

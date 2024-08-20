@@ -1,5 +1,6 @@
 using BusinessObject.IService;
 using BusinessObject.Models.PaymentDTO;
+using DataAccessObject.Entities;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -90,31 +91,49 @@ public class PaymentController : ControllerBase
         return Ok(result);
     }
 
-    /*[HttpPost("create")]
-    public async Task<IActionResult> CreatePayment(decimal amount)
+    /// <summary>
+    /// Creates a new order for an attendee.
+    /// </summary>
+    /// <param name="request">The request containing the attendee ID, amount, and currency.</param>
+    /// <returns>Returns the order creation response.</returns>
+    /// <remarks>
+    /// The currency is defaulted to VND (Vietnamese Dong).
+    /// </remarks>
+    [HttpPost("create-order")]
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)
     {
-        var response = await _paymentService.CreatePayment(amount, "VND", "https://localhost:3000", "https://localhost:3000");
-
-        if (!response.Success)
+        try
         {
-            return BadRequest(response);
-        }
+            var response =
+                await _paymentService.CreateOrderAsync(request.AttendeeId, request.Amount, request.Currency = "VND");
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            var error = new { e.GetBaseException().Message };
+            return BadRequest(error);
+        }
     }
 
-    [HttpPost("execute")]
-    public async Task<IActionResult> ExecutePayment(string paymentId, string payerId)
+    /// <summary>
+    /// Captures an existing order using the order ID and transaction ID.
+    /// </summary>
+    /// <param name="request">The request containing the order ID and transaction ID.</param>
+    /// <returns>Returns the order capture response.</returns>
+    [HttpPost("capture-order")]
+    public async Task<IActionResult> CaptureOrder([FromBody] CaptureOrderRequestDto request)
     {
-        var response = await _paymentService.ExecutePayment(paymentId, payerId);
-
-        if (!response.Success)
+        try
         {
-            return BadRequest(response);
+            var response = await _paymentService.CaptureOrderAsync(request.OrderId, request.TransactionId);
+
+            return Ok(response);
         }
-
-        return Ok(response);
-    }*/
-
-
+        catch (Exception e)
+        {
+            var error = new { e.GetBaseException().Message };
+            return BadRequest(error);
+        }
+    }
 }
