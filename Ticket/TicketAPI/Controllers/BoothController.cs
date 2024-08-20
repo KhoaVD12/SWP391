@@ -20,7 +20,7 @@ namespace TicketAPI.Controllers
         /// </summary>                                                                                                  
         /// <param name="page">Page number.</param>
         /// <param name="pageSize">Number of Booths per page.</param>
-        /// <param name="search">Search by Location, Name.</param>
+        /// <param name="search">Search by Location, Name, Status.</param>
         /// <param name="sort">Sort by Location or Name.</param>
         /// <returns>A paginated list of events.</returns>
         [HttpGet]

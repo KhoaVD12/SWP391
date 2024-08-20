@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -46,10 +47,30 @@ namespace DataAccessObject.Repo
         }
         public async Task UpdateBooth(int id, Booth booth)
         {
-            var exist = await _context.Booths.FindAsync(id);
-            if(exist != null)
+            var exist = await _context.Booths.Include(b=>b.BoothRequests).FirstOrDefaultAsync(b=>b.Id==id);
+            var boothRequest = exist.BoothRequests.FirstOrDefault();
+            if (exist != null)
             {
-                exist.Status = booth.Status;
+                if (booth.Status.Equals(BoothStatus.Opened, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (boothRequest.Status.Equals(BoothRequestStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception("You can not Open unless your reception is approved");
+                    }
+                        exist.Status = BoothStatus.Opened.ToString();
+                }
+                else if (booth.Status.Equals(BoothStatus.Closed, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (boothRequest.Status.Equals(BoothRequestStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception("You can not Close unless your reception is approved");
+                    }
+                    exist.Status = BoothStatus.Closed.ToString();
+                }
+                else
+                {
+                    throw new Exception("Invalid Status");
+                }
                 exist.EventId=booth.EventId;
                 exist.Location = booth.Location;
                 exist.SponsorId = booth.SponsorId;
@@ -66,6 +87,14 @@ namespace DataAccessObject.Repo
         public async Task<bool> CheckExistByName(string inputString)
         {
             return await _context.Booths.AnyAsync(e => e.Name == inputString);
+        }
+        public async Task<bool> CheckEventExist(int eventId)
+        {
+            return await _context.Events.AnyAsync(e => e.Id == eventId);
+        }
+        public async Task<bool> CheckSponsorExist(int sponsorId)
+        {
+            return await _context.Users.AnyAsync(u => u.Id == sponsorId && u.Role == "Sponsor");
         }
     }
 }
