@@ -235,52 +235,60 @@ namespace BusinessObject.Service
             return response;
         }
 
-        public async Task<ServiceResponse<EventStaffDTO?>> GetStaffByEventAsync(int eventId)
+        public async Task<ServiceResponse<EventStaffDTO?>> GetEventByStaffAsync(int staffId)
         {
             var response = new ServiceResponse<EventStaffDTO?>();
 
             try
             {
-                var eventEntity = await _eventRepo.GetEventById(eventId);
+                // Retrieve the staff by their ID
+                var staff = await _userRepo.GetByIdAsync(staffId);
 
-                if (eventEntity?.StaffId == null)
+                if (staff == null || staff.Role != Roles.STAFF)
+                {
+                    throw new UnauthorizedAccessException("User does not have the required Staff role.");
+                }
+
+                // Retrieve all events assigned to this staff member
+                var events = await _eventRepo.GetEventsByStaffIdAsync(staffId);
+
+                if (events.Count == 0)
                 {
                     response.Success = false;
-                    response.Message = "Staff not assigned or event not found.";
+                    response.Message = "No events found for this staff member.";
                     return response;
                 }
 
-                var staff = await _userRepo.GetByIdAsync(eventEntity.StaffId.Value);
+                // Map the events to a list of EventDTO
+                var eventDtos = events.Select(eventEntity => new EventDTO
+                {
+                    Id = eventEntity.Id,
+                    Title = eventEntity.Title,
+                    ImageUrl = eventEntity.ImageUrl,
+                    StartDate = eventEntity.StartDate,
+                    EndDate = eventEntity.EndDate,
+                    VenueName = eventEntity.Venue.Name,
+                    Status = eventEntity.Status,
+                    Description = eventEntity.Description
+                }).ToList();
 
-                var staffDto = new EventStaffDTO
+                // Create the StaffEventsDTO
+                var staffEventsDto = new EventStaffDTO
                 {
                     Id = staff.Id,
                     Name = staff.Name,
                     Email = staff.Email,
-                    AssignedEvents =
-                    [
-                        new EventDTO
-                        {
-                            Id = eventEntity.Id,
-                            Title = eventEntity.Title,
-                            ImageUrl = eventEntity.ImageUrl,
-                            StartDate = eventEntity.StartDate,
-                            EndDate = eventEntity.EndDate,
-                            VenueName = eventEntity.Venue.Name,
-                            Status = eventEntity.Status,
-                            Description = eventEntity.Description
-                        }
-                    ]
+                    AssignedEvents = eventDtos
                 };
 
-                response.Data = staffDto;
+                response.Data = staffEventsDto;
                 response.Success = true;
-                response.Message = "Staff retrieved successfully.";
+                response.Message = "Events retrieved successfully.";
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = "Error retrieving staff for the event.";
+                response.Message = "Error retrieving events for the staff member.";
                 response.ErrorMessages = [ex.Message];
             }
 
