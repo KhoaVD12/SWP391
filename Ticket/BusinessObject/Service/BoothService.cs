@@ -7,6 +7,7 @@ using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -65,6 +66,20 @@ namespace BusinessObject.Service
             {
                 var createResult = _mapper.Map<Booth>(boothDTO);
                 var nameExist = await _boothRepo.CheckExistByName(createResult.Name);
+                var eventExist = await _boothRepo.CheckEventExist(createResult.EventId);
+                var sponsorExist=await _boothRepo.CheckSponsorExist(createResult.SponsorId);
+                if (!sponsorExist)
+                {
+                    res.Success = false;
+                    res.Message = "Sponsor not exist";
+                    return res;
+                }
+                if (!eventExist)
+                {
+                    res.Success = false;
+                    res.Message = "Event not exist";
+                    return res;
+                }
                 if (nameExist)
                 {
                     res.Success = false;
@@ -134,7 +149,8 @@ namespace BusinessObject.Service
                 if (!string.IsNullOrEmpty(search))
                 {
                     booths = booths.Where(b => b != null && (b.Name.Contains(search, StringComparison.OrdinalIgnoreCase)||
-                                                            b.Location.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                                                            b.Location.Contains(search, StringComparison.OrdinalIgnoreCase)||
+                                                            b.Status.Contains(search, StringComparison.OrdinalIgnoreCase)));
                 }
                 booths = sort.ToLower().Trim() switch
                 {
@@ -203,8 +219,30 @@ namespace BusinessObject.Service
                     res.Message = "Id not found";
                     return res;
                 }
+                var eventExist = await _boothRepo.CheckEventExist(boothDTO.EventId);
+                var sponsorExist = await _boothRepo.CheckSponsorExist(boothDTO.SponsorId);
+                if (!sponsorExist)
+                {
+                    res.Success = false;
+                    res.Message = "Sponsor not exist";
+                    return res;
+                }
+                if (!eventExist)
+                {
+                    res.Success = false;
+                    res.Message = "Event not exist";
+                    return res;
+                }
+                var nameExist = await _boothRepo.CheckExistByName(boothDTO.Name);
+                if (nameExist)
+                {
+                    res.Success = false;
+                    res.Message = "This name has already existed";
+                    return res;
+                }
                 var updateResult = _mapper.Map<Booth>(boothDTO);
                 updateResult.Id = id;
+                updateResult.Status = exist.Status;
                 await _boothRepo.UpdateBooth(id, updateResult);
                 var result = _mapper.Map<ViewBoothDTO>(updateResult);
                 res.Success = true;

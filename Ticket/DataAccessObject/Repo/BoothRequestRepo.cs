@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -50,11 +51,16 @@ namespace DataAccessObject.Repo
             {
                 exist.SponsorId=boothRequest.SponsorId;
                 exist.RequestDate=boothRequest.RequestDate;
-                exist.Status=boothRequest.Status;
                 exist.BoothId=boothRequest.BoothId;
-                if(boothRequest.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                if(boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
                 {
-                    exist.Booth.Status = "Opened";
+                    exist.Status = BoothRequestStatus.Approved.ToString();
+                    exist.Booth.Status = BoothStatus.Opened.ToString();
+                }
+                else if (boothRequest.Status.Equals(BoothRequestStatus.Rejected, StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Status = BoothRequestStatus.Rejected.ToString();
+                    exist.Booth.Status = BoothStatus.Closed.ToString();  
                 }
                 else
                 {
