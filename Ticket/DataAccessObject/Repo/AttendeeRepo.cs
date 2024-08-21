@@ -59,4 +59,13 @@ public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
         return await _context.Attendees
             .FirstOrDefaultAsync(a => a.CheckInCode == checkInCode);
     }
+
+    public async Task<Attendee?> GetAttendeeByIdAsync(int id)
+    {
+        return await _context.Attendees
+            .Include(a => a.AttendeeDetails)         
+            .Include(a => a.Transactions)            
+            .ThenInclude(t => t.PaymentMethodNavigation) 
+            .FirstOrDefaultAsync(a => a.Id == id);
+    }
 }

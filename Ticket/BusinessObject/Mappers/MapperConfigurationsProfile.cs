@@ -36,6 +36,19 @@ public class MapperConfigurationsProfile : Profile
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Email))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Phone))
             .ReverseMap();
+        CreateMap<Attendee, AttendeeDetailDto>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Name))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Email))
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Phone))
+            .ForMember(dest => dest.CheckInCode, opt => opt.MapFrom(src => src.CheckInCode))
+            .ForMember(dest => dest.CheckInStatus, opt => opt.MapFrom(src => src.CheckInStatus))
+            .ReverseMap();
+
+        CreateMap<AttendeeDetail, AttendeeDetailDto>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
+            .ReverseMap();
 
         CreateMap<CreateEventDTO, Event>()
             .ReverseMap();
@@ -77,10 +90,9 @@ public class MapperConfigurationsProfile : Profile
             .ForMember(dest => dest.BoothName, opt => opt.MapFrom(src => src.Booth.Name))
             .ReverseMap();
 
-        CreateMap<CreateGiftReceptionDTO,GiftReception>().ReverseMap();
-        CreateMap< GiftReception, ViewGiftReceptionDTO>()
+        CreateMap<CreateGiftReceptionDTO, GiftReception>().ReverseMap();
+        CreateMap<GiftReception, ViewGiftReceptionDTO>()
             .ForMember(dest => dest.GiftName, opt => opt.MapFrom(src => src.Gift.Name))
             .ReverseMap();
-
     }
 }

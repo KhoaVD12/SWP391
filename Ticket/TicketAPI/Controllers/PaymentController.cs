@@ -92,12 +92,12 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
-    /// Creates a new order for an attendee.
+    /// Creates a new order for an attendee using Paypal.
     /// </summary>
-    /// <param name="request">The request containing the attendee ID, amount, and currency.</param>
+    /// <param name="request">The request containing the attendee ID, amount, and currency in VND.</param>
     /// <returns>Returns the order creation response.</returns>
     /// <remarks>
-    /// The currency is defaulted to VND (Vietnamese Dong).
+    /// The amount will be converted from VND to USD for PayPal processing, as PayPal does not support VND.
     /// </remarks>
     [HttpPost("create-order")]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)

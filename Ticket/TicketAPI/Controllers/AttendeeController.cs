@@ -30,7 +30,25 @@ public class AttendeeController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("attendees/{id}")]
+    /// <summary>
+    /// Completes registration for an attendee after payment is confirmed.
+    /// </summary>
+    /// <param name="attendeeId">The ID of the attendee to complete registration for.</param>
+    /// <returns>Returns the result of the registration completion process.</returns>
+    [HttpPost("complete-registration/{attendeeId}")]
+    public async Task<IActionResult> CompleteRegistration(int attendeeId)
+    {
+        var response = await _attendeeService.CompleteRegistrationAfterPaymentAsync(attendeeId);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAttendee(int id, [FromBody] UpdateAttendeeDto updateAttendeeDto)
     {
         if (id != updateAttendeeDto.Id)
@@ -48,7 +66,7 @@ public class AttendeeController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("attendees/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetAttendeeDetails(int id)
     {
         var attendee = await _attendeeService.GetAttendeeDetailsAsync(id);
@@ -84,7 +102,7 @@ public class AttendeeController : ControllerBase
         return File(Encoding.UTF8.GetBytes(result.Data), "text/csv", "attendees.csv");
     }
 
-    [HttpPut("attendee/{attendeeId}/checkin")]
+    [HttpPut("{attendeeId}/checkin")]
     public async Task<IActionResult> UpdateCheckInStatus(int attendeeId, [FromBody] string status)
     {
         var result = await _attendeeService.UpdateCheckInStatusAsync(attendeeId, status);
