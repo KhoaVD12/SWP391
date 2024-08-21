@@ -7,7 +7,8 @@ namespace BusinessObject.IService;
 public interface IAttendeeService
 {
     Task<ServiceResponse<RegisterAttendeeDTO>> RegisterAttendeeAsync(RegisterAttendeeDTO registerAttendeeDto);
-    Task<AttendeeDetailDto?> GetAttendeeDetailsAsync(int id);
+    Task<ServiceResponse<AttendeeDto>> CompleteRegistrationAfterPaymentAsync(int attendeeId);  
+    Task<ServiceResponse<AttendeeDetailDto?>> GetAttendeeDetailsAsync(int id);
     Task<ServiceResponse<UpdateAttendeeDto>> UpdateAttendeeAsync(UpdateAttendeeDto updateAttendeeDto);
     Task<ServiceResponse<IEnumerable<AttendeeDto>>> GetAttendeesByEventAsync(int eventId);
     Task<ServiceResponse<IEnumerable<AttendeeDto>>> SearchAttendeesAsync(int eventId, string searchTerm);

@@ -18,17 +18,19 @@ public class AttendeeService : IAttendeeService
     private readonly IConfiguration _configuration;
     private readonly IAttendeeRepo _attendeeRepo;
     private readonly IEventRepo _eventRepo;
+    private readonly ITransactionRepo _transactionRepo;
     private readonly IMapper _mapper;
     private readonly IMemoryCache _memoryCache;
 
     public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IConfiguration configuration,
-        IMemoryCache memoryCache, IEventRepo eventRepo)
+        IMemoryCache memoryCache, IEventRepo eventRepo, ITransactionRepo transactionRepo)
     {
         _mapper = mapper;
         _attendeeRepo = attendeeRepo;
         _configuration = configuration;
         _memoryCache = memoryCache;
         _eventRepo = eventRepo;
+        _transactionRepo = transactionRepo;
     }
 
     public async Task<ServiceResponse<RegisterAttendeeDTO>> RegisterAttendeeAsync(
@@ -65,17 +67,69 @@ public class AttendeeService : IAttendeeService
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Use enum for status
+            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Set to pending initially
 
-            // Generate check-in code
-            string checkInCode = GenerateCheckInCode();
-            attendee.CheckInCode = checkInCode; // Store the check-in code in the Attendee entity
-
-            // Save to the database
+            // Save to the database without generating the check-in code
             await _attendeeRepo.AddAsync(attendee);
 
-            // Send email
-            foreach (var attendeeDetail in registerAttendeeDto.AttendeeDetails)
+            response.Data = registerAttendeeDto;
+            response.Success = true;
+            response.Message = "Attendee registered successfully. Proceed to payment.";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = "Error registering attendee.";
+            response.ErrorMessages = [ex.Message];
+        }
+
+        return response;
+    }
+
+    public async Task<ServiceResponse<AttendeeDto>> CompleteRegistrationAfterPaymentAsync(int attendeeId)
+    {
+        var response = new ServiceResponse<AttendeeDto>();
+
+        try
+        {
+            // Retrieve the attendee by ID
+            var attendee = await _attendeeRepo.GetAttendeeByIdAsync(attendeeId);
+
+            if (attendee == null)
+            {
+                response.Success = false;
+                response.Message = "Attendee not found.";
+                return response;
+            }
+
+            // Retrieve the associated transaction
+            var transaction = await _transactionRepo.GetTransactionByAttendeeIdAsync(attendeeId);
+
+            if (transaction == null)
+            {
+                response.Success = false;
+                response.Message = "Transaction not found.";
+                return response;
+            }
+
+            // Ensure that payment is completed
+            if (transaction.Status != PaymentStatus.SUCCESSFUL)
+            {
+                response.Success = false;
+                response.Message = "Payment not completed.";
+                return response;
+            }
+
+            // Generate check-in code
+            var checkInCode = GenerateCheckInCode();
+            attendee.CheckInCode = checkInCode;
+            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Update to not checked in
+
+            // Save the updated attendee details
+            await _attendeeRepo.UpdateAsync(attendee);
+
+            // Send confirmation email
+            foreach (var attendeeDetail in attendee.AttendeeDetails)
             {
                 await SendEmail.SendRegistrationEmail(
                     _memoryCache,
@@ -85,27 +139,48 @@ public class AttendeeService : IAttendeeService
                     checkInCode);
             }
 
-            response.Data = registerAttendeeDto;
+            // Map the updated attendee to DTO
+            response.Data = _mapper.Map<AttendeeDto>(attendee);
             response.Success = true;
-            response.Message = "Attendee registered and email sent successfully.";
+            response.Message = "Registration completed and email sent successfully.";
         }
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = "Error registering attendee.";
+            response.Message = "Error completing registration and sending email.";
             response.ErrorMessages = new List<string> { ex.Message };
         }
 
         return response;
     }
 
-    public async Task<AttendeeDetailDto?> GetAttendeeDetailsAsync(int id)
+    public async Task<ServiceResponse<AttendeeDetailDto?>> GetAttendeeDetailsAsync(int id)
     {
-        var attendee = await _attendeeRepo.GetByIdAsync(id);
-        if (attendee == null) return null;
+        var response = new ServiceResponse<AttendeeDetailDto?>();
+        try
+        {
+            var attendee = await _attendeeRepo.GetAttendeeByIdAsync(id);
+            if (attendee == null)
+            {
+                response.Success = false;
+                response.Message = "Attendee not found.";
+                response.Data = null;
+                return response;
+            }
 
-        var attendeeDetails = _mapper.Map<AttendeeDetailDto>(attendee);
-        return attendeeDetails;
+            var attendeeDetails = _mapper.Map<AttendeeDetailDto>(attendee);
+            response.Success = true;
+            response.Message = " Retrieve attendee successfully";
+            response.Data = attendeeDetails;
+        }
+        catch (Exception e)
+        {
+            response.Success = false;
+            response.Message = $"An error occurred: {e.Message}";
+            response.Data = null;
+        }
+
+        return response;
     }
 
     public async Task<ServiceResponse<UpdateAttendeeDto>> UpdateAttendeeAsync(UpdateAttendeeDto updateAttendeeDto)

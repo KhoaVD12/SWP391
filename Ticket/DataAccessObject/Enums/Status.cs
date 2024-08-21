@@ -13,7 +13,7 @@ public class TransactionStatus
     public static readonly string PENDING = "Pending";
     public static readonly string COMPLETED = "Completed";
     public static readonly string FAILED = "Failed";
-    public static readonly string CANCELLED = "cancelled";
+    public static readonly string CANCELLED = "Cancelled";
 }
 
 public class PaymentStatus

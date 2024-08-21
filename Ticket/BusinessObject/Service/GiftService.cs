@@ -38,7 +38,13 @@ namespace BusinessObject.Service
             try
             {
                 var mapp = _mapper.Map<Gift>(giftDTO);
-
+                var giftExist = await _giftRepo.CheckExistByNameAndBooth(mapp.Name, mapp.BoothId);
+                if(giftExist)
+                {
+                    res.Success = false;
+                    res.Message = "Gift existed";
+                    return res;
+                }
                 await _giftRepo.CreateGift(mapp);
                 
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
@@ -201,7 +207,7 @@ namespace BusinessObject.Service
             }
             return res;
         }
-        public async Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newVenue)
+        public async Task<ServiceResponse<ViewGiftDTO>> UpdateGift(int id, CreateGiftDTO newGift)
         {
             var res = new ServiceResponse<ViewGiftDTO>();
             try
@@ -213,8 +219,15 @@ namespace BusinessObject.Service
                     res.Message = "Id not found";
                     return res;
                 }
-                var mapp = _mapper.Map<Gift>(newVenue);
+                var mapp = _mapper.Map<Gift>(newGift);
                 mapp.Id = id;
+                var giftExist = await _giftRepo.CheckExistByNameAndBooth(mapp.Name, mapp.BoothId);
+                if (giftExist)
+                {
+                    res.Success = false;
+                    res.Message = "Gift existed";
+                    return res;
+                }
                 await _giftRepo.UpdateGift(id, mapp);
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
                 res.Success = true;

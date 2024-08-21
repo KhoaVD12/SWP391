@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessObject.IRepo
 {
-    public interface IGiftReceptionRepo:IGenericRepo<GiftReception>
+    public interface IGiftReceptionRepo : IGenericRepo<GiftReception>
     {
         Task CreateGiftReception(GiftReception reception);
         Task<IEnumerable<GiftReception>> GetReceptions();
@@ -18,5 +18,8 @@ namespace DataAccessObject.IRepo
         Task<bool> CheckGiftExist(int giftId);
         Task<bool> CheckMaxGiftQuantity(int giftId);
         Task<bool> DeleteGiftReception(int id);
+        Task UpdateReception(int id, GiftReception reception);
+        Task<IEnumerable<GiftReception>> GetReceptionByBoothId(int boothId);
+        Task<bool> CheckExistByAttendeeIdAndGiftId(int attendeeId, int giftId);
     }
 }

@@ -42,17 +42,61 @@ namespace BusinessObject.Service
                     res.Message = "Attendee or/and Gift not exist";
                     return res;
                 }
+                if(await _giftReceptionRepo.CheckExistByAttendeeIdAndGiftId(createResult.AttendeeId, createResult.GiftId))
+                {
+                    res.Success = false;
+                    res.Message = "Reception with this Attendee and Gift existed";
+                    return res;
+                }
                 if(await _giftReceptionRepo.CheckMaxGiftQuantity(createResult.GiftId))
                 {
                     res.Success = false;
                     res.Message = "You reach Max Gift Quantities";
                     return res;
                 }
-                createResult.ReceptionDate = DateTime.Now;
                 await _giftReceptionRepo.CreateGiftReception(createResult);
                 var result = _mapper.Map<ViewGiftReceptionDTO>(createResult);
                 res.Success = true;
                 res.Message = "Reception created successfully";
+                res.Data = result;
+            }
+            catch (DbException e)
+            {
+                res.Success = false;
+                res.Message = "Db error?";
+                res.ErrorMessages = new List<string> { e.Message };
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "An error occurred.";
+                res.ErrorMessages = new List<string> { e.Message };
+            }
+            return res;
+        }
+        public async Task<ServiceResponse<ViewGiftReceptionDTO>> UpdateReception(int id, CreateGiftReceptionDTO receptionDTO)
+        {
+            var res=new ServiceResponse<ViewGiftReceptionDTO>();
+            try
+            {
+                
+                var createResult = _mapper.Map<GiftReception>(receptionDTO);
+                if (!await _giftReceptionRepo.CheckAttendeeExist(createResult.AttendeeId)|| !await _giftReceptionRepo.CheckGiftExist(createResult.GiftId))
+                {
+                    res.Success = false;
+                    res.Message = "Attendee or/and Gift not exist";
+                    return res;
+                }
+                if(await _giftReceptionRepo.CheckExistByAttendeeIdAndGiftId(createResult.AttendeeId, createResult.GiftId))
+                {
+                    res.Success = false;
+                    res.Message = "Reception with this Attendee and Gift existed";
+                    return res;
+                }
+                await _giftReceptionRepo.UpdateReception(id, createResult);
+                var result = _mapper.Map<ViewGiftReceptionDTO>(createResult);
+                res.Success = true;
+                res.Message = "Reception Updated successfully";
                 res.Data = result;
             }
             catch (DbException e)
@@ -206,6 +250,33 @@ namespace BusinessObject.Service
             {
                 res.Success = false;
                 res.Message = $"Fail to get Reception: {e.Message}";
+            }
+            return res;
+        }
+
+        public async Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByBoothId(int boothId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>();
+            try
+            {
+                var result = await _giftReceptionRepo.GetReceptionByBoothId(boothId);
+                if (result != null && result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewGiftReceptionDTO>>(result);
+                    res.Success = true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Reception not Found";
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
             }
             return res;
         }
