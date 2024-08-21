@@ -33,6 +33,7 @@ namespace TicketAPI.Controllers
                 message = result.Message,
                 token = result.DataToken,
                 role = result.Role,
+                hintId = result.HintId
             });
         }
 
