@@ -17,5 +17,7 @@ namespace BusinessObject.IService
         Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByAttendeeId(int attendeeId);
         Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByGiftId(int giftId);
         Task<ServiceResponse<bool>> DeleteGiftReception(int id);
+        Task<ServiceResponse<IEnumerable<ViewGiftReceptionDTO>>> GetReceptionByBoothId(int boothId);
+        Task<ServiceResponse<ViewGiftReceptionDTO>> UpdateReception(int id, CreateGiftReceptionDTO receptionDTO);
     }
 }

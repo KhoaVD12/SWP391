@@ -46,6 +46,16 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("booth/{boothId}")]
+        public async Task<IActionResult> GetReceptionByBoothId(int boothId)
+        {
+            var result = await _giftReceptionService.GetReceptionByBoothId(boothId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
         [HttpGet("gift/{giftId}")]
         public async Task<IActionResult> GetReceptionByGiftId(int giftId)
         {
@@ -60,6 +70,16 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateReception(CreateGiftReceptionDTO receptionDTO)
         {
             var result = await _giftReceptionService.CreateReception(receptionDTO);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateReception(int id, CreateGiftReceptionDTO receptionDTO)
+        {
+            var result = await _giftReceptionService.UpdateReception(id, receptionDTO);
             if (!result.Success)
             {
                 return BadRequest(result);
