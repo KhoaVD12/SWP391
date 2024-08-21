@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Responses;
@@ -9,7 +8,6 @@ using DataAccessObject.IRepo;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DataAccessObject.Enums;
-using Microsoft.AspNetCore.Http;
 
 namespace BusinessObject.Service
 {
@@ -17,20 +15,16 @@ namespace BusinessObject.Service
     {
         private readonly IUserRepo _userRepo;
         private readonly IEventRepo _eventRepo;
-        private readonly ITicketRepo _ticketRepo;
         private readonly IMapper _mapper;
-        private readonly AppConfiguration _appConfiguration;
         private readonly Cloudinary _cloudinary;
 
-        public EventService(IEventRepo repo, AppConfiguration configuration, IMapper mapper, Cloudinary cloudinary,
-            IUserRepo userRepo, ITicketRepo ticketRepo)
+        public EventService(IEventRepo repo, IMapper mapper, Cloudinary cloudinary,
+            IUserRepo userRepo)
         {
             _eventRepo = repo;
             _mapper = mapper;
             _cloudinary = cloudinary;
             _userRepo = userRepo;
-            _ticketRepo = ticketRepo;
-            _appConfiguration = configuration;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize,
@@ -43,6 +37,7 @@ namespace BusinessObject.Service
                 {
                     page = 1;
                 }
+
                 var events = await _eventRepo.GetEvent();
                 if (!string.IsNullOrEmpty(search))
                 {
@@ -153,8 +148,23 @@ namespace BusinessObject.Service
                         return result;
                     }
 
-                    // Upload image if provided
-                    var imageUrl = await UploadImageCollection(eventDTO.ImageUrl);
+                    // Upload image if ImageUrl is provided
+                    string imageUrl = null;
+                    if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                    {
+                        // Validate if the URL is a valid image URL
+                        if (Uri.TryCreate(eventDTO.ImageUrl, UriKind.Absolute, out var uriResult)
+                            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                        {
+                            imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl); // Upload and get new URL
+                        }
+                        else
+                        {
+                            result.Success = false;
+                            result.Message = "Invalid image URL.";
+                            return result;
+                        }
+                    }
 
                     // Create the event entity
                     var Event = new Event
@@ -171,7 +181,6 @@ namespace BusinessObject.Service
 
                     // Save the event to the database
                     await _eventRepo.AddAsync(Event);
-
 
                     // Map to DTO
                     var newEvent = new ViewEventDTO()
@@ -299,23 +308,33 @@ namespace BusinessObject.Service
             return response;
         }
 
-        public async Task<string> UploadImageCollection(IFormFile file)
+        public async Task<string> UploadImageFromUrl(string imageUrl)
         {
-            if (file.Length <= 0) throw new Exception("Failed to upload image");
-            await using var stream = file.OpenReadStream();
-            var upLoadParams = new ImageUploadParams()
+            if (string.IsNullOrEmpty(imageUrl))
             {
-                File = new FileDescription(file.Name, stream),
-                Transformation = new Transformation().Crop("fill").Gravity("face")
-            };
-            var uploadResult = await _cloudinary.UploadAsync(upLoadParams);
-
-            if (uploadResult.Url != null)
-            {
-                return uploadResult.Url.ToString();
+                throw new ArgumentException("Image URL cannot be null or empty.", nameof(imageUrl));
             }
 
-            throw new Exception("Failed to upload image");
+            try
+            {
+                using var httpClient = new HttpClient();
+                var imageData = await httpClient.GetByteArrayAsync(imageUrl);
+
+                using var stream = new MemoryStream(imageData);
+
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription("image", stream),
+                    Transformation = new Transformation().Crop("fill").Gravity("face")
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                return uploadResult.Url.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to upload image from URL.", ex);
+            }
         }
 
 
@@ -353,6 +372,7 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewEventDTO>();
             try
             {
+                // Retrieve the event to update
                 var eventToUpdate = await _eventRepo.GetEventById(id);
                 if (eventToUpdate == null)
                 {
@@ -362,31 +382,35 @@ namespace BusinessObject.Service
                 }
 
                 // Update the fields that can be changed
-                eventToUpdate.Title = eventDTO.Title;
-                eventToUpdate.Description = eventDTO.Description;
-                eventToUpdate.VenueId = eventDTO.VenueId;
-                eventToUpdate.StartDate = eventDTO.StartDate;
-                eventToUpdate.EndDate = eventDTO.EndDate;
+                eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
+                eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
+                eventToUpdate.VenueId = eventDTO.VenueId != 0 ? eventDTO.VenueId : eventToUpdate.VenueId;
+                eventToUpdate.StartDate = eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
+                eventToUpdate.EndDate = eventDTO.EndDate != default ? eventDTO.EndDate : eventToUpdate.EndDate;
 
-                // If a new image is provided, upload it
-                if (eventDTO.ImageFile != null)
+                // If a new image URL is provided, upload it
+                if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
                 {
-                    var imageUrl = await UploadImageCollection(eventDTO.ImageFile);
+                    // Validate the image URL and upload
+                    var imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl);
                     eventToUpdate.ImageUrl = imageUrl;
                 }
 
+                // Save the updated event to the database
                 await _eventRepo.UpdateAsync(eventToUpdate);
+
+                // Prepare the response DTO
                 res.Data = new ViewEventDTO()
                 {
                     Id = eventToUpdate.Id,
                     Title = eventToUpdate.Title,
                     Description = eventToUpdate.Description,
                     OrganizerId = eventToUpdate.OrganizerId,
-                    OrganizerName = eventToUpdate.Organizer.Name, // Access the organizer's name
+                    OrganizerName = eventToUpdate.Organizer.Name,
                     VenueId = eventToUpdate.VenueId,
-                    VenueName = eventToUpdate.Venue.Name, // Access the venue's name
-                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime
-                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime
+                    VenueName = eventToUpdate.Venue.Name,
+                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime if needed
+                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime if needed
                     Image = eventToUpdate.ImageUrl,
                     Status = eventToUpdate.Status
                 };
@@ -442,50 +466,6 @@ namespace BusinessObject.Service
             }
 
             return response;
-        }
-
-        public async Task<ServiceResponse<CreateEventWithTicketsDTO>> CreateEventWithTickets(
-            CreateEventWithTicketsDTO dto)
-        {
-            var result = new ServiceResponse<CreateEventWithTicketsDTO>();
-            try
-            {
-                // Create event
-                var eventEntity = new Event
-                {
-                    Title = dto.Title,
-                    ImageUrl = await UploadImageCollection(dto.ImageUrl),
-                    StartDate = dto.StartDate,
-                    EndDate = dto.EndDate,
-                    OrganizerId = dto.OrganizerId,
-                    VenueId = dto.VenueId,
-                    Description = dto.Description,
-                    Status = "Pending"
-                };
-
-                await _eventRepo.AddAsync(eventEntity);
-
-                // Create tickets
-                var ticket = new Ticket
-                {
-                    EventId = eventEntity.Id,
-                    Price = dto.Ticket.Price,
-                    Quantity = dto.Ticket.Quantity,
-                    TicketSaleEndDate = dto.Ticket.TicketSaleEndDate
-                };
-                await _ticketRepo.AddAsync(ticket);
-
-                result.Data = dto;
-                result.Success = true;
-                result.Message = "Event and tickets created successfully!";
-            }
-            catch (Exception ex)
-            {
-                result.Success = false;
-                result.Message = ex.Message;
-            }
-
-            return result;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsByStatus(string status, int page,
