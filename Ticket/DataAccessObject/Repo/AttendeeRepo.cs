@@ -5,20 +5,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessObject.Repo;
 
-public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
-{ private readonly TicketContext _context;
- 
-     public AttendeeRepo(TicketContext context) : base(context)
-     {
-         _context = context;
-     }
-   
+public class AttendeeRepo : RepoBase<Attendee>, IAttendeeRepo
+{
+    private readonly TicketContext _context;
+
+    public AttendeeRepo(TicketContext context) : base(context)
+    {
+        _context = context;
+    }
+
 
     public async Task<Attendee?> GetAttendeeByEventAndEmailAsync(int eventId, string email)
     {
         return await _context.Attendees
             .Include(a => a.AttendeeDetails)
             .FirstOrDefaultAsync(a => a.EventId == eventId && a.AttendeeDetails.Any(ad => ad.Email == email));
+    }
+
+    public async Task<IEnumerable<Attendee>> GetAttendees()
+    {
+        return await _context.Attendees
+            .Include(a => a.AttendeeDetails)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
@@ -34,9 +42,9 @@ public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
         return await _context.Attendees
             .Include(a => a.AttendeeDetails)
             .Where(a => a.EventId == eventId &&
-                        (a.AttendeeDetails.Any(ad => ad.Name.Contains(searchTerm) || 
+                        (a.AttendeeDetails.Any(ad => ad.Name.Contains(searchTerm) ||
                                                      ad.Email.Contains(searchTerm)) ||
-                         a.CheckInStatus.ToString().Contains(searchTerm))) 
+                         a.CheckInStatus.ToString().Contains(searchTerm)))
             .ToListAsync();
     }
 
@@ -63,9 +71,9 @@ public class AttendeeRepo   : RepoBase<Attendee>, IAttendeeRepo
     public async Task<Attendee?> GetAttendeeByIdAsync(int id)
     {
         return await _context.Attendees
-            .Include(a => a.AttendeeDetails)         
-            .Include(a => a.Transactions)            
-            .ThenInclude(t => t.PaymentMethodNavigation) 
+            .Include(a => a.AttendeeDetails)
+            .Include(a => a.Transactions)
+            .ThenInclude(t => t.PaymentMethodNavigation)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 }

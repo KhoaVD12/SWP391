@@ -82,6 +82,7 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
+builder.Services.AddHostedService<PaymentCleanupService>(); 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 

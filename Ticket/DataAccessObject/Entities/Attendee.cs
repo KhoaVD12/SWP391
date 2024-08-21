@@ -17,6 +17,8 @@ public partial class Attendee
     public int EventId { get; set; }
     public string CheckInCode { get; set; } = null!;
 
+    public string PaymentStatus { get; set; }
+
     public virtual ICollection<AttendeeDetail> AttendeeDetails { get; set; } = new List<AttendeeDetail>();
 
     public virtual Event Event { get; set; } = null!;
@@ -26,4 +28,14 @@ public partial class Attendee
     public virtual Ticket Ticket { get; set; } = null!;
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    public bool IsPaymentExpired(TimeSpan expirationPeriod)
+    {
+        var latestTransaction = Transactions.OrderByDescending(t => t.Date).FirstOrDefault();
+        if (latestTransaction == null || latestTransaction.Status != "PENDING")
+        {
+            return false;
+        }
+        return DateTime.UtcNow - latestTransaction.Date > expirationPeriod;
+    }
 }
