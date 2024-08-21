@@ -53,19 +53,25 @@ namespace DataAccessObject.Repo
             {
                 if (booth.Status.Equals(BoothStatus.Opened, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (boothRequest.Status.Equals(BoothRequestStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                    if (boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new Exception("You can not Open unless your reception is approved");
-                    }
                         exist.Status = BoothStatus.Opened.ToString();
+                    }
+                    else
+                    {
+                        throw new Exception("Your reception is pending approved/rejected");
+                    }
                 }
                 else if (booth.Status.Equals(BoothStatus.Closed, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (boothRequest.Status.Equals(BoothRequestStatus.Pending, StringComparison.OrdinalIgnoreCase))
+                    if (boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new Exception("You can not Close unless your reception is approved");
+                        exist.Status = BoothStatus.Closed.ToString();
                     }
-                    exist.Status = BoothStatus.Closed.ToString();
+                    else
+                    {
+                        throw new Exception("Your reception is pending approved/rejected");
+                    }
                 }
                 else
                 {
@@ -95,6 +101,11 @@ namespace DataAccessObject.Repo
         public async Task<bool> CheckSponsorExist(int sponsorId)
         {
             return await _context.Users.AnyAsync(u => u.Id == sponsorId && u.Role == "Sponsor");
+        }
+        public async Task<bool> CheckBoothExist(int eventId, int sponsorId)
+        {
+            return await _context.Booths
+                .AnyAsync(b => b.EventId == eventId && b.SponsorId == sponsorId);
         }
     }
 }

@@ -17,5 +17,6 @@ namespace DataAccessObject.IRepo
         Task<bool> CheckExistByName(string inputString);
         Task<bool> CheckEventExist(int eventId);
         Task<bool> CheckSponsorExist(int sponsorId);
+        Task<bool> CheckBoothExist(int eventId, int sponsorId);
     }
 }
