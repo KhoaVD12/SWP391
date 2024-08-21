@@ -32,7 +32,11 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-
+    /// <summary>
+    /// Creates a new user with the specified details.
+    /// </summary>
+    /// <param name="registerObject">The details of the user to be created. The role should be one of the following: 'Organizer', 'Staff', 'Sponsor'.</param>
+    /// <returns>A result indicating whether the user was created successfully or if there were any errors.</returns>
     [HttpPost]
     public async Task<ActionResult> CreateUser([FromBody] CreateUserDto registerObject)
     {
