@@ -21,5 +21,5 @@ public class UpdateEventDTO
     public DateTime EndDate { get; set; }
 
     [SwaggerSchema(Description = "Upload an image for the event")]
-    public IFormFile ImageFile { get; set; }  
+    public string? ImageUrl { get; set; }  
 }
