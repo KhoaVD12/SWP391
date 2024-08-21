@@ -218,7 +218,7 @@ public class PaymentService : IPaymentService
             {
                 Name = "PayPal",
                 Status = PaymentStatus.PENDING,
-                PaymentDate = DateOnly.FromDateTime(DateTime.UtcNow)
+                PaymentDate = DateTime.Now
             };
 
             await _paymentRepo.AddAsync(payment);

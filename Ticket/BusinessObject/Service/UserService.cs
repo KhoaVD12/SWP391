@@ -68,6 +68,14 @@ public class UserService : IUserService
             // Check if email already exists
             var userAccount = await _userRepo.CheckEmailAddressExisted(userObject.Email);
 
+            var allowedRoles = new[] { Roles.ORGANIZER, Roles.STAFF, Roles.SPONSOR };
+            if (!allowedRoles.Contains(userObject.Role))
+            {
+                response.Success = false;
+                response.Message = "Invalid role. Allowed values are: 'Organizer', 'Staff', 'Sponsor'.";
+                return response;
+            }
+
             // Prevent creation of additional admin accounts
             if (userObject.Role == Roles.ADMIN)
             {
