@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DataAccessObject.Enums;
 
 namespace BusinessObject.Models.AttendeeDto;
 
@@ -23,4 +24,7 @@ public class AttendeeDetailDto
     [Required]
     [Phone(ErrorMessage = "Invalid phone number.")]
     public string Phone { get; set; }
+
+    public string CheckInCode { get; set; }
+    public CheckInStatus CheckInStatus { get; set; }
 }
