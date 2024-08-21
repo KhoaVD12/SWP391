@@ -27,6 +27,7 @@ var myConfig = new AppConfiguration();
 configuration.Bind(myConfig);
 builder.Services.AddSingleton(myConfig);
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 
 // Configure DbContext
 builder.Services.AddDbContext<TicketContext>(options =>
@@ -80,6 +81,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
