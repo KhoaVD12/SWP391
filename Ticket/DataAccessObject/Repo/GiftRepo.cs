@@ -22,14 +22,19 @@ namespace DataAccessObject.Repo
         }
         public async Task<IEnumerable<Gift>> GetGiftsBySponsorId(int sponsorId)
         {
-            return await _context.Gifts
+            return await _context.Gifts.Include(g => g.Booth)
                 .Where(g => g.Booth.SponsorId == sponsorId)
                 .ToListAsync();
         }
         public async Task<Gift> GetGiftById(int id)
         {
-            return await _context.Set<Gift>().Where(g => g.Id == id).SingleOrDefaultAsync();
-        }public async Task<IEnumerable<Gift>> GetGiftByBoothId(int boothId)
+            return await _context.Set<Gift>().Include(g => g.Booth).Where(g => g.Id == id).SingleOrDefaultAsync();
+        }
+        public async Task<bool> CheckExistByNameAndBooth(string inputString, int boothId)
+        {
+            return await _context.Gifts.AnyAsync(e => e.Name == inputString&&e.BoothId==boothId);
+        }
+        public async Task<IEnumerable<Gift>> GetGiftByBoothId(int boothId)
         {
             return await _context.Set<Gift>().Where(g => g.BoothId == boothId).ToListAsync();
         }
