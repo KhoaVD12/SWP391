@@ -1,3 +1,4 @@
+using System.Globalization;
 using BusinessObject.IService;
 using BusinessObject.Models.VnPayDTO;
 using BusinessObject.Responses;
@@ -15,16 +16,14 @@ public class VnPayService : IVnPayService
     private readonly IConfiguration _configuration;
     private readonly ITransactionRepo _transactionRepo;
     private readonly IPaymentRepo _paymentRepo;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public VnPayService(IConfiguration configuration,
         ITransactionRepo transactionRepo,
-        IPaymentRepo paymentRepo, IHttpContextAccessor httpContextAccessor)
+        IPaymentRepo paymentRepo)
     {
         _configuration = configuration;
         _transactionRepo = transactionRepo;
         _paymentRepo = paymentRepo;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
@@ -75,7 +74,8 @@ public class VnPayService : IVnPayService
             vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
             vnpay.AddRequestData("vnp_TxnRef", tick);
 
-            var paymentUrl = vnpay.CreateRequestUrl( _configuration["VNPay:BaseUrl"],_configuration["VNPay:HashSecret"]);
+            var paymentUrl =
+                vnpay.CreateRequestUrl(_configuration["VNPay:BaseUrl"], _configuration["VNPay:HashSecret"]);
 
             // Prepare response
             response.Data = new VnPaymentResponseModel
@@ -124,38 +124,45 @@ public class VnPayService : IVnPayService
                 {
                     Success = false,
                     Message = "Missing or invalid parameters in the payment response.",
-                    ErrorMessages = ["One or more required parameters are missing or invalid."]
+                    ErrorMessages = new List<string> { "One or more required parameters are missing or invalid." }
                 };
             }
 
-            if (!int.TryParse(txnRef, out var txnRefStr) || !decimal.TryParse(vnp_Amount, out var vnpAmountStr))
+            if (!int.TryParse(txnRef, out var txnRefId) || !decimal.TryParse(vnp_Amount, NumberStyles.Number,
+                    CultureInfo.InvariantCulture, out var vnpAmount))
             {
                 return new ServiceResponse<Payment>
                 {
                     Success = false,
                     Message = "Invalid format for transaction reference or amount.",
-                    ErrorMessages = ["Transaction reference or amount is not in the correct format."]
+                    ErrorMessages = new List<string> { "Transaction reference or amount is not in the correct format." }
                 };
             }
 
-            var transaction = await _transactionRepo.GetByIdAsync(int.Parse(txnRef));
+            var transaction = await _transactionRepo.GetByIdAsync(txnRefId);
             if (transaction == null)
             {
-                response.Success = false;
-                response.Message = "Transaction not found.";
-                return response;
+                return new ServiceResponse<Payment>
+                {
+                    Success = false,
+                    Message = "Transaction not found.",
+                    ErrorMessages = new List<string> { "Transaction with the given reference ID does not exist." }
+                };
             }
 
             var vnp_HashSecret = _configuration["VNPay:HashSecret"];
-            bool isValidSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+            var isValidSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
             if (!isValidSignature)
             {
                 transaction.Status = TransactionStatus.FAILED;
                 await _transactionRepo.UpdateAsync(transaction);
 
-                response.Success = false;
-                response.Message = "Invalid signature.";
-                return response;
+                return new ServiceResponse<Payment>
+                {
+                    Success = false,
+                    Message = "Invalid signature.",
+                    ErrorMessages = new List<string> { "The signature provided by VNPay is invalid." }
+                };
             }
 
             if (vnp_ResponseCode == "00")
@@ -169,26 +176,34 @@ public class VnPayService : IVnPayService
                 };
                 await _paymentRepo.AddAsync(payment);
 
-                response.Success = true;
-                response.Data = payment;
-                response.Message = "Payment successful.";
+                return new ServiceResponse<Payment>
+                {
+                    Success = true,
+                    Data = payment,
+                    Message = "Payment successful."
+                };
             }
             else
             {
                 transaction.Status = TransactionStatus.FAILED;
                 await _transactionRepo.UpdateAsync(transaction);
 
-                response.Success = false;
-                response.Message = "Payment failed.";
+                return new ServiceResponse<Payment>
+                {
+                    Success = false,
+                    Message = "Payment failed.",
+                    ErrorMessages = new List<string> { $"Payment failed with response code: {vnp_ResponseCode}" }
+                };
             }
         }
         catch (Exception ex)
         {
-            response.Success = false;
-            response.Message = "Error occurred while processing VNPay payment response.";
-            response.ErrorMessages.Add(ex.Message);
+            return new ServiceResponse<Payment>
+            {
+                Success = false,
+                Message = "Error occurred while processing VNPay payment response.",
+                ErrorMessages = new List<string> { ex.Message }
+            };
         }
-
-        return response;
     }
 }

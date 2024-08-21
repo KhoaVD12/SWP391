@@ -86,6 +86,35 @@ public class AttendeeService : IAttendeeService
         return response;
     }
 
+    public async Task<ServiceResponse<PaginationModel<AttendeeDto>>> GetAttendees(int page, int pageSize)
+    {
+        var response = new ServiceResponse<PaginationModel<AttendeeDto>>();
+        try
+        {
+            if (page <= 0)
+            {
+                page = 1;
+            }
+            var attendees = await _attendeeRepo.GetAttendees();
+
+            var map = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
+
+            var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+
+            response.Data = paging;
+            response.Success = true;
+        }
+        catch (Exception e)
+        {
+            response.Success = false;
+            response.Message = e.InnerException != null
+                ? e.InnerException.Message + "\n" + e.StackTrace
+                : e.Message + "\n" + e.StackTrace;
+        }
+
+        return response;
+    }                                                                      
+
     public async Task<ServiceResponse<AttendeeDto>> CompleteRegistrationAfterPaymentAsync(int attendeeId)
     {
         var response = new ServiceResponse<AttendeeDto>();

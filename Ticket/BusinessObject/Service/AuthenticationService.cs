@@ -44,11 +44,13 @@ public class AuthenticationService : IAuthenticationService
             }
 
             var auth = user.Role;
+            var userId = user.Id;
             var token = user.GenerateJsonWebToken(_configuration, _configuration.JWTSection.Key, DateTime.Now);
             response.DataToken = token;
             response.Success = true;
             response.Message = "Login successful.";
             response.Role = auth;
+            response.HintId = userId;
         }
         catch (Exception ex)
         {

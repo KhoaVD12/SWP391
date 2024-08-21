@@ -48,6 +48,18 @@ public class AttendeeController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetEvent([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var result = await _attendeeService.GetAttendees(page, pageSize);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAttendee(int id, [FromBody] UpdateAttendeeDto updateAttendeeDto)
     {
