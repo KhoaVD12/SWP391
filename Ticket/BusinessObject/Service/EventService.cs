@@ -39,6 +39,10 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<PaginationModel<ViewEventDTO>>();
             try
             {
+                if (page <= 0)
+                {
+                    page = 1;
+                }
                 var events = await _eventRepo.GetEvent();
                 if (!string.IsNullOrEmpty(search))
                 {
