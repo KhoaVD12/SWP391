@@ -11,7 +11,7 @@ public partial class Payment
 
     public string Status { get; set; } = null!;
 
-    public DateOnly PaymentDate { get; set; }
+    public DateTime PaymentDate { get; set; }
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

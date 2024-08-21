@@ -12,10 +12,12 @@ namespace TicketAPI.Controllers;
 public class PaymentController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
+    private readonly IVnPayService _vnPayService;
 
-    public PaymentController(IPaymentService paymentService)
+    public PaymentController(IPaymentService paymentService, IVnPayService vnPayService)
     {
         _paymentService = paymentService;
+        _vnPayService = vnPayService;
     }
 
     [HttpGet]
@@ -135,5 +137,45 @@ public class PaymentController : ControllerBase
             var error = new { e.GetBaseException().Message };
             return BadRequest(error);
         }
+    }
+
+    /// <summary>
+    /// Creates a payment request using VNPay for a specified attendee and amount.
+    /// This action generates a payment URL that can use to redirect the user to VNPay's payment page.
+    /// </summary>
+    /// <param name="request">The payment request details including attendee ID and amount.</param>
+    /// <returns>Returns the payment request response which includes a URL for the VNPay payment page.</returns>
+    /// /// <response code="200">Returns the payment URL and other details if the request was successful.</response>
+    /// <response code="400">Returns an error response if the payment request failed.</response>
+    [HttpPost("create-payment-request")]
+    public async Task<IActionResult> CreatePaymentRequest([FromBody] PaymentRequestDto request)
+    {
+        var response = await _vnPayService.CreatePaymentRequest(request.AttendeeId, request.Amount, HttpContext);
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Processes the payment response from VNPay after the user completes the payment process.
+    /// This action validates the payment response and updates the transaction status accordingly.
+    /// </summary>
+    /// <returns>Returns the result of processing the payment response, including success or failure status.</returns>
+    /// <response code="200">Returns the result of the payment processing, indicating success or failure.</response>
+    /// <response code="400">Returns an error response if the payment processing failed.</response>
+    [HttpGet("VnPayReturn")]
+    public async Task<IActionResult> VnPayReturn()
+    {
+        var paymentResponse = await _vnPayService.ProcessPaymentResponse(Request.Query);
+        if (paymentResponse.Success)
+        {
+            // Complete registration or other business logic
+            return Ok(paymentResponse);
+        }
+
+        return BadRequest(paymentResponse);
     }
 }
