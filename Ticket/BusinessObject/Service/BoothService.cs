@@ -65,9 +65,11 @@ namespace BusinessObject.Service
             try
             {
                 var createResult = _mapper.Map<Booth>(boothDTO);
-                var nameExist = await _boothRepo.CheckExistByName(createResult.Name);
+
+                var boothNameExist = await _boothRepo.CheckExistByName(createResult.Name);
                 var eventExist = await _boothRepo.CheckEventExist(createResult.EventId);
                 var sponsorExist=await _boothRepo.CheckSponsorExist(createResult.SponsorId);
+                var boothExist = await _boothRepo.CheckBoothExist(createResult.SponsorId, createResult.EventId);
                 if (!sponsorExist)
                 {
                     res.Success = false;
@@ -80,10 +82,16 @@ namespace BusinessObject.Service
                     res.Message = "Event not exist";
                     return res;
                 }
-                if (nameExist)
+                if (boothNameExist)
                 {
                     res.Success = false;
                     res.Message = "Name existed";
+                    return res;
+                }
+                if (boothExist)
+                {
+                    res.Success = false;
+                    res.Message = "Booth with this Sponsor and Event existed";
                     return res;
                 }
                 createResult.Status = "Pending";

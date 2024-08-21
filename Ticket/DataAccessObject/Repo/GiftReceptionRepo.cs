@@ -44,17 +44,21 @@ namespace DataAccessObject.Repo
 
         public async Task<IEnumerable<GiftReception>> GetReceptionByAttendeeId(int attendeeId)
         {
-            return await _context.GiftReceptions.Where(g => g.AttendeeId == attendeeId).ToListAsync();
+            return await _context.GiftReceptions.Include(g => g.Gift).Where(g => g.AttendeeId == attendeeId).ToListAsync();
         }
 
         public async Task<IEnumerable<GiftReception>> GetReceptionByGiftId(int giftId)
         {
-            return await _context.GiftReceptions.Where(g => g.GiftId == giftId).ToListAsync();
+            return await _context.GiftReceptions.Include(g => g.Gift).Where(g => g.GiftId == giftId).ToListAsync();
+        }
+        public async Task<IEnumerable<GiftReception>> GetReceptionByBoothId(int boothId)
+        {
+            return await _context.GiftReceptions.Include(g => g.Gift).Where(g => g.Gift.BoothId == boothId).ToListAsync();
         }
 
         public async Task<GiftReception> GetReceptionById(int id)
         {
-            return await _context.Set<GiftReception>().Where(g => g.Id == id).FirstOrDefaultAsync();
+            return await _context.Set<GiftReception>().Include(g => g.Gift).Where(g => g.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<GiftReception>> GetReceptions()
@@ -74,6 +78,26 @@ namespace DataAccessObject.Repo
             {
                 throw new Exception("Id not found");
             }
+        }
+        public async Task UpdateReception(int id, GiftReception reception)
+        {
+            var exist = await _context.GiftReceptions.FirstOrDefaultAsync(g => g.Id == id);
+            if (exist != null)
+            {
+                exist.AttendeeId= reception.AttendeeId;
+                exist.GiftId= reception.GiftId;
+                exist.ReceptionDate= reception.ReceptionDate;
+                _context.GiftReceptions.Update(exist);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("Id Not found");
+            }
+        }
+        public async Task<bool> CheckExistByAttendeeIdAndGiftId(int attendeeId, int giftId)
+        {
+            return await _context.GiftReceptions.AnyAsync(g => g.AttendeeId == attendeeId && g.GiftId == giftId);
         }
     }
 }
