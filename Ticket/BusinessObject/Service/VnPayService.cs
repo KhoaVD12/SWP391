@@ -27,7 +27,8 @@ public class VnPayService : IVnPayService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount, HttpContext httpContext)
+    public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
+        HttpContext httpContext)
     {
         var response = new ServiceResponse<VnPaymentResponseModel>();
 
@@ -36,8 +37,9 @@ public class VnPayService : IVnPayService
             var vnpay = new VnPayLibrary();
             var vnp_TmnCode = _configuration["VNPay:TmnCode"];
             var vnp_HashSecret = _configuration["VNPay:HashSecret"];
-            var vnp_Url = _configuration["VNPay:Url"];
+            var vnp_BaseUrl = _configuration["VNPay:BaseUrl"];
             var returnUrl = _configuration["VNPay:ReturnUrl"];
+            var tick = DateTime.Now.Ticks.ToString();
 
             // Prepare transaction
             var payment = new Payment
@@ -64,16 +66,16 @@ public class VnPayService : IVnPayService
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
             vnpay.AddRequestData("vnp_Amount", ((int)(amount * 100)).ToString());
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", VnPayUtils.GetIpAddress(httpContext));
             vnpay.AddRequestData("vnp_Locale", "vn");
             vnpay.AddRequestData("vnp_OrderInfo", $"Payment for transaction {transaction.Id}");
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
-            vnpay.AddRequestData("vnp_TxnRef", transaction.Id.ToString());
+            vnpay.AddRequestData("vnp_TxnRef", tick);
 
-            var paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+            var paymentUrl = vnpay.CreateRequestUrl( _configuration["VNPay:BaseUrl"],_configuration["VNPay:HashSecret"]);
 
             // Prepare response
             response.Data = new VnPaymentResponseModel
