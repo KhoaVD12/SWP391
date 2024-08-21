@@ -149,9 +149,22 @@ namespace BusinessObject.Service
                     }
 
                     // Upload image if ImageUrl is provided
-                    var imageUrl = string.IsNullOrEmpty(eventDTO.ImageUrl)
-                        ? null
-                        : await UploadImageFromUrl(eventDTO.ImageUrl);
+                    string imageUrl = null;
+                    if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                    {
+                        // Validate if the URL is a valid image URL
+                        if (Uri.TryCreate(eventDTO.ImageUrl, UriKind.Absolute, out var uriResult)
+                            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                        {
+                            imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl); // Upload and get new URL
+                        }
+                        else
+                        {
+                            result.Success = false;
+                            result.Message = "Invalid image URL.";
+                            return result;
+                        }
+                    }
 
                     // Create the event entity
                     var Event = new Event
@@ -359,6 +372,7 @@ namespace BusinessObject.Service
             var res = new ServiceResponse<ViewEventDTO>();
             try
             {
+                // Retrieve the event to update
                 var eventToUpdate = await _eventRepo.GetEventById(id);
                 if (eventToUpdate == null)
                 {
@@ -368,31 +382,35 @@ namespace BusinessObject.Service
                 }
 
                 // Update the fields that can be changed
-                eventToUpdate.Title = eventDTO.Title;
-                eventToUpdate.Description = eventDTO.Description;
-                eventToUpdate.VenueId = eventDTO.VenueId;
-                eventToUpdate.StartDate = eventDTO.StartDate;
-                eventToUpdate.EndDate = eventDTO.EndDate;
+                eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
+                eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
+                eventToUpdate.VenueId = eventDTO.VenueId != 0 ? eventDTO.VenueId : eventToUpdate.VenueId;
+                eventToUpdate.StartDate = eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
+                eventToUpdate.EndDate = eventDTO.EndDate != default ? eventDTO.EndDate : eventToUpdate.EndDate;
 
-                // If a new image is provided, upload it
-                if (eventDTO.ImageUrl != null)
+                // If a new image URL is provided, upload it
+                if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
                 {
+                    // Validate the image URL and upload
                     var imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl);
                     eventToUpdate.ImageUrl = imageUrl;
                 }
 
+                // Save the updated event to the database
                 await _eventRepo.UpdateAsync(eventToUpdate);
+
+                // Prepare the response DTO
                 res.Data = new ViewEventDTO()
                 {
                     Id = eventToUpdate.Id,
                     Title = eventToUpdate.Title,
                     Description = eventToUpdate.Description,
                     OrganizerId = eventToUpdate.OrganizerId,
-                    OrganizerName = eventToUpdate.Organizer.Name, // Access the organizer's name
+                    OrganizerName = eventToUpdate.Organizer.Name,
                     VenueId = eventToUpdate.VenueId,
-                    VenueName = eventToUpdate.Venue.Name, // Access the venue's name
-                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime
-                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime
+                    VenueName = eventToUpdate.Venue.Name,
+                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime if needed
+                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime if needed
                     Image = eventToUpdate.ImageUrl,
                     Status = eventToUpdate.Status
                 };
