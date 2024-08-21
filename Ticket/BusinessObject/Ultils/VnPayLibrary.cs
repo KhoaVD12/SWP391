@@ -64,6 +64,7 @@ public class VnPayLibrary
         return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
     }
 
+
     private string GetResponseData()
     {
         var data = new StringBuilder();
@@ -82,6 +83,7 @@ public class VnPayLibrary
             data.Append(WebUtility.UrlEncode(key) + "=" + WebUtility.UrlEncode(value) + "&");
         }
 
+        //remove last '&'
         if (data.Length > 0)
         {
             data.Remove(data.Length - 1, 1);
