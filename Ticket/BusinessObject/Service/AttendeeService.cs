@@ -67,7 +67,7 @@ public class AttendeeService : IAttendeeService
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Set to pending initially
+            attendee.PaymentStatus = PaymentStatus.PENDING;// Set to pending initially
 
             // Save to the database without generating the check-in code
             await _attendeeRepo.AddAsync(attendee);
@@ -152,7 +152,7 @@ public class AttendeeService : IAttendeeService
             // Generate check-in code
             var checkInCode = GenerateCheckInCode();
             attendee.CheckInCode = checkInCode;
-            attendee.CheckInStatus = CheckInStatus.NotCheckedIn; // Update to not checked in
+            attendee.CheckInStatus = CheckInStatus.NotCheckedIn;
 
             // Save the updated attendee details
             await _attendeeRepo.UpdateAsync(attendee);

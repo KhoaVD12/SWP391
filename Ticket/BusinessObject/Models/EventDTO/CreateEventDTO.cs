@@ -23,7 +23,7 @@ namespace BusinessObject.Models.EventDTO
         [SwaggerSchema(Description = "ID of the venue where the event will be held")]
         public int VenueId { get; set; }
 
-        [SwaggerSchema(Description = "Image file for the event banner")]
-        public IFormFile ImageUrl { get; set; }
+        [SwaggerSchema(Description = "URL of the image for the event banner")]
+        public string? ImageUrl { get; set; }
     }
 }

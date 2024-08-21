@@ -25,7 +25,6 @@ namespace BusinessObject.IService
         public Task<ServiceResponse<string>> DeleteEvent(int id);
         public Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO);
         Task<ServiceResponse<bool>> ChangeEventStatus(int eventId, ChangeEventStatusDTO statusDTO);
-        Task<ServiceResponse<CreateEventWithTicketsDTO>> CreateEventWithTickets(CreateEventWithTicketsDTO dto);
         Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsByStatus(string status, int page, int pageSize);
     }
 }
