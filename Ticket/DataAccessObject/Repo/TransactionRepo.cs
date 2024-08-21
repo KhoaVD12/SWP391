@@ -47,4 +47,11 @@ public class TransactionRepo : RepoBase<Transaction>, ITransactionRepo
 
         return transaction;
     }
+
+    public async Task<Transaction?> GetTransactionByAttendeeIdAsync(int attendeeId)
+    {
+        return await _context.Transactions
+            .Include(t => t.PaymentMethodNavigation) 
+            .FirstOrDefaultAsync(t => t.AttendeeId == attendeeId);
+    }
 }
