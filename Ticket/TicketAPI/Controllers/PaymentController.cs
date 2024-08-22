@@ -118,7 +118,7 @@ public class PaymentController : ControllerBase
         }
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Captures an existing order using the order ID and transaction ID.
     /// </summary>
     /// <param name="request">The request containing the order ID and transaction ID.</param>
@@ -137,7 +137,7 @@ public class PaymentController : ControllerBase
             var error = new { e.GetBaseException().Message };
             return BadRequest(error);
         }
-    }
+    }*/
 
     /// <summary>
     /// Creates a payment request using VNPay for a specified attendee and amount.
@@ -159,7 +159,7 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Processes the payment response from VNPay after the user completes the payment process.
     /// This action validates the payment response and updates the transaction status accordingly.
     /// </summary>
@@ -177,5 +177,5 @@ public class PaymentController : ControllerBase
         }
 
         return BadRequest(paymentResponse);
-    }
+    }*/
 }
