@@ -47,48 +47,48 @@ namespace DataAccessObject.Repo
         }
         public async Task UpdateBooth(int id, Booth booth)
         {
-            var exist = await _context.Booths.Include(b=>b.BoothRequests).FirstOrDefaultAsync(b=>b.Id==id);
-            var boothRequest = exist.BoothRequests.FirstOrDefault();
-            if (exist != null)
-            {
-                if (booth.Status.Equals(BoothStatus.Opened, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
-                    {
-                        exist.Status = BoothStatus.Opened.ToString();
-                    }
-                    else
-                    {
-                        throw new Exception("Your reception is pending approved/rejected");
-                    }
-                }
-                else if (booth.Status.Equals(BoothStatus.Closed, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
-                    {
-                        exist.Status = BoothStatus.Closed.ToString();
-                    }
-                    else
-                    {
-                        throw new Exception("Your reception is pending approved/rejected");
-                    }
-                }
-                else
-                {
-                    throw new Exception("Invalid Status");
-                }
-                exist.EventId=booth.EventId;
-                exist.Location = booth.Location;
-                exist.SponsorId = booth.SponsorId;
-                exist.Name = booth.Name;
-                exist.Description = booth.Description;
-                _context.Booths.Update(exist);
-                await _context.SaveChangesAsync();
-            }
-            else
+            var exist = await _context.Booths.Include(b => b.BoothRequests).FirstOrDefaultAsync(b => b.Id == id);
+            if (exist == null)
             {
                 throw new Exception("Id Not Found");
             }
+
+            // Prevent updates if the booth status is "Closed"
+            if (exist.Status.Equals(BoothStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception("Cannot update a booth with status 'Closed'.");
+            }
+
+            // Allow updates if the booth status is "Pending" or "Opened"
+            exist.EventId = booth.EventId;
+            exist.Location = booth.Location;
+            exist.SponsorId = booth.SponsorId;
+            exist.Name = booth.Name;
+            exist.Description = booth.Description;
+
+            if (booth.Status.Equals(BoothStatus.Opened.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                var boothRequest = exist.BoothRequests.FirstOrDefault();
+                if (boothRequest != null && boothRequest.Status.Equals(BoothRequestStatus.Approved.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Status = BoothStatus.Opened.ToString();
+                }
+                else
+                {
+                    throw new Exception("Booth cannot be opened as the associated request is not approved.");
+                }
+            }
+            else if (booth.Status.Equals(BoothStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                exist.Status = BoothStatus.Closed.ToString();
+            }
+            else if (!booth.Status.Equals(BoothStatus.Pending.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception("Invalid Status");
+            }
+
+            _context.Booths.Update(exist);
+            await _context.SaveChangesAsync();
         }
         public async Task<bool> CheckExistByName(string inputString)
         {
