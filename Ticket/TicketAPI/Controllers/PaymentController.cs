@@ -1,8 +1,10 @@
 using BusinessObject.IService;
 using BusinessObject.Models.PaymentDTO;
+using BusinessObject.Responses;
 using DataAccessObject.Entities;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace TicketAPI.Controllers;
 
@@ -159,23 +161,31 @@ public class PaymentController : ControllerBase
         return Ok(response);
     }
 
-    /*/// <summary>
-    /// Processes the payment response from VNPay after the user completes the payment process.
-    /// This action validates the payment response and updates the transaction status accordingly.
+    /// <summary>
+    /// Handles the callback from VNPay after a payment transaction is completed.
+    /// VNPay sends various parameters as query parameters to this endpoint to notify about the payment result.
+    /// No input is required from the front-end or user for this callback endpoint.
+    /// This endpoint processes the response and updates the payment status accordingly.
     /// </summary>
-    /// <returns>Returns the result of processing the payment response, including success or failure status.</returns>
-    /// <response code="200">Returns the result of the payment processing, indicating success or failure.</response>
-    /// <response code="400">Returns an error response if the payment processing failed.</response>
-    [HttpGet("VnPayReturn")]
-    public async Task<IActionResult> VnPayReturn()
+    /// <returns>An IActionResult indicating the success or failure of processing the VNPay callback.</returns>
+    [HttpGet("vnpay/callback")]
+    public async Task<IActionResult> VnPayCallback()
     {
-        var paymentResponse = await _vnPayService.ProcessPaymentResponse(Request.Query);
-        if (paymentResponse.Success)
+        try
         {
-            // Complete registration or other business logic
-            return Ok(paymentResponse);
-        }
+            var result = await _vnPayService.ProcessPaymentResponse(Request.Query);
 
-        return BadRequest(paymentResponse);
-    }*/
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            // Return an error response to VNPay
+            return StatusCode(500, "Error processing VNPay callback");
+        }
+    }
 }

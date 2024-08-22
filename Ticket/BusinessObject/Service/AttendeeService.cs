@@ -67,7 +67,8 @@ public class AttendeeService : IAttendeeService
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.PaymentStatus = PaymentStatus.PENDING;// Set to pending initially
+            attendee.PaymentStatus = PaymentStatus.PENDING;
+            attendee.CheckInCode = null;// Set to pending initially
 
             // Save to the database without generating the check-in code
             await _attendeeRepo.AddAsync(attendee);
@@ -130,24 +131,14 @@ public class AttendeeService : IAttendeeService
                 response.Message = "Attendee not found.";
                 return response;
             }
-
-            // Retrieve the associated transaction
-            var transaction = await _transactionRepo.GetTransactionByAttendeeIdAsync(attendeeId);
-
-            if (transaction == null)
-            {
-                response.Success = false;
-                response.Message = "Transaction not found.";
-                return response;
-            }
-
-            // Ensure that payment is completed
-            if (transaction.Status != PaymentStatus.SUCCESSFUL)
+            if (attendee.PaymentStatus != PaymentStatus.SUCCESSFUL)
             {
                 response.Success = false;
                 response.Message = "Payment not completed.";
                 return response;
             }
+
+            // Retrieve the associated transaction
 
             // Generate check-in code
             var checkInCode = GenerateCheckInCode();
@@ -350,7 +341,7 @@ public class AttendeeService : IAttendeeService
         return response;
     }
 
-    private string GenerateCheckInCode()
+    private string? GenerateCheckInCode()
     {
         return Guid.NewGuid().ToString()[..8].ToUpper();
     }

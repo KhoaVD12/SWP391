@@ -46,34 +46,43 @@ namespace DataAccessObject.Repo
         }
         public async Task UpdateBoothRequest(int id, BoothRequest boothRequest)
         {
-            var exist = await _context.BoothRequests.Include(b=>b.Booth).FirstOrDefaultAsync(b=>b.Id==id);
-            if(exist != null)
-            {
-                exist.SponsorId=boothRequest.SponsorId;
-                exist.RequestDate=boothRequest.RequestDate;
-                exist.BoothId=boothRequest.BoothId;
-                if(boothRequest.Status.Equals(BoothRequestStatus.Approved, StringComparison.OrdinalIgnoreCase))
-                {
-                    exist.Status = BoothRequestStatus.Approved.ToString();
-                    exist.Booth.Status = BoothStatus.Opened.ToString();
-                }
-                else if (boothRequest.Status.Equals(BoothRequestStatus.Rejected, StringComparison.OrdinalIgnoreCase))
-                {
-                    exist.Status = BoothRequestStatus.Rejected.ToString();
-                    exist.Booth.Status = BoothStatus.Closed.ToString();  
-                }
-                else
-                {
-                    throw new Exception("Invalid Status");
-                }
-                _context.BoothRequests.Update(exist);
-
-                await _context.SaveChangesAsync();
-            }
-            else
+            var exist = await _context.BoothRequests.Include(b => b.Booth).FirstOrDefaultAsync(b => b.Id == id);
+            if (exist == null)
             {
                 throw new Exception("Id Not Found");
             }
+
+            exist.SponsorId = boothRequest.SponsorId;
+            exist.RequestDate = boothRequest.RequestDate;
+            exist.BoothId = boothRequest.BoothId;
+
+            if (boothRequest.Status.Equals(BoothRequestStatus.Approved.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                exist.Status = BoothRequestStatus.Approved.ToString();
+
+                // Update booth status only if it's not "Closed"
+                if (!exist.Booth.Status.Equals(BoothStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Booth.Status = BoothStatus.Opened.ToString();
+                }
+            }
+            else if (boothRequest.Status.Equals(BoothRequestStatus.Rejected.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                exist.Status = BoothRequestStatus.Rejected.ToString();
+
+                // Update booth status only if it's not "Closed"
+                if (!exist.Booth.Status.Equals(BoothStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Booth.Status = BoothStatus.Closed.ToString();
+                }
+            }
+            else
+            {
+                throw new Exception("Invalid Status");
+            }
+
+            _context.BoothRequests.Update(exist);
+            await _context.SaveChangesAsync();
         }
         public async Task<BoothRequest> GetBoothRequestById(int id)
         {

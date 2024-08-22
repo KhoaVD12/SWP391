@@ -10,4 +10,5 @@ public interface ITransactionRepo  : IGenericRepo<Transaction>
     Task<decimal> GetTotalAmountByAttendeeIdAsync(int attendeeId);
     Task<Transaction?> UpdateTransactionStatusAsync(int transactionId, string status);
     Task<Transaction?> GetTransactionByAttendeeIdAsync(int attendeeId);
+    Task<Transaction?> GetByIdWithPaymentAsync(int transactionId);
 }
