@@ -1,4 +1,3 @@
-using System.Globalization;
 using BusinessObject.IService;
 using BusinessObject.Models.VnPayDTO;
 using BusinessObject.Responses;
@@ -16,14 +15,16 @@ public class VnPayService : IVnPayService
     private readonly IConfiguration _configuration;
     private readonly ITransactionRepo _transactionRepo;
     private readonly IPaymentRepo _paymentRepo;
+    private readonly IAttendeeRepo _attendeeRepo;
 
     public VnPayService(IConfiguration configuration,
         ITransactionRepo transactionRepo,
-        IPaymentRepo paymentRepo)
+        IPaymentRepo paymentRepo, IAttendeeRepo attendeeRepo)
     {
         _configuration = configuration;
         _transactionRepo = transactionRepo;
         _paymentRepo = paymentRepo;
+        _attendeeRepo = attendeeRepo;
     }
 
     public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
@@ -72,7 +73,7 @@ public class VnPayService : IVnPayService
             vnpay.AddRequestData("vnp_OrderInfo", $"Payment for transaction {transaction.Id}");
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
-            vnpay.AddRequestData("vnp_TxnRef", tick);
+            vnpay.AddRequestData("vnp_TxnRef", transaction.Id.ToString());
 
             var paymentUrl =
                 vnpay.CreateRequestUrl(_configuration["VNPay:BaseUrl"], _configuration["VNPay:HashSecret"]);
@@ -107,103 +108,94 @@ public class VnPayService : IVnPayService
         try
         {
             var vnpay = new VnPayLibrary();
+
             foreach (var (key, value) in queryParams)
             {
-                vnpay.AddResponseData(key, value);
+                Console.WriteLine($"Key: {key}, Value: {value}");
             }
 
-            var txnRef = vnpay.GetResponseData("vnp_TxnRef");
-            var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
+
+            // Collect and validate the response data
+            foreach (var (key, value) in queryParams)
+            {
+                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                {
+                    vnpay.AddResponseData(key, value.ToString());
+                }
+            }
+
+            var vnp_orderId = Convert.ToInt64(vnpay.GetResponseData("vnp_TxnRef"));
+            var vnp_TransactionIdString = vnpay.GetResponseData("vnp_TransactionNo");
+            var vnp_SecureHash = queryParams["vnp_SecureHash"].ToString();
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
-            var vnp_SecureHash = vnpay.GetResponseData("vnp_SecureHash");
+            var vnp_HashSecret = _configuration["VNPay:HashSecret"];
 
-            if (string.IsNullOrEmpty(txnRef) || string.IsNullOrEmpty(vnp_Amount) ||
-                string.IsNullOrEmpty(vnp_ResponseCode) || string.IsNullOrEmpty(vnp_SecureHash))
-            {
-                return new ServiceResponse<Payment>
-                {
-                    Success = false,
-                    Message = "Missing or invalid parameters in the payment response.",
-                    ErrorMessages = new List<string> { "One or more required parameters are missing or invalid." }
-                };
-            }
-
-            if (!int.TryParse(txnRef, out var txnRefId) || !decimal.TryParse(vnp_Amount, NumberStyles.Number,
-                    CultureInfo.InvariantCulture, out var vnpAmount))
-            {
-                return new ServiceResponse<Payment>
-                {
-                    Success = false,
-                    Message = "Invalid format for transaction reference or amount.",
-                    ErrorMessages = new List<string> { "Transaction reference or amount is not in the correct format." }
-                };
-            }
-
-            var transaction = await _transactionRepo.GetByIdAsync(txnRefId);
+            // Retrieve the transaction from the database
+            var transaction = await _transactionRepo.GetByIdWithPaymentAsync((int)vnp_orderId);
             if (transaction == null)
             {
-                return new ServiceResponse<Payment>
-                {
-                    Success = false,
-                    Message = "Transaction not found.",
-                    ErrorMessages = new List<string> { "Transaction with the given reference ID does not exist." }
-                };
+                response.Success = false;
+                response.Message = "Transaction not found.";
+                response.ErrorMessages.Add("Transaction with the given reference ID does not exist.");
+                return response;
             }
 
-            var vnp_HashSecret = _configuration["VNPay:HashSecret"];
+            // Validate the secure hash
             var isValidSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
             if (!isValidSignature)
             {
                 transaction.Status = TransactionStatus.FAILED;
                 await _transactionRepo.UpdateAsync(transaction);
 
-                return new ServiceResponse<Payment>
-                {
-                    Success = false,
-                    Message = "Invalid signature.",
-                    ErrorMessages = new List<string> { "The signature provided by VNPay is invalid." }
-                };
+                response.Success = false;
+                response.Message = "Invalid signature.";
+                response.ErrorMessages.Add("The signature provided by VNPay is invalid.");
+                return response;
             }
 
+            // Determine the transaction status based on VNPay's response code
             if (vnp_ResponseCode == "00")
             {
                 transaction.Status = TransactionStatus.COMPLETED;
-                var payment = new Payment
-                {
-                    Name = "VNPay",
-                    Status = PaymentStatus.SUCCESSFUL,
-                    PaymentDate = DateTime.UtcNow
-                };
-                await _paymentRepo.AddAsync(payment);
-
-                return new ServiceResponse<Payment>
-                {
-                    Success = true,
-                    Data = payment,
-                    Message = "Payment successful."
-                };
             }
             else
             {
                 transaction.Status = TransactionStatus.FAILED;
-                await _transactionRepo.UpdateAsync(transaction);
-
-                return new ServiceResponse<Payment>
-                {
-                    Success = false,
-                    Message = "Payment failed.",
-                    ErrorMessages = new List<string> { $"Payment failed with response code: {vnp_ResponseCode}" }
-                };
             }
+
+            // Update the transaction status in the database
+            await _transactionRepo.UpdateAsync(transaction);
+
+            // Create a new payment record based on the transaction status
+            var payment = transaction.PaymentMethodNavigation;
+            payment.Status = transaction.Status == TransactionStatus.COMPLETED
+                ? PaymentStatus.SUCCESSFUL
+                : PaymentStatus.FAILED;
+            payment.PaymentDate = DateTime.UtcNow;
+
+            await _paymentRepo.UpdateAsync(payment);
+
+            var attendee = await _attendeeRepo.GetByIdAsync(transaction.AttendeeId);
+            if (attendee != null)
+            {
+                attendee.PaymentStatus = PaymentStatus.SUCCESSFUL;
+                await _attendeeRepo.UpdateAsync(attendee);
+            }
+
+            // Prepare the response
+            response.Success = true;
+            response.Data = payment;
+            response.Message = transaction.Status == TransactionStatus.COMPLETED
+                ? "Payment processed successfully."
+                : "Payment failed.";
         }
         catch (Exception ex)
         {
-            return new ServiceResponse<Payment>
-            {
-                Success = false,
-                Message = "Error occurred while processing VNPay payment response.",
-                ErrorMessages = new List<string> { ex.Message }
-            };
+            response.Success = false;
+            response.Message = "Error occurred while processing VNPay payment response.";
+            response.ErrorMessages.Add(ex.Message);
         }
+
+        return response;
     }
 }
