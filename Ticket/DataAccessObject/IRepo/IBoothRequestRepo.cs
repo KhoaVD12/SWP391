@@ -15,5 +15,7 @@ namespace DataAccessObject.IRepo
         Task<bool> DeleteBoothRequest(int id);
         Task UpdateBoothRequest(int id, BoothRequest boothRequest);
         Task<BoothRequest> GetBoothRequestById(int id);
+        Task<IEnumerable<BoothRequest>> GetBoothRequestBySponsorId(int sponsorId);
+        Task<IEnumerable<BoothRequest>> GetBoothRequestByEventId(int eventId);
     }
 }

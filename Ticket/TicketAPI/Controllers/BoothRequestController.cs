@@ -27,7 +27,7 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> CreateBoothRequest(CreateBoothRequestDTO requestDTO)
         {
             var result=await _boothRequestService.CreateBoothRequest(requestDTO);
@@ -36,7 +36,7 @@ namespace TicketAPI.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }
+        }*/
         [HttpDelete("{id}")]
         public async Task<IActionResult>DeleteBoothRequest(int id)
         {
@@ -47,7 +47,7 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpPut("{id}")]
+        /*[HttpPut("{id}")]
         public async Task<IActionResult>UpdateBoothRequest(int id, CreateBoothRequestDTO boothRequestDTO)
         {
             var result = await _boothRequestService.UpdateBoothRequest(id, boothRequestDTO);
@@ -56,7 +56,7 @@ namespace TicketAPI.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        }
+        }*/
         [HttpPut("ChangeRequestStatus/{id}")]
         public async Task<IActionResult> ChangeBoothRequestStatus(int id, BoothRequestStatusDTO boothRequestStatusDTO)
         {
@@ -71,6 +71,26 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult>GetBoothRequestById(int id)
         {
             var result=await _boothRequestService.GetBoothRequestById(id);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpGet("sponsor/{sponsorId}")]
+        public async Task<IActionResult>GetBoothRequestBySponsorId(int sponsorId)
+        {
+            var result=await _boothRequestService.GetBoothRequestBySponsorId(sponsorId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+        [HttpGet("event/{eventId}")]
+        public async Task<IActionResult>GetBoothRequestByEventId(int eventId)
+        {
+            var result=await _boothRequestService.GetBoothRequestByEventId(eventId);
             if (!result.Success)
             {
                 return NotFound(result);

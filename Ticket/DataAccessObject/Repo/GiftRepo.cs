@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -29,6 +30,10 @@ namespace DataAccessObject.Repo
         public async Task<Gift> GetGiftById(int id)
         {
             return await _context.Set<Gift>().Include(g => g.Booth).Where(g => g.Id == id).SingleOrDefaultAsync();
+        }
+        public async Task<IEnumerable<Booth>> GetOpenBooth()
+        {
+            return await _context.Booths.Where(b => b.Status == BoothStatus.Opened.ToString()).ToListAsync();
         }
         public async Task<bool> CheckExistByNameAndBooth(string inputString, int boothId)
         {

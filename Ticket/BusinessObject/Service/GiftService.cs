@@ -38,11 +38,24 @@ namespace BusinessObject.Service
             try
             {
                 var mapp = _mapper.Map<Gift>(giftDTO);
+                var openBooth = await _giftRepo.GetOpenBooth();
+                if (!openBooth.Any(b=>b.Id==mapp.BoothId))
+                {
+                    res.Success = false;
+                    res.Message = "This Booth is not Opened";
+                    return res;
+                }
                 var giftExist = await _giftRepo.CheckExistByNameAndBooth(mapp.Name, mapp.BoothId);
                 if(giftExist)
                 {
                     res.Success = false;
                     res.Message = "Gift existed";
+                    return res;
+                }
+                if (mapp.Quantity <= 0)
+                {
+                    res.Success = false;
+                    res.Message = "Quantity must be 1 or above";
                     return res;
                 }
                 await _giftRepo.CreateGift(mapp);
@@ -219,6 +232,7 @@ namespace BusinessObject.Service
                     res.Message = "Id not found";
                     return res;
                 }
+
                 var mapp = _mapper.Map<Gift>(newGift);
                 mapp.Id = id;
                 var giftExist = await _giftRepo.CheckExistByNameAndBooth(mapp.Name, mapp.BoothId);
@@ -226,6 +240,19 @@ namespace BusinessObject.Service
                 {
                     res.Success = false;
                     res.Message = "Gift existed";
+                    return res;
+                }
+                var openBooth = await _giftRepo.GetOpenBooth();
+                if (!openBooth.Any(b => b.Id == mapp.BoothId))
+                {
+                    res.Success = false;
+                    res.Message = "This Booth is not Opened";
+                    return res;
+                }
+                if (mapp.Quantity <= 0)
+                {
+                    res.Success = false;
+                    res.Message = "Quantity must be 1 or above";
                     return res;
                 }
                 await _giftRepo.UpdateGift(id, mapp);

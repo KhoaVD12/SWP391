@@ -79,5 +79,13 @@ namespace DataAccessObject.Repo
         {
             return await _context.Set<BoothRequest>().Where(b => b.Id == id).SingleOrDefaultAsync();
         }
+        public async Task<IEnumerable<BoothRequest>> GetBoothRequestBySponsorId(int sponsorId)
+        {
+            return await _context.BoothRequests.Include(r => r.Booth).Include(r => r.Sponsor).Where(b => b.SponsorId == sponsorId).ToListAsync();
+        }
+        public async Task<IEnumerable<BoothRequest>> GetBoothRequestByEventId(int eventId)
+        {
+            return await _context.BoothRequests.Include(b=>b.Booth).Include(r => r.Sponsor).Where(b => b.Booth.EventId == eventId).ToListAsync();
+        }
     }
 }

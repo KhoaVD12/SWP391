@@ -7,6 +7,7 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -152,6 +153,33 @@ namespace BusinessObject.Service
             return res;
         }
 
+        public async Task<ServiceResponse<IEnumerable<ViewBoothRequestDTO>>> GetBoothRequestByEventId(int eventId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewBoothRequestDTO>>();
+            try
+            {
+                var result = await _boothRequestRepo.GetBoothRequestByEventId(eventId);
+                if(result != null && result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(result);
+                    res.Success= true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Request not Found";
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
+            }
+            return res;
+        }
+
         public async Task<ServiceResponse<ViewBoothRequestDTO>> GetBoothRequestById(int id)
         {
             var res = new ServiceResponse<ViewBoothRequestDTO>();
@@ -175,6 +203,33 @@ namespace BusinessObject.Service
             {
                 res.Success = false;
                 res.Message = ex.Message;
+            }
+            return res;
+        }
+
+        public async Task<ServiceResponse<IEnumerable<ViewBoothRequestDTO>>> GetBoothRequestBySponsorId(int sponsorId)
+        {
+            var res = new ServiceResponse<IEnumerable<ViewBoothRequestDTO>>();
+            try
+            {
+                var result = await _boothRequestRepo.GetBoothRequestBySponsorId(sponsorId);
+                if (result != null && result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewBoothRequestDTO>>(result);
+                    res.Success = true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Request not Found";
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
             }
             return res;
         }
