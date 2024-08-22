@@ -15,7 +15,7 @@ public partial class Attendee
     public int TicketId { get; set; }
 
     public int EventId { get; set; }
-    public string CheckInCode { get; set; } = null!;
+    public string? CheckInCode { get; set; } 
 
     public string PaymentStatus { get; set; }
 
