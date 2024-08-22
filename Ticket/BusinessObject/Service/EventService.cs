@@ -150,13 +150,13 @@ namespace BusinessObject.Service
 
                     // Upload image if ImageUrl is provided
                     string imageUrl = null;
+
+                    // Handle Image URL validation
                     if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
                     {
-                        // Validate if the URL is a valid image URL
-                        if (Uri.TryCreate(eventDTO.ImageUrl, UriKind.Absolute, out var uriResult)
-                            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                        if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
                         {
-                            imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl); // Upload and get new URL
+                            imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl);
                         }
                         else
                         {
@@ -210,6 +210,34 @@ namespace BusinessObject.Service
             }
 
             return result;
+        }
+
+        private async Task<bool> IsValidImageUrlAsync(string imageUrl)
+        {
+            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            {
+                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+                if (validExtensions.Contains(Path.GetExtension(uriResult.AbsolutePath).ToLower()))
+                {
+                    try
+                    {
+                        using (var httpClient = new HttpClient())
+                        {
+                            var response = await httpClient.SendAsync(
+                                new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Head, imageUrl));
+                            var contentType = response.Content.Headers.ContentType.MediaType;
+                            return contentType.StartsWith("image/");
+                        }
+                    }
+                    catch
+                    {
+                        return false; // Handle exceptions as needed
+                    }
+                }
+            }
+
+            return false;
         }
 
         public async Task<ServiceResponse<bool>> AssignStaffToEventAsync(int staffId, int eventId)
@@ -385,7 +413,8 @@ namespace BusinessObject.Service
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId != 0 ? eventDTO.VenueId : eventToUpdate.VenueId;
-                eventToUpdate.StartDate = eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
+                eventToUpdate.StartDate =
+                    eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
                 eventToUpdate.EndDate = eventDTO.EndDate != default ? eventDTO.EndDate : eventToUpdate.EndDate;
 
                 // If a new image URL is provided, upload it
