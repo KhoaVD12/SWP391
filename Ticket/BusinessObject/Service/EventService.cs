@@ -91,7 +91,7 @@ namespace BusinessObject.Service
                     VenueName = eventEntity.Venue.Name, // Access the venue's name
                     StartDate = eventEntity.StartDate, // Convert DateOnly to DateTime
                     EndDate = eventEntity.EndDate, // Convert DateOnly to DateTime
-                    Image = eventEntity.ImageUrl,
+                    ImageURL = eventEntity.ImageUrl,
                     Status = eventEntity.Status
                 };
 
@@ -187,7 +187,7 @@ namespace BusinessObject.Service
                     {
                         Id = Event.Id,
                         Title = Event.Title,
-                        Image = Event.ImageUrl,
+                        ImageURL = Event.ImageUrl,
                         StartDate = Event.StartDate,
                         EndDate = Event.EndDate,
                         OrganizerId = Event.OrganizerId,
@@ -440,7 +440,7 @@ namespace BusinessObject.Service
                     VenueName = eventToUpdate.Venue.Name,
                     StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime if needed
                     EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime if needed
-                    Image = eventToUpdate.ImageUrl,
+                    ImageURL = eventToUpdate.ImageUrl,
                     Status = eventToUpdate.Status
                 };
 
