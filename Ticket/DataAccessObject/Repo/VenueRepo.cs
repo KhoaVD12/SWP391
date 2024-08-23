@@ -17,6 +17,10 @@ namespace DataAccessObject.Repo
             await _context.SaveChangesAsync();
             
         }
+        public async Task<bool>CheckNameExist(string venueName)
+        {
+            return await _context.Venues.AnyAsync(v=>v.Name.ToLower().Trim()== venueName.ToLower().Trim());
+        }
         public async Task<IEnumerable<Venue>> GetAllVenues()
         {
             return await _context.Venues.ToListAsync();

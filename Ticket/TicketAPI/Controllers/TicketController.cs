@@ -21,6 +21,10 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> GetAllTickets([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
         {
             var result = await _ticketService.GetAllTickets(page, pageSize);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 

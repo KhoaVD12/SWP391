@@ -64,6 +64,10 @@ public class MapperConfigurationsProfile : Profile
             .ForMember(dest => dest.OrganizerId, opt => opt.Ignore())
             .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
             .ReverseMap(); // Image will be handled separately.ReverseMap();
+        CreateMap<Event, ViewOrganizerEventDTO>()
+            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Tickets.FirstOrDefault()));
+        CreateMap<Ticket, EventTicket>()
+            .ReverseMap();
 
         CreateMap<Venue, CreateVenueDTO>().ReverseMap();
         CreateMap<Venue, ViewVenueDTO>().ReverseMap();

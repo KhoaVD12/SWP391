@@ -12,5 +12,6 @@ namespace DataAccessObject.IRepo
         Task<Event?> CheckExistByTitle(string inputString);
         Task<IEnumerable<Event>> GetEventsByStatus(string status);
         Task<List<Event>> GetEventsByStaffIdAsync(int staffId);
+        Task<IEnumerable<Event>> GetEventByOrganizer(int organizerId);
     }
 }
