@@ -38,6 +38,12 @@ namespace BusinessObject.Service
             try
             {
                 var mapp = _mapper.Map<Gift>(giftDTO);
+                if (string.IsNullOrWhiteSpace(mapp.Name) || !mapp.Name.Any(char.IsLetter) || mapp.Name.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch)))
+                {
+                    res.Success = false;
+                    res.Message = "Invalid name. Name must contain at least one letter and no special characters.";
+                    return res;
+                }
                 var openBooth = await _giftRepo.GetOpenBooth();
                 if (!openBooth.Any(b=>b.Id==mapp.BoothId))
                 {

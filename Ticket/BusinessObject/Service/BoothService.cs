@@ -65,7 +65,12 @@ namespace BusinessObject.Service
             try
             {
                 var createResult = _mapper.Map<Booth>(boothDTO);
-
+                if (string.IsNullOrWhiteSpace(createResult.Name) || !createResult.Name.Any(char.IsLetter) || createResult.Name.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch)))
+                {
+                    res.Success = false;
+                    res.Message = "Invalid name. Name must contain at least one letter and no special characters.";
+                    return res;
+                }
                 var boothNameExist = await _boothRepo.CheckExistByName(createResult.Name);
                 var eventExist = await _boothRepo.CheckEventExist(createResult.EventId);
                 var sponsorExist=await _boothRepo.CheckSponsorExist(createResult.SponsorId);
