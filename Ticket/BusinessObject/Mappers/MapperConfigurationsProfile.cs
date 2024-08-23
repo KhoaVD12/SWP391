@@ -78,6 +78,7 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<CreateTicketDTO, Ticket>().ReverseMap();
         CreateMap<ViewTicketDTO, Ticket>().ReverseMap();
+        CreateMap<CreateTicketDTO, ViewTicketDTO>().ReverseMap();
 
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
         CreateMap<ViewBoothDTO, Booth>().ReverseMap();
