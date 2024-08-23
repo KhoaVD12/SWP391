@@ -12,6 +12,6 @@ namespace BusinessObject.Models.VenueDTO
 
         public string? Description { get; set; }
 
-        public string Status { get; set; }
+        
     }
 }

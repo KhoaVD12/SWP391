@@ -65,7 +65,7 @@ namespace DataAccessObject.Repo
 
         public async Task<Event?> CheckExistByTitle(string inputString)
         {
-            return await _context.Events.FirstOrDefaultAsync(e => e.Title == inputString);
+            return await _context.Events.FirstOrDefaultAsync(e => e.Title.ToLower().Trim() == inputString.ToLower().Trim());
         }
 
         public async Task<IEnumerable<Event>> GetEventsByStatus(string status)
