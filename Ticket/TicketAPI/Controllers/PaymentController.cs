@@ -12,11 +12,13 @@ public class PaymentController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
     private readonly IVnPayService _vnPayService;
+    private readonly IConfiguration _configuration;
 
-    public PaymentController(IPaymentService paymentService, IVnPayService vnPayService)
+    public PaymentController(IPaymentService paymentService, IVnPayService vnPayService, IConfiguration configuration)
     {
         _paymentService = paymentService;
         _vnPayService = vnPayService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -173,7 +175,10 @@ public class PaymentController : ControllerBase
         // Process the VNPay payment response
         var paymentResult = await _vnPayService.ProcessPaymentResponse(queryParams);
 
-        // Handle failure, maybe redirect to an error page
-        return Redirect("http://localhost:3000");
+        // Get the redirect URL from configuration
+        var redirectUrl = _configuration["Redirect:Url"];
+
+        // Redirect to the configured URL
+        return Redirect(redirectUrl);
     }
 }
