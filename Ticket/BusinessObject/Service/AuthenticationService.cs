@@ -6,7 +6,6 @@ using BusinessObject.Models;
 using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
-using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 
 namespace BusinessObject.Service;

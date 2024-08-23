@@ -30,24 +30,6 @@ public class AttendeeController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Completes registration for an attendee after payment is confirmed.
-    /// </summary>
-    /// <param name="attendeeId">The ID of the attendee to complete registration for.</param>
-    /// <returns>Returns the result of the registration completion process.</returns>
-    [HttpPost("complete-registration/{attendeeId}")]
-    public async Task<IActionResult> CompleteRegistration(int attendeeId)
-    {
-        var response = await _attendeeService.CompleteRegistrationAfterPaymentAsync(attendeeId);
-
-        if (!response.Success)
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetEvent([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {

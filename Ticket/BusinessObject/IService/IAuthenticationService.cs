@@ -1,5 +1,4 @@
-﻿using BusinessObject.Models;
-using BusinessObject.Models.UserDTO;
+﻿using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 
 namespace BusinessObject.IService

@@ -1,9 +1,6 @@
-﻿using System.Net.Mime;
-using BusinessObject.IService;
+﻿using BusinessObject.IService;
 using BusinessObject.Models.EventDTO;
 using BusinessObject.Responses;
-using DataAccessObject.Enums;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -47,9 +44,12 @@ namespace TicketAPI.Controllers
         public async Task<IActionResult> CreateEvent([FromForm] CreateEventDTO eventDto)
         {
             var result = await _eventService.CreateEvent(eventDto);
-            return !result.Success
-                ? Problem(detail: result.Message, statusCode: StatusCodes.Status400BadRequest)
-                : Ok(result.Data);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
 
         /// <summary>
