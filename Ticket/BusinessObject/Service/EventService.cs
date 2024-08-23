@@ -519,5 +519,33 @@ namespace BusinessObject.Service
 
             return result;
         }
+
+        public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventByOrganizer(int organizerId, int page, int pageSize)
+        {
+            var res = new ServiceResponse<PaginationModel<ViewEventDTO>>();
+            try
+            {
+                var result = await _eventRepo.GetEventByOrganizer(organizerId);
+                if (result.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewEventDTO>>(result);
+                    var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Event not Found";
+                    return res;
+                }
+            }
+            catch(Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
+            }
+            return res;
+        }
     }
 }
