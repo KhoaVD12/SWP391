@@ -1,5 +1,3 @@
-using DataAccessObject.Enums;
-
 namespace BusinessObject.Models.UserDTO;
 
 public class CreateUserDto

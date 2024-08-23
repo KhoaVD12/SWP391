@@ -1,4 +1,4 @@
-namespace BusinessObject.Models;
+namespace BusinessObject.Models.UserDTO;
 
 public class LoginResquestDto
 {

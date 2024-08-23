@@ -1,14 +1,12 @@
 using System.Globalization;
 using AutoMapper;
 using BusinessObject.IService;
-using BusinessObject.Mappers;
 using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
-using Microsoft.Extensions.Configuration;
 
 namespace BusinessObject.Service;
 
@@ -16,18 +14,16 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepo _paymentRepo;
     private readonly ITransactionRepo _transactionRepo;
-    private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
     private readonly PaypalClient _paypalClient;
 
     public PaymentService(IPaymentRepo paymentRepo, IMapper mapper, ITransactionRepo transactionRepo,
-        PaypalClient paypalClient, IConfiguration configuration)
+        PaypalClient paypalClient)
     {
         _paymentRepo = paymentRepo;
         _mapper = mapper;
         _transactionRepo = transactionRepo;
         _paypalClient = paypalClient;
-        _configuration = configuration;
     }
 
     public async Task<ServiceResponse<PaginationModel<PaymentMethodDto>>> GetAllPaymentMethodsAsync(int page,

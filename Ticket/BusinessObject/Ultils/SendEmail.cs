@@ -1,7 +1,6 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using Microsoft.Extensions.Caching.Memory;
 using QRCoder;
 using System.Drawing.Imaging;
 
@@ -9,8 +8,8 @@ namespace BusinessObject.Ultils;
 
 public class SendEmail
 {
-    public static async Task<bool> SendRegistrationEmail(IMemoryCache cache, string recipientEmail,
-        string recipientName, DateTime registrationDate, string checkInCode)
+    public static async Task SendRegistrationEmail(string recipientEmail,
+        string recipientName, string checkInCode)
     {
         const string userName = "FUEventTicket";
         const string emailFrom = "phongdinh930@gmail.com";
@@ -65,12 +64,6 @@ public class SendEmail
         var bodyBuilder = new BodyBuilder { HtmlBody = body };
         bodyBuilder.LinkedResources.Add(imageAttachment);
         message.Body = bodyBuilder.ToMessageBody();
-        // Save OTP (Check-In Code) in cache
-        var key = $"{recipientEmail}_OTP";
-        cache.Set(key, checkInCode, TimeSpan.FromMinutes(1));
-
-        // Remove key OTP when expired
-        await Task.Delay(TimeSpan.FromMinutes(1)).ContinueWith(_ => { cache.Remove(key); });
 
         using (var client = new SmtpClient())
         {
@@ -81,12 +74,10 @@ public class SendEmail
             {
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
-                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
             }
         }
     }

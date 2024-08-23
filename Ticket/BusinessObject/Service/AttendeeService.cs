@@ -8,47 +8,26 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 
 namespace BusinessObject.Service;
 
 public class AttendeeService : IAttendeeService
 {
-    private readonly IConfiguration _configuration;
     private readonly IAttendeeRepo _attendeeRepo;
     private readonly IEventRepo _eventRepo;
-    private readonly ITransactionRepo _transactionRepo;
     private readonly IMapper _mapper;
-    private readonly IMemoryCache _memoryCache;
 
-    public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IConfiguration configuration,
-        IMemoryCache memoryCache, IEventRepo eventRepo, ITransactionRepo transactionRepo)
+    public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IEventRepo eventRepo)
     {
         _mapper = mapper;
         _attendeeRepo = attendeeRepo;
-        _configuration = configuration;
-        _memoryCache = memoryCache;
         _eventRepo = eventRepo;
-        _transactionRepo = transactionRepo;
     }
 
     public async Task<ServiceResponse<RegisterAttendeeDTO>> RegisterAttendeeAsync(
         RegisterAttendeeDTO registerAttendeeDto)
     {
         var response = new ServiceResponse<RegisterAttendeeDTO>();
-
-        var context = new ValidationContext(registerAttendeeDto, serviceProvider: null, items: null);
-        var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(registerAttendeeDto, context, validationResults, true);
-
-        if (!isValid)
-        {
-            response.Success = false;
-            response.Message = "Validation failed.";
-            response.ErrorMessages = validationResults.Select(vr => vr.ErrorMessage).ToList();
-            return response;
-        }
 
         try
         {
@@ -67,21 +46,23 @@ public class AttendeeService : IAttendeeService
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.PaymentStatus = PaymentStatus.PENDING;
-            attendee.CheckInCode = null;// Set to pending initially
+            attendee.PaymentStatus = PaymentStatus.PENDING; // Set default status
+            attendee.CheckInCode = null; // Ensure CheckInCode is null initially
 
-            // Save to the database without generating the check-in code
+            // Save to the database
             await _attendeeRepo.AddAsync(attendee);
 
             response.Data = registerAttendeeDto;
             response.Success = true;
             response.Message = "Attendee registered successfully. Proceed to payment.";
+            response.Id = attendee.Id;
         }
         catch (Exception ex)
         {
             response.Success = false;
             response.Message = "Error registering attendee.";
-            response.ErrorMessages = [ex.Message];
+            response.ErrorMessages = new List<string> { ex.Message };
+            Console.WriteLine(ex.ToString()); // Log detailed exception information
         }
 
         return response;
@@ -96,6 +77,7 @@ public class AttendeeService : IAttendeeService
             {
                 page = 1;
             }
+
             var attendees = await _attendeeRepo.GetAttendees();
 
             var map = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
@@ -111,64 +93,6 @@ public class AttendeeService : IAttendeeService
             response.Message = e.InnerException != null
                 ? e.InnerException.Message + "\n" + e.StackTrace
                 : e.Message + "\n" + e.StackTrace;
-        }
-
-        return response;
-    }                                                                      
-
-    public async Task<ServiceResponse<AttendeeDto>> CompleteRegistrationAfterPaymentAsync(int attendeeId)
-    {
-        var response = new ServiceResponse<AttendeeDto>();
-
-        try
-        {
-            // Retrieve the attendee by ID
-            var attendee = await _attendeeRepo.GetAttendeeByIdAsync(attendeeId);
-
-            if (attendee == null)
-            {
-                response.Success = false;
-                response.Message = "Attendee not found.";
-                return response;
-            }
-            if (attendee.PaymentStatus != PaymentStatus.SUCCESSFUL)
-            {
-                response.Success = false;
-                response.Message = "Payment not completed.";
-                return response;
-            }
-
-            // Retrieve the associated transaction
-
-            // Generate check-in code
-            var checkInCode = GenerateCheckInCode();
-            attendee.CheckInCode = checkInCode;
-            attendee.CheckInStatus = CheckInStatus.NotCheckedIn;
-
-            // Save the updated attendee details
-            await _attendeeRepo.UpdateAsync(attendee);
-
-            // Send confirmation email
-            foreach (var attendeeDetail in attendee.AttendeeDetails)
-            {
-                await SendEmail.SendRegistrationEmail(
-                    _memoryCache,
-                    attendeeDetail.Email,
-                    attendeeDetail.Name,
-                    attendee.RegistrationDate,
-                    checkInCode);
-            }
-
-            // Map the updated attendee to DTO
-            response.Data = _mapper.Map<AttendeeDto>(attendee);
-            response.Success = true;
-            response.Message = "Registration completed and email sent successfully.";
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = "Error completing registration and sending email.";
-            response.ErrorMessages = new List<string> { ex.Message };
         }
 
         return response;
@@ -339,10 +263,5 @@ public class AttendeeService : IAttendeeService
         response.Success = true;
         response.Message = "Attendee checked in successfully.";
         return response;
-    }
-
-    private string? GenerateCheckInCode()
-    {
-        return Guid.NewGuid().ToString()[..8].ToUpper();
     }
 }

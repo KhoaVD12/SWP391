@@ -1,7 +1,5 @@
 using AutoMapper;
 using BusinessObject.IService;
-using BusinessObject.Mappers;
-using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Responses;
 using DataAccessObject.Entities;

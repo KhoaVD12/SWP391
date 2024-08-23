@@ -1,6 +1,5 @@
 using BusinessObject.IService;
 using BusinessObject.Models.UserDTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
