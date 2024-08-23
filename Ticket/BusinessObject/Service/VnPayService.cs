@@ -6,6 +6,7 @@ using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace BusinessObject.Service;
@@ -16,15 +17,17 @@ public class VnPayService : IVnPayService
     private readonly ITransactionRepo _transactionRepo;
     private readonly IPaymentRepo _paymentRepo;
     private readonly IAttendeeRepo _attendeeRepo;
+    private readonly IMemoryCache _memoryCache;
 
     public VnPayService(IConfiguration configuration,
         ITransactionRepo transactionRepo,
-        IPaymentRepo paymentRepo, IAttendeeRepo attendeeRepo)
+        IPaymentRepo paymentRepo, IAttendeeRepo attendeeRepo, IMemoryCache memoryCache)
     {
         _configuration = configuration;
         _transactionRepo = transactionRepo;
         _paymentRepo = paymentRepo;
         _attendeeRepo = attendeeRepo;
+        _memoryCache = memoryCache;
     }
 
     public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
@@ -109,12 +112,6 @@ public class VnPayService : IVnPayService
         {
             var vnpay = new VnPayLibrary();
 
-            foreach (var (key, value) in queryParams)
-            {
-                Console.WriteLine($"Key: {key}, Value: {value}");
-            }
-
-
             // Collect and validate the response data
             foreach (var (key, value) in queryParams)
             {
@@ -125,7 +122,6 @@ public class VnPayService : IVnPayService
             }
 
             var vnp_orderId = Convert.ToInt64(vnpay.GetResponseData("vnp_TxnRef"));
-            var vnp_TransactionIdString = vnpay.GetResponseData("vnp_TransactionNo");
             var vnp_SecureHash = queryParams["vnp_SecureHash"].ToString();
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
             var vnp_HashSecret = _configuration["VNPay:HashSecret"];
@@ -175,18 +171,36 @@ public class VnPayService : IVnPayService
 
             await _paymentRepo.UpdateAsync(payment);
 
-            var attendee = await _attendeeRepo.GetByIdAsync(transaction.AttendeeId);
-            if (attendee != null)
+            if (transaction.Status == TransactionStatus.COMPLETED)
             {
-                attendee.PaymentStatus = PaymentStatus.SUCCESSFUL;
-                await _attendeeRepo.UpdateAsync(attendee);
+                // Retrieve the attendee
+                var attendee = await _attendeeRepo.GetAttendeeByIdAsync(transaction.AttendeeId);
+                if (attendee != null)
+                {
+                    attendee.PaymentStatus = PaymentStatus.SUCCESSFUL;
+
+                    // Generate check-in code and update attendee
+                    var checkInCode = GenerateCheckInCode();
+                    attendee.CheckInCode = checkInCode;
+                    attendee.CheckInStatus = CheckInStatus.NotCheckedIn;
+
+                    await _attendeeRepo.UpdateAsync(attendee);
+
+                    // Send confirmation email with the check-in code
+                    foreach (var attendeeDetail in attendee.AttendeeDetails)
+                    {
+                        await SendEmail.SendRegistrationEmail(attendeeDetail.Email,
+                            attendeeDetail.Name,
+                            checkInCode);
+                    }
+                }
             }
 
             // Prepare the response
             response.Success = true;
             response.Data = payment;
             response.Message = transaction.Status == TransactionStatus.COMPLETED
-                ? "Payment processed successfully."
+                ? "Payment processed and email sent successfully."
                 : "Payment failed.";
         }
         catch (Exception ex)
@@ -197,5 +211,10 @@ public class VnPayService : IVnPayService
         }
 
         return response;
+    }
+
+    private string? GenerateCheckInCode()
+    {
+        return Guid.NewGuid().ToString()[..8].ToUpper();
     }
 }

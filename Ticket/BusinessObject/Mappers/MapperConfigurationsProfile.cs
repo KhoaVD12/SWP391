@@ -1,5 +1,4 @@
 using AutoMapper;
-using BusinessObject.Models;
 using BusinessObject.Models.AttendeeDto;
 using BusinessObject.Models.BoothDTO;
 using BusinessObject.Models.BoothRequestDTO;
@@ -30,7 +29,11 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<AttendeeDetailDto, AttendeeDetail>().ReverseMap();
         CreateMap<UpdateAttendeeDto, AttendeeDetail>().ReverseMap();
         CreateMap<RegisterAttendeeDTO, Attendee>()
-            .ForMember(dest => dest.AttendeeDetails, opt => opt.MapFrom(src => src.AttendeeDetails)).ReverseMap();
+            .ForMember(dest => dest.CheckInCode, opt => opt.Ignore()) // Ignore CheckInCode
+            .ForMember(dest => dest.PaymentStatus, opt => opt.Ignore())
+            .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate))
+            .ForMember(dest => dest.AttendeeDetails, opt => opt.MapFrom(src => src.AttendeeDetails))
+            .ReverseMap();
         CreateMap<Attendee, AttendeeDto>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Name))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AttendeeDetails.FirstOrDefault()!.Email))
@@ -49,6 +52,7 @@ public class MapperConfigurationsProfile : Profile
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
             .ReverseMap();
+        CreateMap<AttendeeDetailRegisterDto, AttendeeDetail>().ReverseMap();
 
         CreateMap<CreateEventDTO, Event>()
             .ReverseMap();
@@ -56,8 +60,8 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<ViewEventDTO, Event>()
             .ReverseMap(); // Automatically maps from Event to CreateEventDTO
         CreateMap<UpdateEventDTO, Event>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore()) // Cannot update the Id
-            .ForMember(dest => dest.OrganizerId, opt => opt.Ignore()) // Cannot update the OrganizerId
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) 
+            .ForMember(dest => dest.OrganizerId, opt => opt.Ignore())
             .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
             .ReverseMap(); // Image will be handled separately.ReverseMap();
 

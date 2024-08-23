@@ -11,6 +11,7 @@ public class ServiceResponse<T>
     public string Hint { get; set; } = null!;
     public decimal PriceTotal { get; set; }
     public List<string> ErrorMessages { get; set; } = [];
+    public int? Id { get; set; }
 }
 
 public class PaginationModel<T>

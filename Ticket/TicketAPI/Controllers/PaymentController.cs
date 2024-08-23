@@ -1,10 +1,7 @@
 using BusinessObject.IService;
 using BusinessObject.Models.PaymentDTO;
-using BusinessObject.Responses;
-using DataAccessObject.Entities;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace TicketAPI.Controllers;
 
@@ -171,21 +168,12 @@ public class PaymentController : ControllerBase
     [HttpGet("vnpay/callback")]
     public async Task<IActionResult> VnPayCallback()
     {
-        try
-        {
-            var result = await _vnPayService.ProcessPaymentResponse(Request.Query);
+        var queryParams = HttpContext.Request.Query;
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
+        // Process the VNPay payment response
+        var paymentResult = await _vnPayService.ProcessPaymentResponse(queryParams);
 
-            return BadRequest(result);
-        }
-        catch (Exception ex)
-        {
-            // Return an error response to VNPay
-            return StatusCode(500, "Error processing VNPay callback");
-        }
+        // Handle failure, maybe redirect to an error page
+        return Redirect("http://localhost:3000");
     }
 }

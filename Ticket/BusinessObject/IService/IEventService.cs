@@ -1,14 +1,5 @@
 ﻿using BusinessObject.Models.EventDTO;
-using BusinessObject.Models.VenueDTO;
 using BusinessObject.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BusinessObject.Responses;
-using DataAccessObject.Entities;
-using DataAccessObject.Enums;
 
 namespace BusinessObject.IService
 {
