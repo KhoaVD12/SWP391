@@ -28,6 +28,10 @@ namespace DataAccessObject.Repo
         {
             return await _context.Set<Ticket>().Where(t => t.EventId == eventId).ToListAsync();
         }
+        public async Task<bool>CheckEventPendingOrActive(int eventId)
+        {
+            return await _context.Events.AnyAsync(e => e.Id == eventId && (e.Status == "Pending" || e.Status == "Active"));
+        }
         public async Task CreateTicket(Ticket ticket)
         {
             await _context.Tickets.AddAsync(ticket);
