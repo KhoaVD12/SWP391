@@ -15,5 +15,6 @@ namespace DataAccessObject.IRepo
         Task CreateTicket(Ticket ticket);
         Task<bool> DeleteTicket(int id);
         Task UpdateTicket(int id, Ticket ticket);
+        Task<bool> CheckEventPendingOrActive(int eventId);
     }
 }

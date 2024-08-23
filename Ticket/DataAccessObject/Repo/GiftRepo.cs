@@ -37,7 +37,7 @@ namespace DataAccessObject.Repo
         }
         public async Task<bool> CheckExistByNameAndBooth(string inputString, int boothId)
         {
-            return await _context.Gifts.AnyAsync(e => e.Name == inputString&&e.BoothId==boothId);
+            return await _context.Gifts.AnyAsync(e => e.Name.ToLower().Trim() == inputString.ToLower().Trim() && e.BoothId==boothId);
         }
         public async Task<IEnumerable<Gift>> GetGiftByBoothId(int boothId)
         {

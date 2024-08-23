@@ -92,7 +92,7 @@ namespace DataAccessObject.Repo
         }
         public async Task<bool> CheckExistByName(string inputString)
         {
-            return await _context.Booths.AnyAsync(e => e.Name == inputString);
+            return await _context.Booths.AnyAsync(e => e.Name.ToLower().Trim() == inputString.ToLower().Trim());
         }
         public async Task<bool> CheckEventExist(int eventId)
         {
