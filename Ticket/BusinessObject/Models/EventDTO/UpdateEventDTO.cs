@@ -5,6 +5,7 @@ namespace BusinessObject.Models.EventDTO;
 
 public class UpdateEventDTO
 {
+
     [SwaggerSchema(Description = "Title of the event")]
     public string Title { get; set; }
 
