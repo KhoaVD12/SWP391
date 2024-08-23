@@ -17,5 +17,6 @@ namespace BusinessObject.IService
         public Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO);
         Task<ServiceResponse<bool>> ChangeEventStatus(int eventId, ChangeEventStatusDTO statusDTO);
         Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsByStatus(string status, int page, int pageSize);
+        public Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventByOrganizer(int organizerId, int page, int pageSize);
     }
 }

@@ -208,5 +208,17 @@ namespace TicketAPI.Controllers
 
             return Ok(result);
         }
+        [HttpGet("organizer/{organizerId}")]
+        public async Task<IActionResult> GetEventsByOrganizer(int organizerId, [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            var result = await _eventService.GetEventByOrganizer(organizerId, page, pageSize);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
     }
 }

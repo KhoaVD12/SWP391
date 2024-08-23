@@ -70,7 +70,7 @@ namespace DataAccessObject.Repo
 
         public async Task<IEnumerable<Event>> GetEventsByStatus(string status)
         {
-            return await _context.Events
+            return await _context.Events.Where(e=>e.Status==status)
                 .ToListAsync();
         }
 
@@ -81,7 +81,10 @@ namespace DataAccessObject.Repo
                 .Include(e => e.Venue)
                 .ToListAsync();
         }
-
+        public async Task<IEnumerable<Event>>GetEventByOrganizer(int organizerId)
+        {
+            return await _context.Events.Where(e => e.OrganizerId ==organizerId).ToListAsync();
+        }
         public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
         {
             return await _context.Attendees
