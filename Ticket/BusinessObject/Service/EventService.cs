@@ -521,15 +521,15 @@ namespace BusinessObject.Service
             return result;
         }
 
-        public async Task<ServiceResponse<PaginationModel<ViewEventDTO2nd>>> GetEventByOrganizer(int organizerId, int page, int pageSize)
+        public async Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(int organizerId, int page, int pageSize)
         {
-            var res = new ServiceResponse<PaginationModel<ViewEventDTO2nd>>();
+            var res = new ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>();
             try
             {
                 var result = await _eventRepo.GetEventByOrganizer(organizerId);
                 if (result.Any())
                 {
-                    var map = _mapper.Map<IEnumerable<ViewEventDTO2nd>>(result);
+                    var map = _mapper.Map<IEnumerable<ViewOrganizerEventDTO>>(result);
                     var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
                     res.Data = paging;
                     res.Success = true;
