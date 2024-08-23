@@ -17,7 +17,7 @@ namespace BusinessObject.Models.EventDTO
         public string VenueName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string? Image { get; set; }
+        public string? ImageUrl { get; set; }
         public string Status { get; set; }
         public EventTicket Ticket { get; set; }
     }
