@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessObject.Models.EventDTO
 {
-    public class ViewEventDTO2nd
+    public class ViewOrganizerEventDTO
     {
         public int Id { get; set; }
         public string Title { get; set; }
