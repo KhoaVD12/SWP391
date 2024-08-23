@@ -54,12 +54,6 @@ namespace BusinessObject.Service
                     res.Message = "Ticket Sale EndDate must be 1 day before the Event EndDate.";
                     return res;
                 }
-                if (existTicket.Any())
-                {
-                    res.Success = false;
-                    res.Message = "Ticket with this event ID has already existed";
-                    return res;
-                }
                 await _ticketRepo.CreateTicket(createResult);
 
                 var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
