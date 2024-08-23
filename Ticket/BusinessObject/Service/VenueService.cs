@@ -35,6 +35,12 @@ namespace BusinessObject.Service
             try
             {
                 var mapp = _mapper.Map<Venue>(venueDTO);
+                if (string.IsNullOrWhiteSpace(mapp.Name) || !mapp.Name.Any(char.IsLetter) || mapp.Name.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch)))
+                {
+                    res.Success = false;
+                    res.Message = "Invalid name. Name must contain at least one letter and no special characters.";
+                    return res;
+                }
                 if(await _venueRepo.CheckNameExist(mapp.Name))
                 {
                     res.Success = false;
@@ -162,6 +168,12 @@ namespace BusinessObject.Service
             try
             {
                 var exist = await _venueRepo.GetVenueById(id);
+                if (string.IsNullOrWhiteSpace(newVenue.Name) || !newVenue.Name.Any(char.IsLetter) || newVenue.Name.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch)))
+                {
+                    res.Success = false;
+                    res.Message = "Invalid name. Name must contain at least one letter and no special characters.";
+                    return res;
+                }
                 if (exist == null)
                 {
                     res.Success = false;
@@ -176,6 +188,8 @@ namespace BusinessObject.Service
                     res.Message = "Name existed";
                     return res;
                 }
+                mapp.Status=exist.Status;
+                mapp.Id=exist.Id;
                 await _venueRepo.UpdateVenue(id, mapp);
                 var result = _mapper.Map<ViewVenueDTO>(mapp);
                 res.Success = true;
