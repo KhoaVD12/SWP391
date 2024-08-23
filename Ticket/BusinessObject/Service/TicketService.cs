@@ -35,12 +35,19 @@ namespace BusinessObject.Service
             {
                 var createResult = _mapper.Map<Ticket>(ticketDTO);
                 var existTicket = await _ticketRepo.GetTicketByEventId(createResult.EventId);
-                if(existTicket != null)
+                if(existTicket.Any())
                 {
                     res.Success = false;
                     res.Message = "Ticket with this event ID has already existed";
                     return res;
                 }
+                if(!await _ticketRepo.CheckEventPendingOrActive(createResult.EventId))
+                {
+                    res.Success = false;
+                    res.Message = "Event ID not found or not In PENDING/ACTIVE";
+                    return res;
+                }
+
                 await _ticketRepo.CreateTicket(createResult);
 
                 var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
@@ -89,10 +96,19 @@ namespace BusinessObject.Service
             try
             {
                 var tickets = await _ticketRepo.GetTicket();
-                var map = _mapper.Map<IEnumerable<ViewTicketDTO>>(tickets);
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
-                res.Data = paging;
-                res.Success = true;
+                if (tickets.Any())
+                {
+                    var map = _mapper.Map<IEnumerable<ViewTicketDTO>>(tickets);
+                    var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                    res.Data = paging;
+                    res.Success = true;
+                }
+                else
+                {
+                    res.Success= false;
+                    res.Message = "No Ticket";
+                    return res;
+                }
             }
             catch (Exception ex)
             {
@@ -109,7 +125,7 @@ namespace BusinessObject.Service
             try
             {
                 var result = await _ticketRepo.GetTicketByEventId(eventId);
-                if (result != null && result.Any())
+                if (result.Any())
                 {
                     var map = _mapper.Map<IEnumerable<ViewTicketDTO>>(result);
                     res.Success= true;
