@@ -6,6 +6,8 @@ using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using DataAccessObject.Repo;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -20,12 +22,14 @@ namespace BusinessObject.Service
         private readonly ITicketRepo _ticketRepo;
         private readonly IMapper _mapper;
         private readonly AppConfiguration _appConfiguration;
+        private readonly IEventRepo _eventRepo;
 
-        public TicketService(ITicketRepo repo, IMapper mapper, AppConfiguration configuration)
+        public TicketService(ITicketRepo repo, IMapper mapper, AppConfiguration configuration, IEventRepo eventRepo)
         {
             _appConfiguration = configuration;
             _ticketRepo = repo;
             _mapper = mapper;
+            _eventRepo = eventRepo;
         }
 
         public async Task<ServiceResponse<ViewTicketDTO>> CreateTicket(CreateTicketDTO ticketDTO)
@@ -35,23 +39,31 @@ namespace BusinessObject.Service
             {
                 var createResult = _mapper.Map<Ticket>(ticketDTO);
                 var existTicket = await _ticketRepo.GetTicketByEventId(createResult.EventId);
-                if(existTicket.Any())
+                if (!await _ticketRepo.CheckEventPendingOrActive(createResult.EventId))
+                {
+                    res.Success = false;
+                    res.Message = "Event ID Not Found or not In Pending/Active";
+                    return res;
+                }
+                var eventTicket = await _eventRepo.GetEventById(createResult.EventId);
+                var minimumValidSaleEndDate = eventTicket.EndDate.AddDays(-2);
+                var maximumValidSaleEndDate = eventTicket.EndDate.AddDays(-1);
+                if (ticketDTO.TicketSaleEndDate < minimumValidSaleEndDate || ticketDTO.TicketSaleEndDate > maximumValidSaleEndDate)
+                {
+                    res.Success = false;
+                    res.Message = "Ticket Sale EndDate must be 1 day before the Event EndDate.";
+                    return res;
+                }
+                if (existTicket.Any())
                 {
                     res.Success = false;
                     res.Message = "Ticket with this event ID has already existed";
                     return res;
                 }
-                if(!await _ticketRepo.CheckEventPendingOrActive(createResult.EventId))
-                {
-                    res.Success = false;
-                    res.Message = "Event ID not found or not In PENDING/ACTIVE";
-                    return res;
-                }
-
                 await _ticketRepo.CreateTicket(createResult);
 
                 var result = _mapper.Map<ViewTicketDTO>(ticketDTO);
-
+                result.Id = createResult.Id;
                 res.Success = true;
                 res.Message = "Ticket created successfully";
                 res.Data = result;
@@ -179,6 +191,28 @@ namespace BusinessObject.Service
             try
             {
                 var updateResult=_mapper.Map<Ticket>(ticketDTO);
+                var existTicket = await _ticketRepo.GetTicketByEventId(updateResult.EventId);
+                if (!await _ticketRepo.CheckEventPendingOrActive(updateResult.EventId))
+                {
+                    res.Success = false;
+                    res.Message = "Event ID Not Found or not In Pending/Active";
+                    return res;
+                }
+                var eventTicket = await _eventRepo.GetEventById(updateResult.EventId);
+                var minimumValidSaleEndDate = eventTicket.EndDate.AddDays(-2);
+                var maximumValidSaleEndDate = eventTicket.EndDate.AddDays(-1);
+                if (ticketDTO.TicketSaleEndDate < minimumValidSaleEndDate || ticketDTO.TicketSaleEndDate > maximumValidSaleEndDate)
+                {
+                    res.Success = false;
+                    res.Message = "Ticket Sale EndDate must be 1 day before the Event EndDate.";
+                    return res;
+                }
+                if (existTicket.Any())
+                {
+                    res.Success = false;
+                    res.Message = "Ticket with this event ID has already existed";
+                    return res;
+                }
                 updateResult.Id= id;
                 await _ticketRepo.UpdateTicket(id, updateResult);
                 var result = _mapper.Map<ViewTicketDTO>(updateResult);
