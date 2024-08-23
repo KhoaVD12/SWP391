@@ -6,6 +6,7 @@ using BusinessObject.Models.VenueDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
 using System;
@@ -34,7 +35,13 @@ namespace BusinessObject.Service
             try
             {
                 var mapp = _mapper.Map<Venue>(venueDTO);
-
+                if(await _venueRepo.CheckNameExist(mapp.Name))
+                {
+                    res.Success = false;
+                    res.Message = "Name existed";
+                    return res;
+                }
+                mapp.Status=VenueStatus.Opened.ToString();
                 await _venueRepo.CreateVenue(mapp);
 
                 var result = _mapper.Map<ViewVenueDTO>(mapp);
@@ -100,7 +107,7 @@ namespace BusinessObject.Service
                     "name"=>venues.OrderBy(v=>v?.Name),
                     _=>venues.OrderBy(v=>v.Id).ToList()
                 };
-                if (venues.Any() && venues != null)
+                if (venues.Any())
                 {
                     var result = _mapper.Map<IEnumerable<ViewVenueDTO>>(venues);
                     var paging = await Pagination.GetPaginationEnum(result, page, pageSize);
@@ -162,12 +169,18 @@ namespace BusinessObject.Service
                     return res;
                 }
                 var mapp = _mapper.Map<Venue>(newVenue);
-                    mapp.Id = id;
-                    await _venueRepo.UpdateVenue(id, mapp);
-                    var result = _mapper.Map<ViewVenueDTO>(mapp);
-                    res.Success = true;
-                    res.Message = "Venue updated successfully";
-                    res.Data = result;
+                mapp.Id = id;
+                if (await _venueRepo.CheckNameExist(mapp.Name))
+                {
+                    res.Success = false;
+                    res.Message = "Name existed";
+                    return res;
+                }
+                await _venueRepo.UpdateVenue(id, mapp);
+                var result = _mapper.Map<ViewVenueDTO>(mapp);
+                res.Success = true;
+                res.Message = "Venue updated successfully";
+                res.Data = result;
             }
             catch (Exception e)
             {
@@ -189,7 +202,20 @@ namespace BusinessObject.Service
                     res.Message = "Id not found";
                     return res;
                 }
-                
+                if (venueStatus.Status.Equals(VenueStatus.Opened.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Status = VenueStatus.Opened.ToString();
+                }
+                else if (venueStatus.Status.Equals(VenueStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    exist.Status = VenueStatus.Closed.ToString();
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Invalid Status";
+                    return res;
+                }
                 exist.Status=venueStatus.Status;
                 await _venueRepo.UpdateVenue(id, exist);
                 
