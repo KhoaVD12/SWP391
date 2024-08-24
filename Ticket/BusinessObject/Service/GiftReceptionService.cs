@@ -87,12 +87,6 @@ namespace BusinessObject.Service
                     res.Message = "Attendee or/and Gift not exist";
                     return res;
                 }
-                if(await _giftReceptionRepo.CheckExistByAttendeeIdAndGiftId(createResult.AttendeeId, createResult.GiftId))
-                {
-                    res.Success = false;
-                    res.Message = "Reception with this Attendee and Gift existed";
-                    return res;
-                }
                 await _giftReceptionRepo.UpdateReception(id, createResult);
                 var result = _mapper.Map<ViewGiftReceptionDTO>(createResult);
                 res.Success = true;

@@ -246,13 +246,6 @@ namespace BusinessObject.Service
                     res.Message = "Event not exist";
                     return res;
                 }
-                var nameExist = await _boothRepo.CheckExistByName(boothDTO.Name);
-                if (nameExist)
-                {
-                    res.Success = false;
-                    res.Message = "This name has already existed";
-                    return res;
-                }
                 var updateResult = _mapper.Map<Booth>(boothDTO);
                 updateResult.Id = id;
                 updateResult.Status = exist.Status;
