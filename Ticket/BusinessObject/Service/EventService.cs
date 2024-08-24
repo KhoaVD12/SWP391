@@ -6,7 +6,6 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Enums;
-using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace BusinessObject.Service
 {
@@ -16,16 +15,14 @@ namespace BusinessObject.Service
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
         private readonly ITicketRepo _ticketRepo;
-        private readonly IFirebaseImageService _firebaseImageService;
 
         public EventService(IEventRepo repo, IMapper mapper,
-            IUserRepo userRepo, ITicketRepo ticketRepo, IFirebaseImageService firebaseImageService)
+            IUserRepo userRepo, ITicketRepo ticketRepo)
         {
             _eventRepo = repo;
             _mapper = mapper;
             _userRepo = userRepo;
             _ticketRepo = ticketRepo;
-            _firebaseImageService = firebaseImageService;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize,
@@ -155,7 +152,7 @@ namespace BusinessObject.Service
                     {
                         if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
                         {
-                            imageUrl = await _firebaseImageService.UploadImageFromUrl(eventDTO.ImageUrl);
+                            imageUrl = eventDTO.ImageUrl; // The URL is valid
                         }
                         else
                         {
@@ -169,7 +166,7 @@ namespace BusinessObject.Service
                     var Event = new Event
                     {
                         Title = eventDTO.Title,
-                        ImageUrl = imageUrl,
+                        ImageUrl = imageUrl, // Use the validated URL
                         StartDate = eventDTO.StartDate,
                         EndDate = eventDTO.EndDate,
                         OrganizerId = eventDTO.OrganizerId,
@@ -197,7 +194,7 @@ namespace BusinessObject.Service
                     {
                         Id = Event.Id,
                         Title = Event.Title,
-                        ImageURL = Event.ImageUrl,
+                        ImageURL = Event.ImageUrl, // Ensure this matches your DTO
                         StartDate = Event.StartDate,
                         EndDate = Event.EndDate,
                         OrganizerId = Event.OrganizerId,
@@ -224,38 +221,38 @@ namespace BusinessObject.Service
 
         private async Task<bool> IsValidImageUrlAsync(string imageUrl)
         {
-            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult)
+                || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)) return false;
+            string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            if (validExtensions.Contains(Path.GetExtension(uriResult.AbsolutePath).ToLower()))
             {
-                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-                if (validExtensions.Contains(Path.GetExtension(uriResult.AbsolutePath).ToLower()))
+                try
                 {
-                    try
+                    using var httpClient = new HttpClient();
+                    // Set a timeout for the request
+                    httpClient.Timeout = TimeSpan.FromSeconds(10); // Adjust timeout as needed
+
+                    // Use HttpMethod.Get to get the content type reliably
+                    var response = await httpClient.GetAsync(imageUrl);
+
+                    // Ensure the response is successful
+                    if (response.IsSuccessStatusCode)
                     {
-                        using (var httpClient = new HttpClient())
+                        // Check for specific image content types
+                        var contentType = response.Content.Headers.ContentType?.MediaType;
+                        if (contentType == "image/jpeg" || contentType == "image/png" ||
+                            contentType == "image/gif" || contentType == "image/bmp" ||
+                            contentType == "image/webp")
                         {
-                            // Set a timeout for the request
-                            httpClient.Timeout = TimeSpan.FromSeconds(5); // Adjust timeout as needed
-
-                            var response = await httpClient.SendAsync(
-                                new HttpRequestMessage(HttpMethod.Head, imageUrl));
-
-                            // Check for specific image content types
-                            var contentType = response.Content.Headers.ContentType.MediaType;
-                            if (contentType == "image/jpeg" || contentType == "image/png" ||
-                                contentType == "image/gif" || contentType == "image/bmp" ||
-                                contentType == "image/webp")
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Log the exception or handle it appropriately
-                        Console.WriteLine($"Error validating image URL: {ex.Message}");
-                        return false;
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it appropriately
+                    Console.WriteLine($"Error validating image URL: {ex.Message}");
+                    return false;
                 }
             }
 
@@ -417,9 +414,7 @@ namespace BusinessObject.Service
                     // Validate the image URL
                     if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
                     {
-                        // Upload the image and update the URL
-                        var imageUrl = await _firebaseImageService.UploadImageFromUrl(eventDTO.ImageUrl);
-                        eventToUpdate.ImageUrl = imageUrl;
+                        eventToUpdate.ImageUrl = eventDTO.ImageUrl;
                     }
                     else
                     {

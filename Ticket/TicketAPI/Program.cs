@@ -9,7 +9,6 @@ using BusinessObject.Service;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
-using Firebase.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,15 +17,6 @@ using TicketAPI.Filters;
 using TicketAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var fileName = "swp-3-209dc-firebase-adminsdk-rd9wf-fc5c75a30c";
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS",
-    @Path.Combine(Environment.CurrentDirectory, fileName));
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-var firebaseStorage = new FirebaseStorage("SWP-391");
-
-// Register the FirebaseStorage instance as a service
-builder.Services.AddSingleton(firebaseStorage);
 
 var configuration = builder.Configuration;
 var myConfig = new AppConfiguration();
@@ -73,7 +63,6 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
-builder.Services.AddScoped<IFirebaseImageService, FirebaseImageService>();
 builder.Services.AddHostedService<PaymentCleanupService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
