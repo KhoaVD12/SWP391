@@ -241,13 +241,6 @@ namespace BusinessObject.Service
 
                 var mapp = _mapper.Map<Gift>(newGift);
                 mapp.Id = id;
-                var giftExist = await _giftRepo.CheckExistByNameAndBooth(mapp.Name, mapp.BoothId);
-                if (giftExist)
-                {
-                    res.Success = false;
-                    res.Message = "Gift existed";
-                    return res;
-                }
                 var openBooth = await _giftRepo.GetOpenBooth();
                 if (!openBooth.Any(b => b.Id == mapp.BoothId))
                 {
