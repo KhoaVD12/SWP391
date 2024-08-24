@@ -46,12 +46,13 @@ namespace BusinessObject.Service
                     return res;
                 }
                 var eventTicket = await _eventRepo.GetEventById(createResult.EventId);
-                var minimumValidSaleEndDate = eventTicket.EndDate.AddDays(-2);
-                var maximumValidSaleEndDate = eventTicket.EndDate.AddDays(-1);
+                var minimumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-10);
+                var maximumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-5);
+
                 if (ticketDTO.TicketSaleEndDate < minimumValidSaleEndDate || ticketDTO.TicketSaleEndDate > maximumValidSaleEndDate)
                 {
                     res.Success = false;
-                    res.Message = "Ticket Sale EndDate must be 1 day before the Event EndDate.";
+                    res.Message = "Ticket Sale EndDate must be 5-10 minutes before the Event StartDate.";
                     return res;
                 }
                 await _ticketRepo.CreateTicket(createResult);
@@ -193,18 +194,12 @@ namespace BusinessObject.Service
                     return res;
                 }
                 var eventTicket = await _eventRepo.GetEventById(updateResult.EventId);
-                var minimumValidSaleEndDate = eventTicket.EndDate.AddDays(-2);
-                var maximumValidSaleEndDate = eventTicket.EndDate.AddDays(-1);
+                var minimumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-10);
+                var maximumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-5);
                 if (ticketDTO.TicketSaleEndDate < minimumValidSaleEndDate || ticketDTO.TicketSaleEndDate > maximumValidSaleEndDate)
                 {
                     res.Success = false;
-                    res.Message = "Ticket Sale EndDate must be 1 day before the Event EndDate.";
-                    return res;
-                }
-                if (existTicket.Any())
-                {
-                    res.Success = false;
-                    res.Message = "Ticket with this event ID has already existed";
+                    res.Message = "Ticket Sale EndDate must be 5-10 minutes before the Event StartDate.";
                     return res;
                 }
                 updateResult.Id= id;
