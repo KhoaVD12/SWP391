@@ -17,17 +17,19 @@ public class VnPayService : IVnPayService
     private readonly ITransactionRepo _transactionRepo;
     private readonly IPaymentRepo _paymentRepo;
     private readonly IAttendeeRepo _attendeeRepo;
+    private readonly ITicketRepo _ticketRepo;
     private readonly IMemoryCache _memoryCache;
 
     public VnPayService(IConfiguration configuration,
         ITransactionRepo transactionRepo,
-        IPaymentRepo paymentRepo, IAttendeeRepo attendeeRepo, IMemoryCache memoryCache)
+        IPaymentRepo paymentRepo, IAttendeeRepo attendeeRepo, IMemoryCache memoryCache, ITicketRepo ticketRepo)
     {
         _configuration = configuration;
         _transactionRepo = transactionRepo;
         _paymentRepo = paymentRepo;
         _attendeeRepo = attendeeRepo;
         _memoryCache = memoryCache;
+        _ticketRepo = ticketRepo;
     }
 
     public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
@@ -173,6 +175,13 @@ public class VnPayService : IVnPayService
 
             if (transaction.Status == TransactionStatus.COMPLETED)
             {
+                var ticket = await _ticketRepo.GetByIdAsync(transaction.Attendee.TicketId);
+                if (ticket != null && ticket.Quantity > 0)
+                {
+                    ticket.Quantity -= 1;
+                    await _ticketRepo.UpdateAsync(ticket);
+                }
+
                 // Retrieve the attendee
                 var attendee = await _attendeeRepo.GetAttendeeByIdAsync(transaction.AttendeeId);
                 if (attendee != null)
