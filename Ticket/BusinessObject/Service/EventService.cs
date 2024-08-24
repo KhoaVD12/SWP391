@@ -6,6 +6,7 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Enums;
+using BusinessObject.Models.TicketDTO;
 
 namespace BusinessObject.Service
 {
@@ -15,14 +16,16 @@ namespace BusinessObject.Service
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
         private readonly ITicketRepo _ticketRepo;
+        private readonly ITicketService _ticketService;
 
         public EventService(IEventRepo repo, IMapper mapper,
-            IUserRepo userRepo, ITicketRepo ticketRepo)
+            IUserRepo userRepo, ITicketRepo ticketRepo , ITicketService ticketService)
         {
             _eventRepo = repo;
             _mapper = mapper;
             _userRepo = userRepo;
             _ticketRepo = ticketRepo;
+            _ticketService = ticketService;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize,
@@ -166,7 +169,7 @@ namespace BusinessObject.Service
                     var Event = new Event
                     {
                         Title = eventDTO.Title,
-                        ImageUrl = imageUrl, // Use the validated URL
+                        ImageUrl = imageUrl,
                         StartDate = eventDTO.StartDate,
                         EndDate = eventDTO.EndDate,
                         OrganizerId = eventDTO.OrganizerId,
@@ -178,7 +181,7 @@ namespace BusinessObject.Service
                     // Save the event to the database
                     await _eventRepo.AddAsync(Event);
 
-                    var newTicket = new Ticket
+                    var newTicket = new CreateTicketDTO
                     {
                         EventId = Event.Id,
                         Price = eventDTO.Price,
@@ -187,20 +190,31 @@ namespace BusinessObject.Service
                     };
 
                     // Save the ticket to the database
-                    await _ticketRepo.CreateTicket(newTicket);
-
+                    var ticketResult= await _ticketService.CreateTicket(newTicket);
+                    if(!ticketResult.Success)
+                    {
+                        result.Success=false;
+                        result.Message=ticketResult.Message;
+                        return result;
+                    }
                     // Map to DTO
                     var newEvent = new ViewEventDTO()
                     {
                         Id = Event.Id,
                         Title = Event.Title,
-                        ImageURL = Event.ImageUrl, // Ensure this matches your DTO
+                        ImageURL = Event.ImageUrl,
                         StartDate = Event.StartDate,
                         EndDate = Event.EndDate,
                         OrganizerId = Event.OrganizerId,
                         VenueId = Event.VenueId,
                         Description = Event.Description,
-                        Status = Event.Status
+                        Status = Event.Status, 
+                        Ticket =new ViewTicketDTO {
+                            EventId=Event.Id,
+                            Price=newTicket.Price,
+                            Quantity=newTicket.Quantity,
+                            TicketSaleEndDate=newTicket.TicketSaleEndDate
+                        }
                     };
                     result.Data = newEvent;
 

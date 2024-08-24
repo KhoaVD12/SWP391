@@ -16,6 +16,9 @@ namespace DataAccessObject.Repo
         public async Task<IEnumerable<Event>> GetEvent()
         {
             return await _context.Events.Include(e => e.Organizer)
+                .Include(e => e.Organizer)
+                .Include(e => e.Staff)
+                .Include(e => e.Tickets)
                 .Include(e => e.Venue).AsNoTracking().ToListAsync();
         }
 
