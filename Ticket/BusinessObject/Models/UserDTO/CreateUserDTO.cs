@@ -8,6 +8,7 @@ public class CreateUserDto
     public string Name { get; set; } = null!;
 
     [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
     public string Email { get; set; } = null!;
 
     [Required(ErrorMessage = "Password is required.")]

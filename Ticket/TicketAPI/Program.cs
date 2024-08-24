@@ -8,11 +8,13 @@ using BusinessObject.Mappers;
 using BusinessObject.Service;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
+using DataAccessObject.Job;
 using DataAccessObject.Repo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Quartz;
 using TicketAPI.Filters;
 using TicketAPI.Middleware;
 
@@ -66,6 +68,19 @@ builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddHostedService<PaymentCleanupService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
+
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("DeleteExpiredEntitiesJob");
+    q.AddJob<DeleteExpiredEntitiesJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("DeleteExpiredEntitiesJob-trigger")
+        .WithCronSchedule("0 0 * * * ?")); // Runs every hour
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
