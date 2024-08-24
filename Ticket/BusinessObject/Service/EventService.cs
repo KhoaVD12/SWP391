@@ -7,6 +7,7 @@ using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Enums;
 using HttpMethod = System.Net.Http.HttpMethod;
+using BusinessObject.Models.TicketDTO;
 
 namespace BusinessObject.Service
 {
@@ -16,16 +17,18 @@ namespace BusinessObject.Service
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
         private readonly ITicketRepo _ticketRepo;
+        private readonly ITicketService _ticketService;
         private readonly IFirebaseImageService _firebaseImageService;
 
         public EventService(IEventRepo repo, IMapper mapper,
-            IUserRepo userRepo, ITicketRepo ticketRepo, IFirebaseImageService firebaseImageService)
+            IUserRepo userRepo, ITicketRepo ticketRepo, IFirebaseImageService firebaseImageService, ITicketService ticketService)
         {
             _eventRepo = repo;
             _mapper = mapper;
             _userRepo = userRepo;
             _ticketRepo = ticketRepo;
             _firebaseImageService = firebaseImageService;
+            _ticketService = ticketService;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize,
@@ -181,7 +184,7 @@ namespace BusinessObject.Service
                     // Save the event to the database
                     await _eventRepo.AddAsync(Event);
 
-                    var newTicket = new Ticket
+                    var newTicket = new CreateTicketDTO
                     {
                         EventId = Event.Id,
                         Price = eventDTO.Price,
@@ -190,8 +193,13 @@ namespace BusinessObject.Service
                     };
 
                     // Save the ticket to the database
-                    await _ticketRepo.CreateTicket(newTicket);
-
+                    var ticketResult= await _ticketService.CreateTicket(newTicket);
+                    if(!ticketResult.Success)
+                    {
+                        result.Success=false;
+                        result.Message=ticketResult.Message;
+                        return result;
+                    }
                     // Map to DTO
                     var newEvent = new ViewEventDTO()
                     {
@@ -203,7 +211,13 @@ namespace BusinessObject.Service
                         OrganizerId = Event.OrganizerId,
                         VenueId = Event.VenueId,
                         Description = Event.Description,
-                        Status = Event.Status
+                        Status = Event.Status, 
+                        Ticket=new ViewTicketDTO {
+                            EventId=Event.Id,
+                            Price=newTicket.Price,
+                            Quantity=newTicket.Quantity,
+                            TicketSaleEndDate=newTicket.TicketSaleEndDate
+                        }
                     };
                     result.Data = newEvent;
 
