@@ -6,20 +6,27 @@ using BusinessObject.Commons;
 using BusinessObject.IService;
 using BusinessObject.Mappers;
 using BusinessObject.Service;
-using CloudinaryDotNet;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Repo;
+using Firebase.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Net.payOS;
 using TicketAPI.Filters;
 using TicketAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var fileName = "swp-3-209dc-firebase-adminsdk-rd9wf-fc5c75a30c";
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS",
+    @Path.Combine(Environment.CurrentDirectory, fileName));
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+var firebaseStorage = new FirebaseStorage("SWP-391");
+
+// Register the FirebaseStorage instance as a service
+builder.Services.AddSingleton(firebaseStorage);
 
 var configuration = builder.Configuration;
 var myConfig = new AppConfiguration();
@@ -32,15 +39,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<TicketContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
-builder.Services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
-builder.Services.AddSingleton(provider =>
-{
-    var config = provider.GetRequiredService<IOptions<CloudinarySettings>>().Value;
-    return new Cloudinary(new Account(
-        config.CloudName,
-        config.ApiKey,
-        config.ApiSecret));
-});
 builder.Services.AddSingleton(x =>
     new PaypalClient(
         builder.Configuration["PayPalOptions:ClientId"],
@@ -48,12 +46,6 @@ builder.Services.AddSingleton(x =>
         builder.Configuration["PayPalOptions:Mode"]
     )
 );
-
-var payOs = new PayOS(
-    configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment client"),
-    configuration["Environment:PAYOS_API_KEY"] ?? throw new Exception("Cannot find environment api"),
-    configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment sum"));
-builder.Services.AddScoped<PayOS>(_ => payOs);
 
 // Configure repositories
 builder.Services.AddScoped<IUserRepo, UserRepo>();
@@ -81,7 +73,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IGiftReceptionService, GiftReceptionService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
-builder.Services.AddHostedService<PaymentCleanupService>(); 
+builder.Services.AddScoped<IFirebaseImageService, FirebaseImageService>();
+builder.Services.AddHostedService<PaymentCleanupService>();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 

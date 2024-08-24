@@ -28,10 +28,7 @@ public class AuthenticationService : IAuthenticationService
         var response = new TokenResponse<string>();
         try
         {
-            if (loginForm == null)
-            {
-                throw new ArgumentNullException(nameof(loginForm));
-            }
+            ArgumentNullException.ThrowIfNull(loginForm);
 
             var passHash = HashPass.HashWithSHA256(loginForm.Password);
             var user = await _repo.GetUserByEmailAddressAndPasswordHash(loginForm.Email, passHash);
