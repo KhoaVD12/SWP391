@@ -32,11 +32,11 @@ namespace BusinessObject.Models.EventDTO
         [SwaggerSchema(Description = "URL of the image for the event banner")]
         public string? ImageUrl { get; set; }
 
-
+        [SwaggerSchema(Description = "Ticket Price for this Event")]
         public decimal Price { get; set; }
-
+        [SwaggerSchema(Description = "Ticket Quantity for this Event")]
         public int Quantity { get; set; }
-
+        [SwaggerSchema(Description = "Date of ending selling Ticket of this Event")]
         public DateTime TicketSaleEndDate { get; set; }
     }
 
