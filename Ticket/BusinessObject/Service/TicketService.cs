@@ -52,8 +52,8 @@ namespace BusinessObject.Service
                     res.Message = "Ticket with this event ID has already existed";
                     return res;
                 }
-                var minimumValidSaleEndDate = eventTicket.StartDate.AddDays(-2);
-                var maximumValidSaleEndDate = eventTicket.StartDate.AddDays(-1);
+                var minimumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-10);
+                var maximumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-5);
 
                 if (ticketDTO.TicketSaleEndDate < minimumValidSaleEndDate || ticketDTO.TicketSaleEndDate > maximumValidSaleEndDate)
                 {
