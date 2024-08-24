@@ -5,9 +5,8 @@ using BusinessObject.Responses;
 using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using DataAccessObject.Enums;
+using BusinessObject.Models.TicketDTO;
 
 namespace BusinessObject.Service
 {
@@ -16,16 +15,17 @@ namespace BusinessObject.Service
         private readonly IUserRepo _userRepo;
         private readonly IEventRepo _eventRepo;
         private readonly IMapper _mapper;
-        private readonly Cloudinary _cloudinary;
         private readonly ITicketRepo _ticketRepo;
-        public EventService(IEventRepo repo, IMapper mapper, Cloudinary cloudinary,
-            IUserRepo userRepo, ITicketRepo ticketRepo)
+        private readonly ITicketService _ticketService;
+
+        public EventService(IEventRepo repo, IMapper mapper,
+            IUserRepo userRepo, ITicketRepo ticketRepo , ITicketService ticketService)
         {
             _eventRepo = repo;
             _mapper = mapper;
-            _cloudinary = cloudinary;
             _userRepo = userRepo;
             _ticketRepo = ticketRepo;
+            _ticketService = ticketService;
         }
 
         public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetAllEvents(int page, int pageSize,
@@ -149,15 +149,13 @@ namespace BusinessObject.Service
                         return result;
                     }
 
-                    // Upload image if ImageUrl is provided
-                    string imageUrl = null;
-
                     // Handle Image URL validation
+                    string imageUrl = null;
                     if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
                     {
                         if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
                         {
-                            imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl);
+                            imageUrl = eventDTO.ImageUrl; // The URL is valid
                         }
                         else
                         {
@@ -183,6 +181,22 @@ namespace BusinessObject.Service
                     // Save the event to the database
                     await _eventRepo.AddAsync(Event);
 
+                    var newTicket = new CreateTicketDTO
+                    {
+                        EventId = Event.Id,
+                        Price = eventDTO.Price,
+                        Quantity = eventDTO.Quantity,
+                        TicketSaleEndDate = eventDTO.TicketSaleEndDate
+                    };
+
+                    // Save the ticket to the database
+                    var ticketResult= await _ticketService.CreateTicket(newTicket);
+                    if(!ticketResult.Success)
+                    {
+                        result.Success=false;
+                        result.Message=ticketResult.Message;
+                        return result;
+                    }
                     // Map to DTO
                     var newEvent = new ViewEventDTO()
                     {
@@ -194,7 +208,13 @@ namespace BusinessObject.Service
                         OrganizerId = Event.OrganizerId,
                         VenueId = Event.VenueId,
                         Description = Event.Description,
-                        Status = Event.Status
+                        Status = Event.Status, 
+                        Ticket =new ViewTicketDTO {
+                            EventId=Event.Id,
+                            Price=newTicket.Price,
+                            Quantity=newTicket.Quantity,
+                            TicketSaleEndDate=newTicket.TicketSaleEndDate
+                        }
                     };
                     result.Data = newEvent;
 
@@ -215,26 +235,38 @@ namespace BusinessObject.Service
 
         private async Task<bool> IsValidImageUrlAsync(string imageUrl)
         {
-            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult)
+                || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)) return false;
+            string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            if (validExtensions.Contains(Path.GetExtension(uriResult.AbsolutePath).ToLower()))
             {
-                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
-                if (validExtensions.Contains(Path.GetExtension(uriResult.AbsolutePath).ToLower()))
+                try
                 {
-                    try
+                    using var httpClient = new HttpClient();
+                    // Set a timeout for the request
+                    httpClient.Timeout = TimeSpan.FromSeconds(10); // Adjust timeout as needed
+
+                    // Use HttpMethod.Get to get the content type reliably
+                    var response = await httpClient.GetAsync(imageUrl);
+
+                    // Ensure the response is successful
+                    if (response.IsSuccessStatusCode)
                     {
-                        using (var httpClient = new HttpClient())
+                        // Check for specific image content types
+                        var contentType = response.Content.Headers.ContentType?.MediaType;
+                        if (contentType == "image/jpeg" || contentType == "image/png" ||
+                            contentType == "image/gif" || contentType == "image/bmp" ||
+                            contentType == "image/webp")
                         {
-                            var response = await httpClient.SendAsync(
-                                new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Head, imageUrl));
-                            var contentType = response.Content.Headers.ContentType.MediaType;
-                            return contentType.StartsWith("image/");
+                            return true;
                         }
                     }
-                    catch
-                    {
-                        return false; // Handle exceptions as needed
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it appropriately
+                    Console.WriteLine($"Error validating image URL: {ex.Message}");
+                    return false;
                 }
             }
 
@@ -337,35 +369,6 @@ namespace BusinessObject.Service
             return response;
         }
 
-        public async Task<string> UploadImageFromUrl(string imageUrl)
-        {
-            if (string.IsNullOrEmpty(imageUrl))
-            {
-                throw new ArgumentException("Image URL cannot be null or empty.", nameof(imageUrl));
-            }
-
-            try
-            {
-                using var httpClient = new HttpClient();
-                var imageData = await httpClient.GetByteArrayAsync(imageUrl);
-
-                using var stream = new MemoryStream(imageData);
-
-                var uploadParams = new ImageUploadParams()
-                {
-                    File = new FileDescription("image", stream),
-                    Transformation = new Transformation().Crop("fill").Gravity("face")
-                };
-
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                return uploadResult.Url.ToString();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to upload image from URL.", ex);
-            }
-        }
-
 
         public async Task<ServiceResponse<string>> DeleteEvent(int id)
         {
@@ -399,10 +402,12 @@ namespace BusinessObject.Service
         public async Task<ServiceResponse<ViewEventDTO>> UpdateEvent(int id, UpdateEventDTO eventDTO)
         {
             var res = new ServiceResponse<ViewEventDTO>();
+
             try
             {
                 // Retrieve the event to update
                 var eventToUpdate = await _eventRepo.GetEventById(id);
+
                 if (eventToUpdate == null)
                 {
                     res.Success = false;
@@ -414,16 +419,23 @@ namespace BusinessObject.Service
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId != 0 ? eventDTO.VenueId : eventToUpdate.VenueId;
-                eventToUpdate.StartDate =
-                    eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
+                eventToUpdate.StartDate = eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
                 eventToUpdate.EndDate = eventDTO.EndDate != default ? eventDTO.EndDate : eventToUpdate.EndDate;
 
-                // If a new image URL is provided, upload it
+                // Handle Image URL update
                 if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
                 {
-                    // Validate the image URL and upload
-                    var imageUrl = await UploadImageFromUrl(eventDTO.ImageUrl);
-                    eventToUpdate.ImageUrl = imageUrl;
+                    // Validate the image URL
+                    if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
+                    {
+                        eventToUpdate.ImageUrl = eventDTO.ImageUrl;
+                    }
+                    else
+                    {
+                        res.Success = false;
+                        res.Message = "Invalid image URL.";
+                        return res;
+                    }
                 }
 
                 // Save the updated event to the database
@@ -439,8 +451,8 @@ namespace BusinessObject.Service
                     OrganizerName = eventToUpdate.Organizer.Name,
                     VenueId = eventToUpdate.VenueId,
                     VenueName = eventToUpdate.Venue.Name,
-                    StartDate = eventToUpdate.StartDate, // Convert DateOnly to DateTime if needed
-                    EndDate = eventToUpdate.EndDate, // Convert DateOnly to DateTime if needed
+                    StartDate = eventToUpdate.StartDate,
+                    EndDate = eventToUpdate.EndDate,
                     ImageURL = eventToUpdate.ImageUrl,
                     Status = eventToUpdate.Status
                 };
@@ -521,7 +533,8 @@ namespace BusinessObject.Service
             return result;
         }
 
-        public async Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(int organizerId, int page, int pageSize)
+        public async Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(int organizerId,
+            int page, int pageSize)
         {
             var res = new ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>();
             try
@@ -541,11 +554,12 @@ namespace BusinessObject.Service
                     return res;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 res.Success = false;
                 res.Message = e.Message;
             }
+
             return res;
         }
     }

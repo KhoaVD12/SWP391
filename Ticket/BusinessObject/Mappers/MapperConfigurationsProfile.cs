@@ -59,6 +59,7 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<Event, ViewEventDTO>()
             .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageUrl))
+            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Tickets.FirstOrDefault()))
             .ReverseMap();
         CreateMap<UpdateEventDTO, Event>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

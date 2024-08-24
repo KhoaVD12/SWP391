@@ -182,12 +182,6 @@ namespace BusinessObject.Service
                 }
                 var mapp = _mapper.Map<Venue>(newVenue);
                 mapp.Id = id;
-                if (await _venueRepo.CheckNameExist(mapp.Name))
-                {
-                    res.Success = false;
-                    res.Message = "Name existed";
-                    return res;
-                }
                 mapp.Status=exist.Status;
                 mapp.Id=exist.Id;
                 await _venueRepo.UpdateVenue(id, mapp);

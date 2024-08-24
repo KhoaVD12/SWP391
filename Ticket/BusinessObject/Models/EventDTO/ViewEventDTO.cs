@@ -1,4 +1,6 @@
-﻿namespace BusinessObject.Models.EventDTO
+﻿using BusinessObject.Models.TicketDTO;
+
+namespace BusinessObject.Models.EventDTO
 {
     public class ViewEventDTO
     {
@@ -13,5 +15,6 @@
         public DateTime EndDate { get; set; }
         public string? ImageURL { get; set; } 
         public string Status { get; set; }
+        public ViewTicketDTO Ticket { get; set; }
     }
 }
