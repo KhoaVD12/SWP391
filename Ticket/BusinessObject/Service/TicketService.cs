@@ -46,6 +46,12 @@ namespace BusinessObject.Service
                     return res;
                 }
                 var eventTicket = await _eventRepo.GetEventById(createResult.EventId);
+                if (existTicket.Any())
+                {
+                    res.Success = false;
+                    res.Message = "Ticket with this event ID has already existed";
+                    return res;
+                }
                 var minimumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-10);
                 var maximumValidSaleEndDate = eventTicket.StartDate.AddMinutes(-5);
 
