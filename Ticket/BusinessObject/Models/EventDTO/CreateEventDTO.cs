@@ -36,8 +36,6 @@ namespace BusinessObject.Models.EventDTO
         public decimal Price { get; set; }
         [SwaggerSchema(Description = "Ticket Quantity for this Event")]
         public int Quantity { get; set; }
-        [SwaggerSchema(Description = "Date of ending selling Ticket of this Event")]
-        public DateTime TicketSaleEndDate { get; set; }
     }
 
 }
