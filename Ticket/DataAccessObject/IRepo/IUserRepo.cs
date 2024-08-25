@@ -16,5 +16,6 @@ namespace DataAccessObject.IRepo
         Task<IEnumerable<User?>> GetAllUsersStaff();
         Task<IEnumerable<User?>> GetAllUsersOrganizer();
         Task UpdateUser(User user);
+        Task<User> GetUserByStatus(string role);
     }
 }
