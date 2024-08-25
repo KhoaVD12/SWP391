@@ -186,7 +186,7 @@ namespace BusinessObject.Service
                         EventId = Event.Id,
                         Price = eventDTO.Price,
                         Quantity = eventDTO.Quantity,
-                        TicketSaleEndDate = eventDTO.TicketSaleEndDate
+                        TicketSaleEndDate = eventDTO.StartDate.AddMinutes(-5)
                     };
 
                     // Save the ticket to the database
