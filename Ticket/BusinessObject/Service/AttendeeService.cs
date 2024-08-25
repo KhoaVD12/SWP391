@@ -47,7 +47,7 @@ public class AttendeeService : IAttendeeService
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
             attendee.RegistrationDate = DateTime.UtcNow;
             attendee.PaymentStatus = PaymentStatus.PENDING; // Set default status
-            attendee.CheckInCode = null; // Ensure CheckInCode is null initially
+            attendee.CheckInCode = null; 
 
             // Save to the database
             await _attendeeRepo.AddAsync(attendee);

@@ -10,8 +10,9 @@ namespace DataAccessObject.IRepo
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
         Task<Event?> CheckExistByTitle(string inputString);
-        Task<IEnumerable<Event>> GetEventsByStatus(string status);
         Task<List<Event>> GetEventsByStaffIdAsync(int staffId);
         Task<IEnumerable<Event>> GetEventByOrganizer(int organizerId);
+        Task<IEnumerable<Event>> GetEventsByStatusAsync(string status);
+        Task<bool> IsStaffAssignedToAnotherEventAsync(int staffId);
     }
 }

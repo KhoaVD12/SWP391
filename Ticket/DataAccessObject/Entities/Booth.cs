@@ -22,4 +22,6 @@ public partial class Booth
     public virtual ICollection<BoothRequest> BoothRequests { get; set; } = new List<BoothRequest>();
 
     public virtual ICollection<Gift> Gifts { get; set; } = new List<Gift>();
+
+    public virtual Event Event { get; set; } = null!;
 }

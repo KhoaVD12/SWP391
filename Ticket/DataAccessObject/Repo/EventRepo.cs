@@ -15,18 +15,24 @@ namespace DataAccessObject.Repo
 
         public async Task<IEnumerable<Event>> GetEvent()
         {
-            return await _context.Events.Include(e => e.Organizer)
+            return await _context.Events
                 .Include(e => e.Organizer)
                 .Include(e => e.Staff)
-                .Include(e => e.Tickets)
-                .Include(e => e.Venue).AsNoTracking().ToListAsync();
+                .Include(e => e.Ticket)
+                .Include(e => e.Venue)
+                .Include(e => e.Booths)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Event?> GetEventById(int id)
         {
             return await _context.Events
                 .Include(e => e.Organizer)
+                .Include(e => e.Staff)
+                .Include(e => e.Ticket)
                 .Include(e => e.Venue)
+                .Include(e => e.Booths)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -68,12 +74,13 @@ namespace DataAccessObject.Repo
 
         public async Task<Event?> CheckExistByTitle(string inputString)
         {
-            return await _context.Events.FirstOrDefaultAsync(e => e.Title.ToLower().Trim() == inputString.ToLower().Trim());
+            return await _context.Events.FirstOrDefaultAsync(e =>
+                e.Title.ToLower().Trim() == inputString.ToLower().Trim());
         }
 
         public async Task<IEnumerable<Event>> GetEventsByStatus(string status)
         {
-            return await _context.Events.Where(e=>e.Status==status)
+            return await _context.Events.Where(e => e.Status == status)
                 .ToListAsync();
         }
 
@@ -84,15 +91,33 @@ namespace DataAccessObject.Repo
                 .Include(e => e.Venue)
                 .ToListAsync();
         }
-        public async Task<IEnumerable<Event>>GetEventByOrganizer(int organizerId)
+
+        public async Task<IEnumerable<Event>> GetEventByOrganizer(int organizerId)
         {
             return await _context.Events
-                .Include(e=>e.Organizer)
-                .Include(e=>e.Staff)
-                .Include(e=>e.Tickets)
-                .Include(e=>e.Venue)
-                .Where(e => e.OrganizerId ==organizerId).ToListAsync();
+                .Include(e => e.Organizer)
+                .Include(e => e.Staff)
+                .Include(e => e.Ticket)
+                .Include(e => e.Venue)
+                .Where(e => e.OrganizerId == organizerId).ToListAsync();
         }
+
+        public async Task<IEnumerable<Event>> GetEventsByStatusAsync(string status)
+        {
+            return await _context.Events
+                .Include(e => e.Venue)
+                .Include(e => e.Ticket)
+                .Include(e => e.Booths)
+                .Where(e => e.Status == status)
+                .ToListAsync();
+        }
+
+        public async Task<bool> IsStaffAssignedToAnotherEventAsync(int staffId)
+        {
+            return await _context.Events
+                .AnyAsync(e => e.StaffId == staffId);
+        }
+
         public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
         {
             return await _context.Attendees

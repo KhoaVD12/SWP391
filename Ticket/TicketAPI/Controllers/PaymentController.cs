@@ -119,27 +119,6 @@ public class PaymentController : ControllerBase
         }
     }
 
-    /*/// <summary>
-    /// Captures an existing order using the order ID and transaction ID.
-    /// </summary>
-    /// <param name="request">The request containing the order ID and transaction ID.</param>
-    /// <returns>Returns the order capture response.</returns>
-    [HttpPost("capture-order")]
-    public async Task<IActionResult> CaptureOrder([FromBody] CaptureOrderRequestDto request)
-    {
-        try
-        {
-            var response = await _paymentService.CaptureOrderAsync(request.OrderId, request.TransactionId);
-
-            return Ok(response);
-        }
-        catch (Exception e)
-        {
-            var error = new { e.GetBaseException().Message };
-            return BadRequest(error);
-        }
-    }*/
-
     /// <summary>
     /// Creates a payment request using VNPay for a specified attendee and amount.
     /// This action generates a payment URL that can use to redirect the user to VNPay's payment page.

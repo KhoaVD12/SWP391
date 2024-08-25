@@ -4,6 +4,7 @@ using DataAccessObject.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccessObject.Migrations
 {
     [DbContext(typeof(TicketContext))]
-    partial class TicketContextModelSnapshot : ModelSnapshot
+    [Migration("20240825155837_AddPresenterAndHostToEvent")]
+    partial class AddPresenterAndHostToEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -322,8 +325,7 @@ namespace DataAccessObject.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId")
-                        .IsUnique();
+                    b.HasIndex("EventId");
 
                     b.ToTable("Ticket", (string)null);
                 });
@@ -552,8 +554,8 @@ namespace DataAccessObject.Migrations
             modelBuilder.Entity("DataAccessObject.Entities.Ticket", b =>
                 {
                     b.HasOne("DataAccessObject.Entities.Event", "Event")
-                        .WithOne("Ticket")
-                        .HasForeignKey("DataAccessObject.Entities.Ticket", "EventId")
+                        .WithMany("Tickets")
+                        .HasForeignKey("EventId")
                         .IsRequired()
                         .HasConstraintName("FK_Ticket_Event");
 
@@ -601,8 +603,7 @@ namespace DataAccessObject.Migrations
 
                     b.Navigation("Booths");
 
-                    b.Navigation("Ticket")
-                        .IsRequired();
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("DataAccessObject.Entities.Gift", b =>

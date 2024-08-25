@@ -196,6 +196,12 @@ namespace TicketAPI.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Retrieves events by their status.
+        /// </summary>
+        /// <param name="status">The status of the events to retrieve. Allowed values are 'Pending' and 'Active'.</param>
+        /// <response code="200">Returns the list of events with the specified status.</response>
+        /// <response code="400">If the status is invalid or an error occurs.</response>
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetEventsByStatus(string status, [FromQuery] int page = 1,
             [FromQuery] int pageSize = 5)
@@ -208,6 +214,7 @@ namespace TicketAPI.Controllers
 
             return Ok(result);
         }
+
         [HttpGet("organizer/{organizerId}")]
         public async Task<IActionResult> GetEventsByOrganizer(int organizerId, [FromQuery] int page = 1,
             [FromQuery] int pageSize = 5)

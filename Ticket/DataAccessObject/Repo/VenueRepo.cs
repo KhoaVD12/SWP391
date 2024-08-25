@@ -46,7 +46,6 @@ namespace DataAccessObject.Repo
             {
                 exist.Description = newVenue.Description;
                 exist.Name = newVenue.Name;
-                exist.Status = newVenue.Status;
                 _context.Venues.Update(exist);
                 await _context.SaveChangesAsync();
             }
