@@ -19,7 +19,7 @@ namespace BusinessObject.Service
         private readonly ITicketService _ticketService;
 
         public EventService(IEventRepo repo, IMapper mapper,
-            IUserRepo userRepo, ITicketRepo ticketRepo , ITicketService ticketService)
+            IUserRepo userRepo, ITicketRepo ticketRepo, ITicketService ticketService)
         {
             _eventRepo = repo;
             _mapper = mapper;
@@ -40,28 +40,58 @@ namespace BusinessObject.Service
                 }
 
                 var events = await _eventRepo.GetEvent();
+
                 if (!string.IsNullOrEmpty(search))
                 {
-                    events = events.Where(e => (e.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                    events = events.Where(e => e.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
                 }
 
                 events = sort.ToLower().Trim() switch
                 {
-                    "startdate" => events.OrderBy(e => e?.StartDate),
-                    "enddate" => events.OrderBy(e => e?.EndDate),
+                    "startdate" => events.OrderBy(e => e.StartDate),
+                    "enddate" => events.OrderBy(e => e.EndDate),
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
-                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
 
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                var eventDTOs = events.Select(e => new ViewEventDTO
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    OrganizerId = e.OrganizerId,
+                    OrganizerName = e.Organizer.Name,
+                    VenueId = e.VenueId,
+                    VenueName = e.Venue.Name,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    ImageURL = e.ImageUrl,
+                    Status = e.Status,
+                    StaffId = e.StaffId,
+                    StaffName = e.Staff?.Name,
+                    Presenter = e.Presenter,
+                    Host = e.Host,
+                    Ticket = new ViewTicketDTO
+                    {
+                        Id = e.Ticket.Id,
+                        EventId = e.Ticket.EventId,
+                        Price = e.Ticket.Price,
+                        Quantity = e.Ticket.Quantity,
+                        TicketSaleEndDate = e.Ticket.TicketSaleEndDate
+                    },
+                    BoothNames = e.Booths.Select(b => b.Name).ToList()
+                }).ToList();
 
-                res.Data = paging;
+                var paginationModel =
+                    await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
+
+                res.Data = paginationModel;
                 res.Success = true;
+                res.Message = "Events retrieved successfully!";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 res.Success = false;
-                res.Message = $"Fail to get Event: {e.Message}";
+                res.Message = ex.InnerException?.Message ?? ex.Message;
             }
 
             return res;
@@ -87,13 +117,24 @@ namespace BusinessObject.Service
                     Title = eventEntity.Title,
                     Description = eventEntity.Description,
                     OrganizerId = eventEntity.OrganizerId,
-                    OrganizerName = eventEntity.Organizer.Name, // Access the organizer's name
+                    OrganizerName = eventEntity.Organizer.Name, 
                     VenueId = eventEntity.VenueId,
-                    VenueName = eventEntity.Venue.Name, // Access the venue's name
-                    StartDate = eventEntity.StartDate, // Convert DateOnly to DateTime
-                    EndDate = eventEntity.EndDate, // Convert DateOnly to DateTime
+                    VenueName = eventEntity.Venue.Name, 
+                    StartDate = eventEntity.StartDate, 
+                    EndDate = eventEntity.EndDate, 
                     ImageURL = eventEntity.ImageUrl,
-                    Status = eventEntity.Status
+                    Presenter = eventEntity.Presenter,
+                    Host = eventEntity.Host,
+                    Status = eventEntity.Status,
+                    Ticket = new ViewTicketDTO
+                    {
+                        Id = eventEntity.Ticket.Id,
+                        EventId = eventEntity.Ticket.EventId,
+                        Price = eventEntity.Ticket.Price,
+                        Quantity = eventEntity.Ticket.Quantity,
+                        TicketSaleEndDate = eventEntity.Ticket.TicketSaleEndDate
+                    },
+                    BoothNames = eventEntity.Booths.Select(b => b.Name).ToList()
                 };
 
                 res.Data = eventDetails;
@@ -127,11 +168,21 @@ namespace BusinessObject.Service
                 return result;
             }
 
+            if (eventDTO.StaffId.HasValue)
+            {
+                bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
+                if (isStaffAssigned)
+                {
+                    result.Success = false;
+                    result.Message = "The staff member is already assigned to another event.";
+                    return result;
+                }
+            }
+
             try
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
-                    // Check if the event title already exists
                     var eventExist = await _eventRepo.CheckExistByTitle(eventDTO.Title);
                     if (eventExist != null)
                     {
@@ -140,7 +191,6 @@ namespace BusinessObject.Service
                         return result;
                     }
 
-                    // Check if the organizer exists
                     var organizerExist = await _userRepo.GetByIdAsync(eventDTO.OrganizerId);
                     if (organizerExist == null)
                     {
@@ -149,23 +199,18 @@ namespace BusinessObject.Service
                         return result;
                     }
 
-                    // Handle Image URL validation
                     string imageUrl = null;
-                    if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                    if (!string.IsNullOrEmpty(eventDTO.ImageUrl) && await IsValidImageUrlAsync(eventDTO.ImageUrl))
                     {
-                        if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
-                        {
-                            imageUrl = eventDTO.ImageUrl; // The URL is valid
-                        }
-                        else
-                        {
-                            result.Success = false;
-                            result.Message = "Invalid image URL.";
-                            return result;
-                        }
+                        imageUrl = eventDTO.ImageUrl;
+                    }
+                    else if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                    {
+                        result.Success = false;
+                        result.Message = "Invalid image URL.";
+                        return result;
                     }
 
-                    // Create the event entity
                     var Event = new Event
                     {
                         Title = eventDTO.Title,
@@ -173,12 +218,14 @@ namespace BusinessObject.Service
                         StartDate = eventDTO.StartDate,
                         EndDate = eventDTO.EndDate,
                         OrganizerId = eventDTO.OrganizerId,
+                        StaffId = eventDTO.StaffId,
                         VenueId = eventDTO.VenueId,
                         Description = eventDTO.Description,
-                        Status = EventStatus.PENDING
+                        Status = EventStatus.PENDING,
+                        Presenter = eventDTO.Presenter,
+                        Host = eventDTO.Host
                     };
 
-                    // Save the event to the database
                     await _eventRepo.AddAsync(Event);
 
                     var newTicket = new CreateTicketDTO
@@ -189,16 +236,15 @@ namespace BusinessObject.Service
                         TicketSaleEndDate = eventDTO.StartDate.AddMinutes(-5)
                     };
 
-                    // Save the ticket to the database
-                    var ticketResult= await _ticketService.CreateTicket(newTicket);
-                    if(!ticketResult.Success)
+                    var ticketResult = await _ticketService.CreateTicket(newTicket);
+                    if (!ticketResult.Success)
                     {
-                        result.Success=false;
-                        result.Message=ticketResult.Message;
+                        result.Success = false;
+                        result.Message = ticketResult.Message;
                         return result;
                     }
-                    // Map to DTO
-                    var newEvent = new ViewEventDTO()
+
+                    var newEvent = new ViewEventDTO
                     {
                         Id = Event.Id,
                         Title = Event.Title,
@@ -206,14 +252,21 @@ namespace BusinessObject.Service
                         StartDate = Event.StartDate,
                         EndDate = Event.EndDate,
                         OrganizerId = Event.OrganizerId,
+                        OrganizerName = Event.Organizer.Name,
+                        StaffId = Event.StaffId,
+                        StaffName = Event.Staff?.Name,
                         VenueId = Event.VenueId,
+                        VenueName = Event.Venue.Name,
                         Description = Event.Description,
-                        Status = Event.Status, 
-                        Ticket =new ViewTicketDTO {
-                            EventId=Event.Id,
-                            Price=newTicket.Price,
-                            Quantity=newTicket.Quantity,
-                            TicketSaleEndDate=newTicket.TicketSaleEndDate
+                        Status = Event.Status,
+                        Presenter = Event.Presenter,
+                        Host = Event.Host,
+                        Ticket = new ViewTicketDTO
+                        {
+                            EventId = Event.Id,
+                            Price = newTicket.Price,
+                            Quantity = newTicket.Quantity,
+                            TicketSaleEndDate = newTicket.TicketSaleEndDate
                         }
                     };
                     result.Data = newEvent;
@@ -405,7 +458,6 @@ namespace BusinessObject.Service
 
             try
             {
-                // Retrieve the event to update
                 var eventToUpdate = await _eventRepo.GetEventById(id);
 
                 if (eventToUpdate == null)
@@ -415,34 +467,47 @@ namespace BusinessObject.Service
                     return res;
                 }
 
-                // Update the fields that can be changed
-                eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
-                eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
-                eventToUpdate.VenueId = eventDTO.VenueId != 0 ? eventDTO.VenueId : eventToUpdate.VenueId;
-                eventToUpdate.StartDate = eventDTO.StartDate != default ? eventDTO.StartDate : eventToUpdate.StartDate;
-                eventToUpdate.EndDate = eventDTO.EndDate != default ? eventDTO.EndDate : eventToUpdate.EndDate;
-
-                // Handle Image URL update
-                if (!string.IsNullOrEmpty(eventDTO.ImageUrl))
+                if (eventDTO.StaffId.HasValue && eventDTO.StaffId.Value != eventToUpdate.StaffId)
                 {
-                    // Validate the image URL
-                    if (await IsValidImageUrlAsync(eventDTO.ImageUrl))
-                    {
-                        eventToUpdate.ImageUrl = eventDTO.ImageUrl;
-                    }
-                    else
+                    bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
+                    if (isStaffAssigned)
                     {
                         res.Success = false;
-                        res.Message = "Invalid image URL.";
+                        res.Message = "The staff member is already assigned to another event.";
                         return res;
                     }
                 }
 
-                // Save the updated event to the database
+                eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
+                eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
+                eventToUpdate.VenueId = eventDTO.VenueId != null ? eventDTO.VenueId.Value : eventToUpdate.VenueId;
+                eventToUpdate.StartDate =
+                    eventDTO.StartDate != null ? eventDTO.StartDate.Value : eventToUpdate.StartDate;
+                eventToUpdate.EndDate = eventDTO.EndDate != null ? eventDTO.EndDate.Value : eventToUpdate.EndDate;
+                eventToUpdate.StaffId = eventDTO.StaffId ?? eventToUpdate.StaffId;
+                eventToUpdate.ImageUrl = eventDTO.ImageUrl ?? eventToUpdate.ImageUrl;
+                eventToUpdate.Presenter = eventDTO.Presenter ?? eventToUpdate.Presenter;
+                eventToUpdate.Host = eventDTO.Host ?? eventToUpdate.Host;
+
+                // Validation: Ensure EndDate is not before StartDate
+                if (eventToUpdate.EndDate < eventToUpdate.StartDate)
+                {
+                    res.Success = false;
+                    res.Message = "EndDate cannot be before StartDate.";
+                    return res;
+                }
+
+                // Validate the new image URL if it was provided
+                if (!string.IsNullOrEmpty(eventDTO.ImageUrl) && !await IsValidImageUrlAsync(eventDTO.ImageUrl))
+                {
+                    res.Success = false;
+                    res.Message = "Invalid image URL.";
+                    return res;
+                }
+
                 await _eventRepo.UpdateAsync(eventToUpdate);
 
-                // Prepare the response DTO
-                res.Data = new ViewEventDTO()
+                var updatedEvent = new ViewEventDTO
                 {
                     Id = eventToUpdate.Id,
                     Title = eventToUpdate.Title,
@@ -454,18 +519,28 @@ namespace BusinessObject.Service
                     StartDate = eventToUpdate.StartDate,
                     EndDate = eventToUpdate.EndDate,
                     ImageURL = eventToUpdate.ImageUrl,
-                    Status = eventToUpdate.Status
+                    Status = eventToUpdate.Status,
+                    StaffId = eventToUpdate.StaffId,
+                    StaffName = eventToUpdate.Staff?.Name,
+                    Presenter = eventToUpdate.Presenter,
+                    Host = eventToUpdate.Host,
+                    Ticket = new ViewTicketDTO
+                    {
+                        EventId = eventToUpdate.Id,
+                        Price = eventToUpdate.Ticket.Price,
+                        Quantity = eventToUpdate.Ticket.Quantity,
+                        TicketSaleEndDate = eventToUpdate.Ticket.TicketSaleEndDate
+                    }
                 };
 
+                res.Data = updatedEvent;
                 res.Success = true;
-                res.Message = "Event updated successfully";
+                res.Message = "Event updated successfully!";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 res.Success = false;
-                res.Message = e.InnerException != null
-                    ? e.InnerException.Message + "\n" + e.StackTrace
-                    : e.Message + "\n" + e.StackTrace;
+                res.Message = ex.InnerException?.Message ?? ex.Message;
             }
 
             return res;
@@ -517,7 +592,7 @@ namespace BusinessObject.Service
 
             try
             {
-                var events = await _eventRepo.GetEventsByStatus(status);
+                var events = await _eventRepo.GetEventsByStatusAsync(status);
                 var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
                 var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
                 result.Data = paging;

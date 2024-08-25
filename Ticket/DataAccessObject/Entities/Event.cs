@@ -11,6 +11,10 @@ public partial class Event
     public string Title { get; set; } = null!;
     public string? ImageUrl { get; set; }
 
+    public string? Presenter { get; set; }
+
+    public string? Host { get; set; }
+
     public DateTime StartDate { get; set; }
 
     public int OrganizerId { get; set; }
@@ -28,10 +32,10 @@ public partial class Event
     public virtual ICollection<Attendee> Attendees { get; set; } = new List<Attendee>();
 
     public virtual User Organizer { get; set; } = null!;
-    [ForeignKey("StaffId")]
-    public virtual User Staff { get; set; } = null!;
+    [ForeignKey("StaffId")] public virtual User Staff { get; set; } = null!;
 
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+    public virtual Ticket Ticket { get; set; } = null!;
 
     public virtual Venue Venue { get; set; } = null!;
+    public virtual ICollection<Booth> Booths { get; set; } = new List<Booth>();
 }
