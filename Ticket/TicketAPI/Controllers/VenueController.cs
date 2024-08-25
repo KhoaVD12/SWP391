@@ -75,15 +75,5 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpPut("ChangeVenueStatus/{id}")]
-        public async Task<IActionResult> ChangeVenueStatus(int id, VenueStatusDTO venueDTO)
-        {
-            var result = await _venueService.ChangeVenueStatus(id, venueDTO);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
     }
 }

@@ -47,7 +47,6 @@ namespace BusinessObject.Service
                     res.Message = "Name existed";
                     return res;
                 }
-                mapp.Status=VenueStatus.Opened.ToString();
                 await _venueRepo.CreateVenue(mapp);
 
                 var result = _mapper.Map<ViewVenueDTO>(mapp);
@@ -104,8 +103,7 @@ namespace BusinessObject.Service
                 var venues = await _venueRepo.GetAllVenues();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)||
-                    x.Status.Contains(search, StringComparison.OrdinalIgnoreCase)));
+                    venues = venues.Where(x => x != null && (x.Name.Contains(search,StringComparison.OrdinalIgnoreCase)));
 
                 }
                 venues = sort.ToLower() switch
@@ -182,7 +180,6 @@ namespace BusinessObject.Service
                 }
                 var mapp = _mapper.Map<Venue>(newVenue);
                 mapp.Id = id;
-                mapp.Status=exist.Status;
                 mapp.Id=exist.Id;
                 await _venueRepo.UpdateVenue(id, mapp);
                 var result = _mapper.Map<ViewVenueDTO>(mapp);
@@ -194,47 +191,6 @@ namespace BusinessObject.Service
             {
                 res.Success=false;
                 res.Message = $"Fail to update Venue:{e.Message}";
-            }
-            return res;
-        }
-
-        public async Task<ServiceResponse<bool>> ChangeVenueStatus(int id, VenueStatusDTO venueStatus)
-        {
-            var res = new ServiceResponse<bool>();
-            try
-            {
-                var exist = await _venueRepo.GetVenueById(id);
-                if (exist == null)
-                {
-                    res.Success = false;
-                    res.Message = "Id not found";
-                    return res;
-                }
-                if (venueStatus.Status.Equals(VenueStatus.Opened.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    exist.Status = VenueStatus.Opened.ToString();
-                }
-                else if (venueStatus.Status.Equals(VenueStatus.Closed.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    exist.Status = VenueStatus.Closed.ToString();
-                }
-                else
-                {
-                    res.Success = false;
-                    res.Message = "Invalid Status";
-                    return res;
-                }
-                exist.Status=venueStatus.Status;
-                await _venueRepo.UpdateVenue(id, exist);
-                
-                res.Success = true;
-                res.Message = "Venue Status updated successfully";
-                res.Data = true;
-            }
-            catch (Exception e)
-            {
-                res.Success = false;
-                res.Message = $"Fail to update Venue Status:{e.Message}";
             }
             return res;
         }

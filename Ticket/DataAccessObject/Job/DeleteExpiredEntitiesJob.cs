@@ -4,7 +4,7 @@ using Quartz;
 
 namespace DataAccessObject.Job;
 
-public class DeleteExpiredEntitiesJob: IJob
+public class DeleteExpiredEntitiesJob : IJob
 {
     private readonly TicketContext _context;
 
@@ -39,7 +39,7 @@ public class DeleteExpiredEntitiesJob: IJob
         var currentDateTime = DateTime.UtcNow;
 
         var expiredEvents = await _context.Events
-            .Where(e => e.EndDate < currentDateTime)
+            .Where(e => e.StartDate < currentDateTime)
             .ToListAsync();
 
         if (expiredEvents.Any())

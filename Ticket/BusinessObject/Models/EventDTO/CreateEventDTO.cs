@@ -21,6 +21,9 @@ namespace BusinessObject.Models.EventDTO
         [SwaggerSchema(Description = "ID of the event organizer")]
         public int OrganizerId { get; set; }
 
+        [SwaggerSchema(Description = "ID of the staff assigned to the event")]
+        public int? StaffId { get; set; }
+
         [MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
         [SwaggerSchema(Description = "Description of the event")]
         public string? Description { get; set; }
@@ -36,6 +39,12 @@ namespace BusinessObject.Models.EventDTO
         public decimal Price { get; set; }
         [SwaggerSchema(Description = "Ticket Quantity for this Event")]
         public int Quantity { get; set; }
+
+        [SwaggerSchema(Description = "Name of the presenter for the event")]
+        public string? Presenter { get; set; }
+
+        [SwaggerSchema(Description = "Name of the host for the event")]
+        public string? Host { get; set; }
     }
 
 }

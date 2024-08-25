@@ -59,7 +59,10 @@ public class MapperConfigurationsProfile : Profile
 
         CreateMap<Event, ViewEventDTO>()
             .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.ImageUrl))
-            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Tickets.FirstOrDefault()))
+            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
+            .ForMember(dest => dest.Presenter, opt => opt.MapFrom(src => src.Presenter))
+            .ForMember(dest => dest.Host, opt => opt.MapFrom(src => src.Host))
+            .ForMember(dest => dest.BoothNames, opt => opt.MapFrom(src => src.Booths.Select(b => b.Name).ToList()))
             .ReverseMap();
         CreateMap<UpdateEventDTO, Event>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -68,7 +71,7 @@ public class MapperConfigurationsProfile : Profile
             .ReverseMap(); // Image will be handled separately.ReverseMap();
         CreateMap<Event, ViewOrganizerEventDTO>()
             .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl))
-            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Tickets.FirstOrDefault()))
+            .ForMember(dest => dest.Ticket, opt => opt.MapFrom(src => src.Ticket))
             .ReverseMap();
         CreateMap<Ticket, EventTicket>()
             .ReverseMap();
