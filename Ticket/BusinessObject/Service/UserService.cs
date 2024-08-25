@@ -67,6 +67,12 @@ public class UserService : IUserService
         {
             // Check if email already exists
             var userAccount = await _userRepo.CheckEmailAddressExisted(userObject.Email);
+            if (userAccount)
+            {
+                response.Success = false;
+                response.Message = "Email is already existed";
+                return response;
+            }
 
             var allowedRoles = new[] { Roles.ORGANIZER, Roles.STAFF, Roles.SPONSOR };
             if (!allowedRoles.Contains(userObject.Role))

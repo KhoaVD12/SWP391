@@ -99,4 +99,9 @@ public class UserRepo: RepoBase<User>, IUserRepo
         _context.Users.Update(existingUser);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<User> GetUserByStatus(string role)
+    {
+        return await _context.Users.FindAsync(role);
+    }
 }
