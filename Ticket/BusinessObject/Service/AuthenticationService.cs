@@ -6,6 +6,7 @@ using BusinessObject.Models;
 using BusinessObject.Models.UserDTO;
 using BusinessObject.Responses;
 using BusinessObject.Ultils;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 
 namespace BusinessObject.Service;
@@ -36,6 +37,12 @@ public class AuthenticationService : IAuthenticationService
             {
                 response.Success = false;
                 response.Message = "Invalid email or password.";
+                return response;
+            }
+            if (user.Status == Status.INACTIVE)
+            {
+                response.Success = false;
+                response.Message = "Account is not active.";
                 return response;
             }
 
