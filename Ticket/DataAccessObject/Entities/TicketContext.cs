@@ -85,6 +85,12 @@ public partial class TicketContext : DbContext
             entity.Property(e => e.Location).IsUnicode(false);
             entity.Property(e => e.Name).IsUnicode(false);
             entity.Property(e => e.Status).IsUnicode(false);
+
+            entity.HasOne(b => b.Event)
+                .WithMany(e => e.Booths)
+                .HasForeignKey(b => b.EventId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Booth_Event");
         });
 
         modelBuilder.Entity<BoothRequest>(entity =>
@@ -189,9 +195,10 @@ public partial class TicketContext : DbContext
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.TicketSaleEndDate).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Event).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.Event)
+                .WithOne(p => p.Ticket)  
+                .HasForeignKey<Ticket>(d => d.EventId)  
+                .OnDelete(DeleteBehavior.ClientSetNull) 
                 .HasConstraintName("FK_Ticket_Event");
         });
 
@@ -233,7 +240,6 @@ public partial class TicketContext : DbContext
 
             entity.Property(e => e.Description).HasColumnType("text");
             entity.Property(e => e.Name).IsUnicode(false);
-            entity.Property(e => e.Status).IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);
