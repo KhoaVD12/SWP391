@@ -206,7 +206,9 @@ namespace BusinessObject.Service
                         StartDate = Event.StartDate,
                         EndDate = Event.EndDate,
                         OrganizerId = Event.OrganizerId,
+                        OrganizerName=Event.Organizer.Name,
                         VenueId = Event.VenueId,
+                        VenueName=Event.Venue.Name,
                         Description = Event.Description,
                         Status = Event.Status, 
                         Ticket =new ViewTicketDTO {
