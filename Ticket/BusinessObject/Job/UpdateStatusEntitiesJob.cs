@@ -3,7 +3,7 @@ using DataAccessObject.Enums;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 
-namespace DataAccessObject.Job;
+namespace BusinessObject.Job;
 
 public class UpdateStatusEntitiesJob : IJob
 {
@@ -33,7 +33,7 @@ public class UpdateStatusEntitiesJob : IJob
             .Where(e => e.EndDate <= currentDateTime && e.Status != EventStatus.ENDED)
             .ToListAsync();
 
-        if (activeEvents.Any())
+        if (activeEvents.Count != 0)
         {
             foreach (var eventItem in activeEvents)
             {
@@ -41,7 +41,7 @@ public class UpdateStatusEntitiesJob : IJob
             }
         }
 
-        if (endedEvents.Any())
+        if (endedEvents.Count != 0)
         {
             foreach (var eventItem in endedEvents)
             {

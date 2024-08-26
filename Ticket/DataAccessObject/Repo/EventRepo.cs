@@ -105,8 +105,10 @@ namespace DataAccessObject.Repo
         public async Task<IEnumerable<Event>> GetEventsByStatusAsync(string status)
         {
             return await _context.Events
-                .Include(e => e.Venue)
+                .Include(e => e.Organizer)
+                .Include(e => e.Staff)
                 .Include(e => e.Ticket)
+                .Include(e => e.Venue)
                 .Include(e => e.Booths)
                 .Where(e => e.Status == status)
                 .ToListAsync();
