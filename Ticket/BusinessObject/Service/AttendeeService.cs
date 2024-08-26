@@ -264,4 +264,13 @@ public class AttendeeService : IAttendeeService
         response.Message = "Attendee checked in successfully.";
         return response;
     }
+
+    private async Task DeleteAttendeeIfPaymentFailed(int attendeeId)
+    {
+        var attendee = await _attendeeRepo.GetAttendeeByIdAsync(attendeeId);
+        if (attendee != null && attendee.PaymentStatus != PaymentStatus.SUCCESSFUL)
+        {
+            await _attendeeRepo.RemoveAsync(attendee);
+        }
+    }
 }

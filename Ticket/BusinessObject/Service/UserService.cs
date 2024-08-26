@@ -97,15 +97,18 @@ public class UserService : IUserService
             // Map the DTO to the User entity
             var userAccountRegister = _mapper.Map<User>(userObject);
             userAccountRegister.Password = HashPass.HashWithSHA256(userObject.Password);
-            userAccountRegister.Status = Status.ACTIVE; // Default status
+            userAccountRegister.Status = Status.ACTIVE;
+
 
             // Save the user
             await _userRepo.AddAsync(userAccountRegister);
 
             // Prepare the response
             var accountRegisteredDto = _mapper.Map<CreateUserDto>(userAccountRegister);
+            var userId = userAccountRegister.Id;
             response.Success = true;
             response.Data = accountRegisteredDto;
+            response.Id = userId;
             response.Message = "User created successfully.";
         }
         catch (DbException e)

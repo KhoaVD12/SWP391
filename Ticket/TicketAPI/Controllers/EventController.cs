@@ -199,7 +199,7 @@ namespace TicketAPI.Controllers
         /// <summary>
         /// Retrieves events by their status.
         /// </summary>
-        /// <param name="status">The status of the events to retrieve. Allowed values are 'Pending' and 'Active'.</param>
+        /// <param name="status">The status of the events to retrieve. Allowed values are 'Pending', 'Active', 'OnGoing' and 'Ended'.</param>
         /// <response code="200">Returns the list of events with the specified status.</response>
         /// <response code="400">If the status is invalid or an error occurs.</response>
         [HttpGet("status/{status}")]
