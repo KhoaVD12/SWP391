@@ -22,6 +22,15 @@ public class TransactionRepo : RepoBase<Transaction>, ITransactionRepo
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Transaction>> GetTransactions()
+    {
+        return await _context.Transactions
+            .Include(t => t.PaymentMethodNavigation)
+            .Include(t => t.Attendee)
+            .ThenInclude(a => a.AttendeeDetails)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
     {
         return await _context.Transactions
