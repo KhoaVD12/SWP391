@@ -183,11 +183,11 @@ namespace BusinessObject.Service
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
-                    var eventExist = await _eventRepo.CheckExistByTitle(eventDTO.Title);
-                    if (eventExist != null)
+                    var eventExist = await _eventRepo.CheckExistByStartDateAndVenue(eventDTO.StartDate.ToString(), eventDTO.VenueId);
+                    if (eventExist)
                     {
                         result.Success = false;
-                        result.Message = "Event with the same name already exists!";
+                        result.Message = "You have the Event with the same start date and venue";
                         return result;
                     }
 
@@ -466,7 +466,12 @@ namespace BusinessObject.Service
                     res.Message = "Event not found!";
                     return res;
                 }
-
+                if (eventToUpdate.StartDate <= DateTime.UtcNow)
+                {
+                    res.Success = false;
+                    res.Message = "You can not update Event when StartDate has come";
+                    return res;
+                }
                 if (eventDTO.StaffId.HasValue && eventDTO.StaffId.Value != eventToUpdate.StaffId)
                 {
                     bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
