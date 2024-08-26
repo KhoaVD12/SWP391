@@ -9,7 +9,7 @@ namespace DataAccessObject.IRepo
         public Task<Event?> GetEventById(int id);
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
-        Task<bool> CheckExistByStartDateAndVenue(string inputString, int venueId);
+        Task<bool> CheckExistByDateAndVenue(int? eventId, DateTime startDate, DateTime endDate, int venueId);
         Task<List<Event>> GetEventsByStaffIdAsync(int staffId);
         Task<IEnumerable<Event>> GetEventByOrganizer(int organizerId);
         Task<IEnumerable<Event>> GetEventsByStatusAsync(string status);
