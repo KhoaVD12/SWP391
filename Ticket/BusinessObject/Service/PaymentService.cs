@@ -7,8 +7,6 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
-using DataAccessObject.Job;
-using Hangfire;
 
 namespace BusinessObject.Service;
 

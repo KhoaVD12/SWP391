@@ -14,4 +14,6 @@ public interface IAttendeeService
     Task<ServiceResponse<string>> ExportAttendeesToCsvAsync(int eventId);
     Task<ServiceResponse<bool>> UpdateCheckInStatusAsync(int attendeeId, string status);
     Task<ServiceResponse<bool>> CheckInAttendeeByCodeAsync(string checkInCode);
+    Task CleanupUnpaidAttendeesAsync(TimeSpan expirationPeriod);
+    Task DeleteUnpaidAttendeeAsync(int attendeeId);
 }

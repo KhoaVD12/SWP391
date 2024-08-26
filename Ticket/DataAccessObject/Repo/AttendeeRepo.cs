@@ -76,4 +76,12 @@ public class AttendeeRepo : RepoBase<Attendee>, IAttendeeRepo
             .ThenInclude(t => t.PaymentMethodNavigation)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
+
+    public async Task<List<Attendee>> GetUnpaidAttendeesAsync(TimeSpan expirationPeriod)
+    {
+        return await _context.Attendees
+            .Where(a => a.PaymentStatus == PaymentStatus.PENDING &&
+                        DateTime.UtcNow - a.RegistrationDate > expirationPeriod)
+            .ToListAsync();
+    }
 }

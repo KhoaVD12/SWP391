@@ -4,11 +4,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using BusinessObject.Commons;
 using BusinessObject.IService;
+using BusinessObject.Job;
 using BusinessObject.Mappers;
 using BusinessObject.Service;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
-using DataAccessObject.Job;
 using DataAccessObject.Repo;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,11 +76,21 @@ builder.Services.AddQuartz(q =>
 {
     var jobKey = new JobKey("UpdateStatusEntitiesJob");
     q.AddJob<UpdateStatusEntitiesJob>(opts => opts.WithIdentity(jobKey));
-
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("UpdateStatusEntitiesJob-trigger")
-        .WithCronSchedule("0 0 * * * ?")); // Runs every hour
+        .WithCronSchedule("0 0/1 * * * ?",
+            x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")))
+    );
+
+    var cleanupAttendeeJobKey = new JobKey("CleanupAttendeeJob");
+    q.AddJob<CleanupUnpaidAttendeesJob>(opts => opts.WithIdentity(cleanupAttendeeJobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(cleanupAttendeeJobKey)
+        .WithIdentity("CleanupUnpaidAttendees-trigger")
+        .WithCronSchedule("0 0/15 * * * ?",
+            x => x.InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))));
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
@@ -90,7 +100,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var config = (IConfiguration)configuration;
-        var jwtSection = builder.Configuration.GetSection("JWTSection");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -98,8 +107,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwtSection["Issuer"],
-            ValidAudience = jwtSection["Audience"],
+            ValidIssuer = configuration["JWTSection:Issuer"],
+            ValidAudience = configuration["JWTSection:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTSection:Key"])),
             RoleClaimType = ClaimTypes.Role
         };
@@ -180,7 +189,7 @@ app.UseHsts();
 app.UseExceptionHandlingMiddleware();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("Allow");
+app.UseCors("AllowAll");
 
 
 app.UseAuthentication();
