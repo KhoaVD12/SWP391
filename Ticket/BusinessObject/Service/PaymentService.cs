@@ -7,6 +7,8 @@ using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
+using DataAccessObject.Job;
+using Hangfire;
 
 namespace BusinessObject.Service;
 
@@ -243,32 +245,9 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<CaptureOrderResponse> CaptureOrderAsync(string orderId, int transactionId)
+    /*public void SchedulePaymentCancellation(int attendeeId)
     {
-        // Capture the order in PayPal
-        var captureResponse = await _paypalClient.CaptureOrder(orderId);
-
-        if (captureResponse == null || captureResponse.status != TransactionStatus.COMPLETED)
-        {
-            throw new Exception("Payment capture failed or was not completed.");
-        }
-
-        // Update Payment and Transaction status in the database
-        var transaction = await _transactionRepo.GetByIdAsync(transactionId);
-        if (transaction != null)
-        {
-            transaction.Status = TransactionStatus.COMPLETED;
-
-            var payment = await _paymentRepo.GetByIdAsync(transaction.PaymentMethod);
-            if (payment != null)
-            {
-                payment.Status = PaymentStatus.SUCCESSFUL;
-
-                await _transactionRepo.UpdateAsync(transaction);
-                await _paymentRepo.UpdateAsync(payment);
-            }
-        }
-
-        return captureResponse;
-    }
+        // Schedule the job to run immediately or at a specified time
+        BackgroundJob.Enqueue(() => _attendeeJobs.HandlePaymentCancellationAsync(attendeeId));
+    }*/
 }

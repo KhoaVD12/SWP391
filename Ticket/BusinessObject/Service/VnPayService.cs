@@ -156,6 +156,13 @@ public class VnPayService : IVnPayService
             {
                 transaction.Status = TransactionStatus.COMPLETED;
             }
+            else if (vnp_ResponseCode == "24") // Assuming "24" is the code for cancellation
+            {
+                transaction.Status = TransactionStatus.CANCELLED;
+                response.Success = false;
+                response.Message = "Payment was canceled by the user.";
+                return response;
+            }
             else
             {
                 transaction.Status = TransactionStatus.FAILED;
@@ -195,12 +202,21 @@ public class VnPayService : IVnPayService
 
                     await _attendeeRepo.UpdateAsync(attendee);
 
+                    var eventTitle = ticket.Event.Title;
+                    var eventStartDate = ticket.Event.StartDate;
+                    var amountPaid = transaction.Amount;
+
                     // Send confirmation email with the check-in code
                     foreach (var attendeeDetail in attendee.AttendeeDetails)
                     {
-                        await SendEmail.SendRegistrationEmail(attendeeDetail.Email,
+                        await SendEmail.SendRegistrationEmail(
+                            attendeeDetail.Email,
                             attendeeDetail.Name,
-                            checkInCode);
+                            eventTitle,
+                            eventStartDate,
+                            amountPaid,
+                            checkInCode
+                        );
                     }
                 }
             }
