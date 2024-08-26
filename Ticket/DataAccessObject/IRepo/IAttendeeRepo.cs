@@ -11,4 +11,5 @@ public interface IAttendeeRepo  : IGenericRepo<Attendee>
     Task<bool> UpdateCheckInStatusAsync(int attendeeId, string status);
     Task<Attendee> GetAttendeeByCheckInCodeAsync(string checkInCode);
     Task<Attendee?> GetAttendeeByIdAsync(int id);
+    Task<List<Attendee>> GetUnpaidAttendeesAsync(TimeSpan expirationPeriod);
 }

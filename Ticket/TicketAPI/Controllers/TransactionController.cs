@@ -17,6 +17,18 @@ public class TransactionController : ControllerBase
         _transactionService = transactionService;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetTransactions([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var response = await _transactionService.GetTransactions(page, pageSize);
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
+
     [HttpGet("attendees/{attendeeId}/transactions")]
     public async Task<IActionResult> GetTransactionsByAttendee(int attendeeId)
     {

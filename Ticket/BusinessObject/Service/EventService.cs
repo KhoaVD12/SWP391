@@ -117,11 +117,11 @@ namespace BusinessObject.Service
                     Title = eventEntity.Title,
                     Description = eventEntity.Description,
                     OrganizerId = eventEntity.OrganizerId,
-                    OrganizerName = eventEntity.Organizer.Name, 
+                    OrganizerName = eventEntity.Organizer.Name,
                     VenueId = eventEntity.VenueId,
-                    VenueName = eventEntity.Venue.Name, 
-                    StartDate = eventEntity.StartDate, 
-                    EndDate = eventEntity.EndDate, 
+                    VenueName = eventEntity.Venue.Name,
+                    StartDate = eventEntity.StartDate,
+                    EndDate = eventEntity.EndDate,
                     ImageURL = eventEntity.ImageUrl,
                     Presenter = eventEntity.Presenter,
                     Host = eventEntity.Host,
@@ -183,7 +183,7 @@ namespace BusinessObject.Service
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
-                    var eventExist = await _eventRepo.CheckExistByStartDateAndVenue(eventDTO.StartDate.ToString(), eventDTO.VenueId);
+                    var eventExist = await _eventRepo.CheckExistByDateAndVenue(null, eventDTO.StartDate,eventDTO.EndDate, eventDTO.VenueId);
                     if (eventExist)
                     {
                         result.Success = false;
@@ -482,7 +482,13 @@ namespace BusinessObject.Service
                         return res;
                     }
                 }
-
+                var eventExist = await _eventRepo.CheckExistByDateAndVenue(id, (DateTime)eventDTO.StartDate, (DateTime)eventDTO.EndDate, (int)eventDTO.VenueId);
+                if (eventExist)
+                {
+                    res.Success = false;
+                    res.Message = "You have the Event with the same start date and venue";
+                    return res;
+                }
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId != null ? eventDTO.VenueId.Value : eventToUpdate.VenueId;
@@ -598,8 +604,34 @@ namespace BusinessObject.Service
             try
             {
                 var events = await _eventRepo.GetEventsByStatusAsync(status);
-                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                var eventDTOs = events.Select(e => new ViewEventDTO
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    OrganizerId = e.OrganizerId,
+                    OrganizerName = e.Organizer.Name,
+                    VenueId = e.VenueId,
+                    VenueName = e.Venue.Name,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    ImageURL = e.ImageUrl,
+                    Status = e.Status,
+                    StaffId = e.StaffId,
+                    StaffName = e.Staff?.Name,
+                    Presenter = e.Presenter,
+                    Host = e.Host,
+                    Ticket = new ViewTicketDTO
+                    {
+                        Id = e.Ticket.Id,
+                        EventId = e.Ticket.EventId,
+                        Price = e.Ticket.Price,
+                        Quantity = e.Ticket.Quantity,
+                        TicketSaleEndDate = e.Ticket.TicketSaleEndDate
+                    },
+                    BoothNames = e.Booths.Select(b => b.Name).ToList()
+                }).ToList();
+                var paging = await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
                 result.Data = paging;
                 result.Success = true;
             }
