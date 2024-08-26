@@ -72,10 +72,17 @@ namespace DataAccessObject.Repo
             }
         }
 
-        public async Task<bool> CheckExistByStartDateAndVenue(string inputString, int venueId)
+        public async Task<bool> CheckExistByDateAndVenue(int? eventId, DateTime startDate, DateTime endDate, int venueId)
         {
-            return await _context.Events.AnyAsync(e =>
-                e.StartDate.ToString() == inputString&&e.VenueId==venueId);
+            return await _context.Events
+                .Where(e => !eventId.HasValue || e.Id != eventId.Value)
+                .AnyAsync(e =>
+                    e.VenueId == venueId &&
+                    (
+                        (startDate >= e.StartDate && startDate < e.EndDate) ||  
+                        (endDate > e.StartDate && endDate <= e.EndDate) ||      
+                        (startDate <= e.StartDate && endDate >= e.EndDate)      
+                    ));
         }
 
         public async Task<IEnumerable<Event>> GetEventsByStatus(string status)

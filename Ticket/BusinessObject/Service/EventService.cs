@@ -183,7 +183,7 @@ namespace BusinessObject.Service
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
-                    var eventExist = await _eventRepo.CheckExistByStartDateAndVenue(eventDTO.StartDate.ToString(), eventDTO.VenueId);
+                    var eventExist = await _eventRepo.CheckExistByDateAndVenue(null, eventDTO.StartDate,eventDTO.EndDate, eventDTO.VenueId);
                     if (eventExist)
                     {
                         result.Success = false;
@@ -482,7 +482,13 @@ namespace BusinessObject.Service
                         return res;
                     }
                 }
-
+                var eventExist = await _eventRepo.CheckExistByDateAndVenue(id, (DateTime)eventDTO.StartDate, (DateTime)eventDTO.EndDate, (int)eventDTO.VenueId);
+                if (eventExist)
+                {
+                    res.Success = false;
+                    res.Message = "You have the Event with the same start date and venue";
+                    return res;
+                }
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId != null ? eventDTO.VenueId.Value : eventToUpdate.VenueId;
