@@ -13,15 +13,17 @@ namespace BusinessObject.Service;
 
 public class AttendeeService : IAttendeeService
 {
+    private readonly TicketContext _context;
     private readonly IAttendeeRepo _attendeeRepo;
     private readonly IEventRepo _eventRepo;
     private readonly IMapper _mapper;
 
-    public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IEventRepo eventRepo)
+    public AttendeeService(IMapper mapper, IAttendeeRepo attendeeRepo, IEventRepo eventRepo, TicketContext context)
     {
         _mapper = mapper;
         _attendeeRepo = attendeeRepo;
         _eventRepo = eventRepo;
+        _context = context;
     }
 
     public async Task<ServiceResponse<RegisterAttendeeDTO>> RegisterAttendeeAsync(
@@ -263,6 +265,26 @@ public class AttendeeService : IAttendeeService
         response.Success = true;
         response.Message = "Attendee checked in successfully.";
         return response;
+    }
+
+    public async Task CleanupUnpaidAttendeesAsync(TimeSpan expirationPeriod)
+    {
+        var unpaidAttendees = await _attendeeRepo.GetUnpaidAttendeesAsync(expirationPeriod);
+        foreach (var attendee in unpaidAttendees)
+        {
+            await DeleteUnpaidAttendeeAsync(attendee.Id);
+        }
+    }
+
+    public async Task DeleteUnpaidAttendeeAsync(int attendeeId)
+    {
+        var attendee = await _attendeeRepo.GetByIdAsync(attendeeId);
+        if (attendee != null)
+        {
+            _context.AttendeeDetails.RemoveRange(attendee.AttendeeDetails);
+            _context.Attendees.Remove(attendee);
+            await _context.SaveChangesAsync();
+        }
     }
 
     private async Task DeleteAttendeeIfPaymentFailed(int attendeeId)

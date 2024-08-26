@@ -1,7 +1,10 @@
 using AutoMapper;
 using BusinessObject.IService;
+using BusinessObject.Models.AttendeeDto;
+using BusinessObject.Models.PaymentDTO;
 using BusinessObject.Models.TransactionDTO;
 using BusinessObject.Responses;
+using BusinessObject.Ultils;
 using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 
@@ -16,6 +19,66 @@ public class TransactionService : ITransactionService
     {
         _transactionRepo = transactionRepo;
         _mapper = mapper;
+    }
+
+    public async Task<ServiceResponse<PaginationModel<TransactionDto>>> GetTransactions(int page, int pageSize)
+    {
+        var response = new ServiceResponse<PaginationModel<TransactionDto>>();
+
+        try
+        {
+            var transactions = await _transactionRepo.GetTransactions();
+            var enumerable = transactions as Transaction[] ?? transactions.ToArray();
+            if (!enumerable.Any())
+            {
+                response.Success = false;
+                response.Message = "No transactions found.";
+                return response;
+            }
+
+            var transactionsDto = enumerable.Select(t => new TransactionDto
+            {
+                Id = t.Id,
+                AttendeeId = t.AttendeeId,
+                Date = t.Date,
+                Amount = t.Amount,
+                Status = t.Status,
+                PaymentMethod = new PaymentMethodDto
+                {
+                    Id = t.PaymentMethodNavigation.Id,
+                    Name = t.PaymentMethodNavigation.Name
+                },
+                Attendee = new AttendeeTransactionDto
+                {
+                    AttendeeId = t.Attendee.Id,
+                    RegistrationDate = t.Attendee.RegistrationDate,
+                    PaymentStatus = t.Attendee.PaymentStatus,
+                    CheckInCode = t.Attendee.CheckInCode,
+                    AttendeeDetails = t.Attendee.AttendeeDetails.Select(ad => new AttendeeDetailTransactionDto
+                    {
+                        AttendeeDetailId = ad.Id,
+                        Name = ad.Name,
+                        Email = ad.Email
+                    }).ToList()
+                }
+            }).ToList();
+
+            var paginationModel =
+                await Pagination.GetPaginationEnum(transactionsDto, page, pageSize);
+
+            response.Data = paginationModel;
+            response.Success = true;
+            response.Message = "Transactions retrieved successfully.";
+        }
+        catch (Exception e)
+        {
+            response.Success = false;
+            response.Message = e.InnerException != null
+                ? e.InnerException.Message + "\n" + e.StackTrace
+                : e.Message + "\n" + e.StackTrace;
+        }
+
+        return response;
     }
 
     public async Task<ServiceResponse<IEnumerable<TransactionDto>>> GetTransactionsByAttendeeAsync(int attendeeId)
@@ -151,7 +214,8 @@ public class TransactionService : ITransactionService
         return response;
     }
 
-    public async Task<ServiceResponse<IEnumerable<TransactionDto>>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<ServiceResponse<IEnumerable<TransactionDto>>> GetTransactionsByDateRangeAsync(DateTime startDate,
+        DateTime endDate)
     {
         var response = new ServiceResponse<IEnumerable<TransactionDto>>();
         try
@@ -167,6 +231,7 @@ public class TransactionService : ITransactionService
             response.Message = "An error occurred while retrieving transactions.";
             response.ErrorMessages = new List<string> { ex.Message };
         }
+
         return response;
     }
 
@@ -186,6 +251,7 @@ public class TransactionService : ITransactionService
             response.Message = "An error occurred while retrieving the total amount.";
             response.ErrorMessages = new List<string> { ex.Message };
         }
+
         return response;
     }
 
@@ -217,6 +283,5 @@ public class TransactionService : ITransactionService
         }
 
         return response;
-
     }
 }

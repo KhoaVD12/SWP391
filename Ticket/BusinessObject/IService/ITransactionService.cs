@@ -7,6 +7,7 @@ namespace BusinessObject.IService;
 
 public interface ITransactionService
 {
+    Task<ServiceResponse<PaginationModel<TransactionDto>>> GetTransactions(int page, int pageSize);
     Task<ServiceResponse<IEnumerable<TransactionDto>>> GetTransactionsByAttendeeAsync(int attendeeId);
     Task<ServiceResponse<TransactionDto>> GetTransactionByIdAsync(int id);
     Task<ServiceResponse<TransactionDto>> CreateTransactionAsync(CreateTransactionDto dto);

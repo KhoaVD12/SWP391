@@ -117,11 +117,11 @@ namespace BusinessObject.Service
                     Title = eventEntity.Title,
                     Description = eventEntity.Description,
                     OrganizerId = eventEntity.OrganizerId,
-                    OrganizerName = eventEntity.Organizer.Name, 
+                    OrganizerName = eventEntity.Organizer.Name,
                     VenueId = eventEntity.VenueId,
-                    VenueName = eventEntity.Venue.Name, 
-                    StartDate = eventEntity.StartDate, 
-                    EndDate = eventEntity.EndDate, 
+                    VenueName = eventEntity.Venue.Name,
+                    StartDate = eventEntity.StartDate,
+                    EndDate = eventEntity.EndDate,
                     ImageURL = eventEntity.ImageUrl,
                     Presenter = eventEntity.Presenter,
                     Host = eventEntity.Host,
@@ -604,8 +604,34 @@ namespace BusinessObject.Service
             try
             {
                 var events = await _eventRepo.GetEventsByStatusAsync(status);
-                var map = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
-                var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
+                var eventDTOs = events.Select(e => new ViewEventDTO
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    OrganizerId = e.OrganizerId,
+                    OrganizerName = e.Organizer.Name,
+                    VenueId = e.VenueId,
+                    VenueName = e.Venue.Name,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    ImageURL = e.ImageUrl,
+                    Status = e.Status,
+                    StaffId = e.StaffId,
+                    StaffName = e.Staff?.Name,
+                    Presenter = e.Presenter,
+                    Host = e.Host,
+                    Ticket = new ViewTicketDTO
+                    {
+                        Id = e.Ticket.Id,
+                        EventId = e.Ticket.EventId,
+                        Price = e.Ticket.Price,
+                        Quantity = e.Ticket.Quantity,
+                        TicketSaleEndDate = e.Ticket.TicketSaleEndDate
+                    },
+                    BoothNames = e.Booths.Select(b => b.Name).ToList()
+                }).ToList();
+                var paging = await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
                 result.Data = paging;
                 result.Success = true;
             }

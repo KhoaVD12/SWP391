@@ -96,7 +96,12 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<BoothRequestStatusDTO, BoothRequest>().ReverseMap();
 
         CreateMap<Transaction, CreateTransactionDto>().ReverseMap();
-        CreateMap<Transaction, TransactionDto>().ReverseMap();
+        CreateMap<Transaction, TransactionDto>()
+            .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethodNavigation))
+            .ForMember(dest => dest.Attendee, opt => opt.MapFrom(src => src.Attendee))
+            .ReverseMap();
+        CreateMap<Attendee, AttendeeTransactionDto>().ReverseMap();
+        CreateMap<AttendeeDetail, AttendeeDetailTransactionDto>().ReverseMap();
 
         CreateMap<Payment, CreatePaymentMethodDto>().ReverseMap();
         CreateMap<Payment, PaymentMethodDto>().ReverseMap();
