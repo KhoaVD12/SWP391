@@ -10,6 +10,7 @@ using DataAccessObject.Entities;
 using DataAccessObject.IRepo;
 using DataAccessObject.Job;
 using DataAccessObject.Repo;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -31,6 +32,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<TicketContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
+
 builder.Services.AddSingleton(x =>
     new PaypalClient(
         builder.Configuration["PayPalOptions:ClientId"],
@@ -51,6 +53,7 @@ builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
 builder.Services.AddScoped<IBoothRequestRepo, BoothRequestRepo>();
 builder.Services.AddScoped<IGiftRepo, GiftRepo>();
 builder.Services.AddScoped<IGiftReceptionRepo, GiftReceptionRepo>();
+builder.Services.AddScoped<IAttendeeDetailRepo, AttendeeDetailRepo>();
 // Configure services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -71,12 +74,12 @@ builder.Services.AddAutoMapper(typeof(MapperConfigurationsProfile));
 
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("DeleteExpiredEntitiesJob");
-    q.AddJob<DeleteExpiredEntitiesJob>(opts => opts.WithIdentity(jobKey));
+    var jobKey = new JobKey("UpdateStatusEntitiesJob");
+    q.AddJob<UpdateStatusEntitiesJob>(opts => opts.WithIdentity(jobKey));
 
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
-        .WithIdentity("DeleteExpiredEntitiesJob-trigger")
+        .WithIdentity("UpdateStatusEntitiesJob-trigger")
         .WithCronSchedule("0 0 * * * ?")); // Runs every hour
 });
 

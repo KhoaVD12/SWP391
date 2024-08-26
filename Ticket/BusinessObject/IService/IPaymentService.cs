@@ -13,5 +13,4 @@ public interface IPaymentService
     Task<ServiceResponse<PaymentMethodDto>> UpdatePaymentMethodAsync(int id, PaymentMethodDto dto);
     Task<ServiceResponse<bool>> DeletePaymentMethodAsync(int id);
     Task<CreateOrderResponse> CreateOrderAsync(int attendeeId, decimal amount, string currency);
-    Task<CaptureOrderResponse> CaptureOrderAsync(string orderId, int transactionId);
 }
