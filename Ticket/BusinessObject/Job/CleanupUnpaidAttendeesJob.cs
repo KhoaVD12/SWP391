@@ -16,7 +16,7 @@ public class CleanupUnpaidAttendeesJob : IJob
     {
         try
         {
-            var expirationPeriod = TimeSpan.FromHours(24); // Define expiration period, e.g., 24 hours
+            var expirationPeriod = TimeSpan.FromMinutes(15);
             await _attendeeService.CleanupUnpaidAttendeesAsync(expirationPeriod);
         }
         catch (Exception ex)
