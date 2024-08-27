@@ -9,7 +9,7 @@ namespace BusinessObject.Models.TicketDTO
 {
     public class CreateTicketDTO
     {
-        [Range(10000, 10000000, ErrorMessage = "Price must be at least 10,000.")]
+        [Range(10000, 10000000, ErrorMessage = "Price must be at least 10,000 and not exceed 10000000")]
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "EventId is required.")]

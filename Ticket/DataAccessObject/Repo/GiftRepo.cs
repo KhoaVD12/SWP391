@@ -19,13 +19,22 @@ namespace DataAccessObject.Repo
         }
         public async Task<IEnumerable<Gift>> GetAllGifts()
         {
-            return await _context.Gifts.Include(g=>g.Booth).ToListAsync();
+            return await _context.Gifts.Include(g => g.Booth)
+                .ThenInclude(b => b.BoothRequests)
+                .ThenInclude(br => br.Sponsor).ToListAsync();
         }
         public async Task<IEnumerable<Gift>> GetGiftsBySponsorId(int sponsorId)
         {
             return await _context.Gifts.Include(g => g.Booth)
                 .Where(g => g.Booth.SponsorId == sponsorId)
                 .ToListAsync();
+        }
+        public async Task<Booth> GetBoothWithSponsor(int boothId)
+        {
+            return await _context.Booths
+            .Include(b => b.BoothRequests)
+            .ThenInclude(br => br.Sponsor)
+            .FirstOrDefaultAsync(b => b.Id ==boothId);
         }
         public async Task<Gift> GetGiftById(int id)
         {

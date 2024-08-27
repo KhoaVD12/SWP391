@@ -85,7 +85,10 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<CreateTicketDTO, ViewTicketDTO>().ReverseMap();
 
         CreateMap<CreateBoothDTO, Booth>().ReverseMap();
-        CreateMap<ViewBoothDTO, Booth>().ReverseMap();
+        CreateMap<Booth, ViewBoothDTO>()
+            .ForMember(dest => dest.SponsorName, opt => opt.MapFrom(src => src.BoothRequests.FirstOrDefault().Sponsor.Name))
+            .ForMember(dest => dest.EventTitle, opt => opt.MapFrom(src => src.Event.Title))
+            .ReverseMap();
         CreateMap<BoothStatusDTO, Booth>().ReverseMap();
 
         CreateMap<CreateBoothRequestDTO, BoothRequest>().ReverseMap();
@@ -109,6 +112,8 @@ public class MapperConfigurationsProfile : Profile
         CreateMap<CreateGiftDTO, Gift>().ReverseMap();
         CreateMap<Gift, ViewGiftDTO>()
             .ForMember(dest => dest.BoothName, opt => opt.MapFrom(src => src.Booth.Name))
+            .ForMember(dest => dest.SponsorId, opt => opt.MapFrom(src => src.Booth.BoothRequests.FirstOrDefault().SponsorId))
+            .ForMember(dest => dest.SponsorName, opt => opt.MapFrom(src => src.Booth.BoothRequests.FirstOrDefault().Sponsor.Name))
             .ReverseMap();
 
         CreateMap<CreateGiftReceptionDTO, GiftReception>().ReverseMap();
