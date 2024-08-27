@@ -32,79 +32,83 @@ public class VnPayService : IVnPayService
         _ticketRepo = ticketRepo;
     }
 
-    public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
-        HttpContext httpContext)
-    {
-        var response = new ServiceResponse<VnPaymentResponseModel>();
-
-        try
+        public async Task<ServiceResponse<VnPaymentResponseModel>> CreatePaymentRequest(int attendeeId, decimal amount,
+            HttpContext httpContext)
         {
-            var vnpay = new VnPayLibrary();
-            var vnp_TmnCode = _configuration["VNPay:TmnCode"];
-            var vnp_HashSecret = _configuration["VNPay:HashSecret"];
-            var vnp_BaseUrl = _configuration["VNPay:BaseUrl"];
-            var returnUrl = _configuration["VNPay:ReturnUrl"];
-            var tick = DateTime.Now.Ticks.ToString();
+            var response = new ServiceResponse<VnPaymentResponseModel>();
 
-            // Prepare transaction
-            var payment = new Payment
+            try
             {
-                Name = "VNPay",
-                Status = PaymentStatus.PENDING,
-                PaymentDate = DateTime.UtcNow
-            };
-            await _paymentRepo.AddAsync(payment);
+                var vnpay = new VnPayLibrary();
+                var vnp_TmnCode = _configuration["VNPay:TmnCode"];
+                var vnp_HashSecret = _configuration["VNPay:HashSecret"];
+                var vnp_BaseUrl = _configuration["VNPay:BaseUrl"];
+                var returnUrl = _configuration["VNPay:ReturnUrl"];
+                var tick = DateTime.Now.Ticks.ToString();
 
-            // Create Transaction Entry
-            var transaction = new Transaction
+                var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var nowUtc = DateTime.UtcNow;
+                var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, localTimeZone);
+
+                // Prepare transaction
+                var payment = new Payment
+                {
+                    Name = "VNPay",
+                    Status = PaymentStatus.PENDING,
+                    PaymentDate = localDateTime
+                };
+                await _paymentRepo.AddAsync(payment);
+
+                // Create Transaction Entry
+                var transaction = new Transaction
+                {
+                    AttendeeId = attendeeId,
+                    Date = localDateTime,
+                    Amount = amount,
+                    PaymentMethod = payment.Id, // Reference to the Payment entry
+                    Status = TransactionStatus.PENDING
+                };
+                await _transactionRepo.AddAsync(transaction);
+
+                // Add request data
+                vnpay.AddRequestData("vnp_Version", "2.1.0");
+                vnpay.AddRequestData("vnp_Command", "pay");
+                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                vnpay.AddRequestData("vnp_Amount", ((int)(amount * 100)).ToString());
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CurrCode", "VND");
+                vnpay.AddRequestData("vnp_IpAddr", VnPayUtils.GetIpAddress(httpContext));
+                vnpay.AddRequestData("vnp_Locale", "vn");
+                vnpay.AddRequestData("vnp_OrderInfo", $"Payment for transaction {transaction.Id}");
+                vnpay.AddRequestData("vnp_OrderType", "other");
+                vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
+                vnpay.AddRequestData("vnp_TxnRef", transaction.Id.ToString());
+
+                var paymentUrl =
+                    vnpay.CreateRequestUrl(_configuration["VNPay:BaseUrl"], _configuration["VNPay:HashSecret"]);
+
+                // Prepare response
+                response.Data = new VnPaymentResponseModel
+                {
+                    Success = true,
+                    PaymentMethod = "VNPay",
+                    OrderId = transaction.Id.ToString(),
+                    PaymentId = transaction.Id.ToString(),
+                    TransactionId = transaction.Id.ToString(),
+                    Token = paymentUrl
+                };
+                response.Success = true;
+                response.Message = "VNPay payment request created successfully.";
+            }
+            catch (Exception ex)
             {
-                AttendeeId = attendeeId,
-                Date = DateTime.UtcNow,
-                Amount = amount,
-                PaymentMethod = payment.Id, // Reference to the Payment entry
-                Status = TransactionStatus.PENDING
-            };
-            await _transactionRepo.AddAsync(transaction);
+                response.Success = false;
+                response.Message = "Error occurred while creating VNPay payment request.";
+                response.ErrorMessages.Add(ex.Message);
+            }
 
-            // Add request data
-            vnpay.AddRequestData("vnp_Version", "2.1.0");
-            vnpay.AddRequestData("vnp_Command", "pay");
-            vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", ((int)(amount * 100)).ToString());
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", VnPayUtils.GetIpAddress(httpContext));
-            vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", $"Payment for transaction {transaction.Id}");
-            vnpay.AddRequestData("vnp_OrderType", "other");
-            vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
-            vnpay.AddRequestData("vnp_TxnRef", transaction.Id.ToString());
-
-            var paymentUrl =
-                vnpay.CreateRequestUrl(_configuration["VNPay:BaseUrl"], _configuration["VNPay:HashSecret"]);
-
-            // Prepare response
-            response.Data = new VnPaymentResponseModel
-            {
-                Success = true,
-                PaymentMethod = "VNPay",
-                OrderId = transaction.Id.ToString(),
-                PaymentId = transaction.Id.ToString(),
-                TransactionId = transaction.Id.ToString(),
-                Token = paymentUrl
-            };
-            response.Success = true;
-            response.Message = "VNPay payment request created successfully.";
+            return response;
         }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = "Error occurred while creating VNPay payment request.";
-            response.ErrorMessages.Add(ex.Message);
-        }
-
-        return response;
-    }
 
     public async Task<ServiceResponse<Payment>> ProcessPaymentResponse(IQueryCollection queryParams)
     {
@@ -171,12 +175,16 @@ public class VnPayService : IVnPayService
             // Update the transaction status in the database
             await _transactionRepo.UpdateAsync(transaction);
 
+// Convert to SE Asia Standard Time
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+
             // Create a new payment record based on the transaction status
             var payment = transaction.PaymentMethodNavigation;
             payment.Status = transaction.Status == TransactionStatus.COMPLETED
                 ? PaymentStatus.SUCCESSFUL
                 : PaymentStatus.FAILED;
-            payment.PaymentDate = DateTime.UtcNow;
+            payment.PaymentDate = localNow;
 
             await _paymentRepo.UpdateAsync(payment);
 

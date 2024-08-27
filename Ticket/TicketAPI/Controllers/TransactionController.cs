@@ -23,7 +23,7 @@ public class TransactionController : ControllerBase
         var response = await _transactionService.GetTransactions(page, pageSize);
         if (!response.Success)
         {
-            return BadRequest(response);
+            return NotFound(response);
         }
 
         return Ok(response);

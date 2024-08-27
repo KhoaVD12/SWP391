@@ -154,14 +154,21 @@ namespace BusinessObject.Service
         {
             var result = new ServiceResponse<ViewEventDTO>();
 
-            if (eventDTO.StartDate.Date < DateTime.UtcNow.Date)
+            // Define the time zone
+            var seAsiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert StartDate and EndDate to SE Asia Standard Time
+            var startDateTime = TimeZoneInfo.ConvertTimeFromUtc(eventDTO.StartDate.ToUniversalTime(), seAsiaTimeZone);
+            var endDateTime = TimeZoneInfo.ConvertTimeFromUtc(eventDTO.EndDate.ToUniversalTime(), seAsiaTimeZone);
+
+            if (startDateTime.Date < DateTime.UtcNow.Date)
             {
                 result.Success = false;
                 result.Message = "StartDate cannot be in the past.";
                 return result;
             }
 
-            if (eventDTO.EndDate.Date < eventDTO.StartDate.Date)
+            if (endDateTime.Date < startDateTime.Date)
             {
                 result.Success = false;
                 result.Message = "EndDate cannot be before StartDate.";
@@ -183,7 +190,8 @@ namespace BusinessObject.Service
             {
                 if (!string.IsNullOrEmpty(eventDTO.Title))
                 {
-                    var eventExist = await _eventRepo.CheckExistByDateAndVenue(null, eventDTO.StartDate,eventDTO.EndDate, eventDTO.VenueId);
+                    var eventExist = await _eventRepo.CheckExistByDateAndVenue(null, eventDTO.StartDate,
+                        eventDTO.EndDate, eventDTO.VenueId);
                     if (eventExist)
                     {
                         result.Success = false;
@@ -215,8 +223,8 @@ namespace BusinessObject.Service
                     {
                         Title = eventDTO.Title,
                         ImageUrl = imageUrl,
-                        StartDate = eventDTO.StartDate,
-                        EndDate = eventDTO.EndDate,
+                        StartDate = startDateTime,
+                        EndDate = endDateTime,
                         OrganizerId = eventDTO.OrganizerId,
                         StaffId = eventDTO.StaffId,
                         VenueId = eventDTO.VenueId,
@@ -233,7 +241,7 @@ namespace BusinessObject.Service
                         EventId = Event.Id,
                         Price = eventDTO.Price,
                         Quantity = eventDTO.Quantity,
-                        TicketSaleEndDate = eventDTO.StartDate.AddMinutes(-5)
+                        TicketSaleEndDate = startDateTime.AddMinutes(-5)
                     };
 
                     var ticketResult = await _ticketService.CreateTicket(newTicket);
@@ -466,12 +474,19 @@ namespace BusinessObject.Service
                     res.Message = "Event not found!";
                     return res;
                 }
-                if (eventToUpdate.StartDate <= DateTime.UtcNow)
+
+                // Convert UTC to SE Asia Standard Time
+                var seAsiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var currentLocalDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, seAsiaTimeZone);
+
+                // Prevent updates if the event has started
+                if (eventToUpdate.StartDate <= currentLocalDateTime)
                 {
                     res.Success = false;
-                    res.Message = "You can not update Event when StartDate has come";
+                    res.Message = "You cannot update the event once the StartDate has come.";
                     return res;
                 }
+
                 if (eventDTO.StaffId.HasValue && eventDTO.StaffId.Value != eventToUpdate.StaffId)
                 {
                     bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
@@ -482,13 +497,18 @@ namespace BusinessObject.Service
                         return res;
                     }
                 }
-                var eventExist = await _eventRepo.CheckExistByDateAndVenue(id, (DateTime)eventDTO.StartDate, (DateTime)eventDTO.EndDate, (int)eventDTO.VenueId);
+
+                // Prevent updates if another event exists with the same start date and venue
+                var eventExist = await _eventRepo.CheckExistByDateAndVenue(id, (DateTime)eventDTO.StartDate,
+                    (DateTime)eventDTO.EndDate, (int)eventDTO.VenueId);
                 if (eventExist)
                 {
                     res.Success = false;
-                    res.Message = "You have the Event with the same start date and venue";
+                    res.Message = "You have another event with the same start date and venue.";
                     return res;
                 }
+
+                // Update the event properties, but not the status
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
                 eventToUpdate.VenueId = eventDTO.VenueId != null ? eventDTO.VenueId.Value : eventToUpdate.VenueId;
@@ -516,6 +536,7 @@ namespace BusinessObject.Service
                     return res;
                 }
 
+                // Prevent status change
                 await _eventRepo.UpdateAsync(eventToUpdate);
 
                 var updatedEvent = new ViewEventDTO
@@ -530,7 +551,7 @@ namespace BusinessObject.Service
                     StartDate = eventToUpdate.StartDate,
                     EndDate = eventToUpdate.EndDate,
                     ImageURL = eventToUpdate.ImageUrl,
-                    Status = eventToUpdate.Status,
+                    Status = eventToUpdate.Status, // Ensure status remains unchanged
                     StaffId = eventToUpdate.StaffId,
                     StaffName = eventToUpdate.Staff?.Name,
                     Presenter = eventToUpdate.Presenter,
