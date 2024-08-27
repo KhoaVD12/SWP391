@@ -24,11 +24,23 @@ namespace DataAccessObject.Repo
         }
         public async Task<IEnumerable<Booth>> GetBooth()
         {
-            return await _context.Booths.ToListAsync();
+            return await _context.Booths.Include(b=>b.Event)
+                .Include(b=>b.BoothRequests)
+                .ThenInclude(b=>b.Sponsor).ToListAsync();
         }
         public async Task<Booth> GetBoothById(int id)
         {
-            return await _context.Set<Booth>().Where(b => b.Id == id).SingleOrDefaultAsync();
+            return await _context.Set<Booth>()
+                .Include(b => b.Event)
+                .Include(b => b.BoothRequests)
+                .Where(b => b.Id == id).SingleOrDefaultAsync();
+        }
+        public async Task<Booth> GetBoothByBoothRequest(int requestId)
+        {
+            return await _context.Booths
+                .Include(b => b.BoothRequests) 
+                .Where(b => b.BoothRequests.Any(br => br.Id == requestId)) 
+                .FirstOrDefaultAsync();
         }
         public async Task<bool> DeleteBooth(int id)
         {
@@ -96,7 +108,7 @@ namespace DataAccessObject.Repo
         }
         public async Task<bool> CheckEventExist(int eventId)
         {
-            return await _context.Events.AnyAsync(e => e.Id == eventId);
+            return await _context.Events.AnyAsync(e => e.Id == eventId&&e.Status=="Active");
         }
         public async Task<bool> CheckSponsorExist(int sponsorId)
         {

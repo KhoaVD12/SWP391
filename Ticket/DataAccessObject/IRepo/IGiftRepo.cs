@@ -18,5 +18,6 @@ namespace DataAccessObject.IRepo
         Task<IEnumerable<Gift>> GetGiftsBySponsorId(int sponsorId);
         Task<bool> CheckExistByNameAndBooth(string inputString, int boothId);
         Task<IEnumerable<Booth>> GetOpenBooth();
+        Task<Booth> GetBoothWithSponsor(int boothId);
     }
 }

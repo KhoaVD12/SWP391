@@ -219,6 +219,32 @@ namespace BusinessObject.Service
             }
             return res;
         }
+        public async Task<ServiceResponse<ViewBoothDTO>> GetBoothByRequest(int requestId)
+        {
+            var res=new ServiceResponse<ViewBoothDTO>();
+            try
+            {
+                var result=await _boothRepo.GetBoothByBoothRequest(requestId);
+                if (result != null)
+                {
+                    var map=_mapper.Map<ViewBoothDTO>(result);
+                    res.Success = true;
+                    res.Data = map;
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Booth not Found";
+                    return res;
+                }
+            }
+            catch(Exception e)
+            {
+                res.Success = false;
+                res.Message = e.Message;
+            }
+            return res;
+        }
 
         public async Task<ServiceResponse<ViewBoothDTO>> UpdateBooth(int id, CreateBoothDTO boothDTO)
         {
