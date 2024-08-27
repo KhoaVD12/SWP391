@@ -79,9 +79,13 @@ public class AttendeeRepo : RepoBase<Attendee>, IAttendeeRepo
 
     public async Task<List<Attendee>> GetUnpaidAttendeesAsync(TimeSpan expirationPeriod)
     {
+        var now = DateTime.UtcNow;
+        var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
+
         return await _context.Attendees
             .Where(a => a.PaymentStatus == PaymentStatus.PENDING &&
-                        DateTime.UtcNow - a.RegistrationDate > expirationPeriod)
+                        localDateTime - a.RegistrationDate > expirationPeriod)
             .ToListAsync();
     }
 }
