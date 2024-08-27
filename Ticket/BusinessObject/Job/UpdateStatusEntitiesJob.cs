@@ -22,15 +22,20 @@ public class UpdateStatusEntitiesJob : IJob
 
     private async Task UpdateEventStatusAsync()
     {
-        var currentDateTime = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
 
+
+        // Filter events that should become ongoing, excluding those with status "CANCELLED"
         var activeEvents = await _context.Events
-            .Where(e => e.StartDate <= currentDateTime && e.EndDate > currentDateTime &&
-                        e.Status != EventStatus.ONGOING)
+            .Where(e => e.StartDate <= localDateTime && e.EndDate > localDateTime &&
+                        e.Status != EventStatus.ONGOING && e.Status != EventStatus.CANCEL)
             .ToListAsync();
 
+        // Filter events that should become ended, excluding those with status "CANCELLED"
         var endedEvents = await _context.Events
-            .Where(e => e.EndDate <= currentDateTime && e.Status != EventStatus.ENDED)
+            .Where(e => e.EndDate <= localDateTime && e.Status != EventStatus.ENDED && e.Status != EventStatus.CANCEL)
             .ToListAsync();
 
         if (activeEvents.Count != 0)

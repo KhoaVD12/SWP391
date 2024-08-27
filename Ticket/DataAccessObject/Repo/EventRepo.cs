@@ -85,12 +85,6 @@ namespace DataAccessObject.Repo
                     ));
         }
 
-        public async Task<IEnumerable<Event>> GetEventsByStatus(string status)
-        {
-            return await _context.Events.Where(e => e.Status == status)
-                .ToListAsync();
-        }
-
         public async Task<List<Event>> GetEventsByStaffIdAsync(int staffId)
         {
             return await _context.Events
