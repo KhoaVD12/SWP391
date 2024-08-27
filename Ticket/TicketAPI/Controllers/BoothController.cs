@@ -44,6 +44,16 @@ namespace TicketAPI.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("Request/{requestId}")]
+        public async Task<IActionResult> GetBoothByRequest(int requestId)
+        {
+            var result = await _boothService.GetBoothByRequest(requestId);
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateBooth(CreateBoothDTO boothDTO)
         {

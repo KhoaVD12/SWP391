@@ -84,34 +84,10 @@ public class AttendeeController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("event/{eventId}/attendees/export")]
-    public async Task<IActionResult> ExportAttendeesToCsv(int eventId)
-    {
-        var result = await _attendeeService.ExportAttendeesToCsvAsync(eventId);
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-
-        return File(Encoding.UTF8.GetBytes(result.Data), "text/csv", "attendees.csv");
-    }
-
     [HttpPut("{attendeeId}/checkin")]
     public async Task<IActionResult> UpdateCheckInStatus(int attendeeId, [FromBody] string status)
     {
         var result = await _attendeeService.UpdateCheckInStatusAsync(attendeeId, status);
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(result);
-    }
-
-    [HttpPost("checkin/qr")]
-    public async Task<IActionResult> CheckInByQrCode([FromBody] string qrCode)
-    {
-        var result = await _attendeeService.CheckInAttendeeByCodeAsync(qrCode);
         if (!result.Success)
         {
             return BadRequest(result);

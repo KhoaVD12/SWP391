@@ -10,9 +10,9 @@ namespace BusinessObject.Models.BoothDTO
     {
         public int Id { get; set; }
         public int SponsorId { get; set; }
-
+        public string SponsorName { get; set; }
         public int EventId { get; set; }
-
+        public string EventTitle { get; set; }
         public string Name { get; set; } = null!;
 
         public string? Description { get; set; }

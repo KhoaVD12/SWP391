@@ -47,9 +47,12 @@ public class AttendeeService : IAttendeeService
 
             // Map DTO to entity
             var attendee = _mapper.Map<Attendee>(registerAttendeeDto);
-            attendee.RegistrationDate = DateTime.UtcNow;
-            attendee.PaymentStatus = PaymentStatus.PENDING; // Set default status
-            attendee.CheckInCode = null; 
+            var now = DateTime.UtcNow;
+            var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
+            attendee.RegistrationDate = localDateTime;
+            attendee.PaymentStatus = PaymentStatus.PENDING; 
+            attendee.CheckInCode = null;
 
             // Save to the database
             await _attendeeRepo.AddAsync(attendee);
@@ -200,19 +203,6 @@ public class AttendeeService : IAttendeeService
         return response;
     }
 
-    public async Task<ServiceResponse<IEnumerable<AttendeeDto>>> SearchAttendeesAsync(int eventId, string searchTerm)
-    {
-        var attendees = await _attendeeRepo.SearchAttendeesAsync(eventId, searchTerm);
-        var attendeeDtos = _mapper.Map<IEnumerable<AttendeeDto>>(attendees);
-
-        return new ServiceResponse<IEnumerable<AttendeeDto>>
-        {
-            Data = attendeeDtos,
-            Success = true,
-            Message = "Search results retrieved successfully."
-        };
-    }
-
     public async Task<ServiceResponse<string>> ExportAttendeesToCsvAsync(int eventId)
     {
         var attendees = await _attendeeRepo.GetAttendeesByEventAsync(eventId);
@@ -243,28 +233,6 @@ public class AttendeeService : IAttendeeService
             Success = success,
             Message = success ? "Check-in status updated successfully." : "Attendee not found."
         };
-    }
-
-    public async Task<ServiceResponse<bool>> CheckInAttendeeByCodeAsync(string checkInCode)
-    {
-        var response = new ServiceResponse<bool>();
-
-        // Find the attendee by check-in code
-        var attendee = await _attendeeRepo.GetAttendeeByCheckInCodeAsync(checkInCode);
-        if (attendee == null)
-        {
-            response.Success = false;
-            response.Message = "Attendee not found";
-            return response;
-        }
-
-        attendee.CheckInStatus = CheckInStatus.CheckedIn;
-        await _attendeeRepo.UpdateAsync(attendee);
-
-        response.Data = true;
-        response.Success = true;
-        response.Message = "Attendee checked in successfully.";
-        return response;
     }
 
     public async Task CleanupUnpaidAttendeesAsync(TimeSpan expirationPeriod)

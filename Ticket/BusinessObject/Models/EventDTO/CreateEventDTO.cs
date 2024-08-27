@@ -36,6 +36,7 @@ namespace BusinessObject.Models.EventDTO
         public string? ImageUrl { get; set; }
 
         [SwaggerSchema(Description = "Ticket Price for this Event")]
+        [Range(10000, 10000000, ErrorMessage = "Price must be at least 10,000 and not exceed 10000000")]
         public decimal Price { get; set; }
         [SwaggerSchema(Description = "Ticket Quantity for this Event")]
         public int Quantity { get; set; }

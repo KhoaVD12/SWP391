@@ -65,9 +65,10 @@ namespace BusinessObject.Service
                     return res;
                 }
                 await _giftRepo.CreateGift(mapp);
-                
+                var boothWithSponsor = await _giftRepo.GetBoothWithSponsor(mapp.BoothId);
                 var result = _mapper.Map<ViewGiftDTO>(mapp);
-
+                result.SponsorId = boothWithSponsor.BoothRequests.FirstOrDefault()?.SponsorId ?? 0;
+                result.SponsorName = boothWithSponsor.BoothRequests.FirstOrDefault()?.Sponsor.Name ?? "Unknown Sponsor";
                 res.Success = true;
                 res.Data = result;
                 res.Message = "Gift created successfully";
