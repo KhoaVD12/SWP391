@@ -6,6 +6,7 @@ namespace DataAccessObject.IRepo
     {
 
         public Task<IEnumerable<Event>> GetEvent();
+        Task<IEnumerable<Event>> GetEventsForGuestsAsync();
         public Task<Event?> GetEventById(int id);
         public Task<bool> DeleteEvent(int id);
         public Task UpdateEvent(int id, Event e);
