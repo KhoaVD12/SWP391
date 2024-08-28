@@ -24,6 +24,6 @@ namespace BusinessObject.Models.EventDTO
         public string Status { get; set; }
         public ViewTicketDTO Ticket { get; set; }
 
-        public List<string> BoothNames { get; set; } = [];
+        public List<string> BoothNames { get; set; } = new List<string>();
     }
 }
