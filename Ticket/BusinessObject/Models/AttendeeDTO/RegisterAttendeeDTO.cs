@@ -14,7 +14,6 @@ public class RegisterAttendeeDTO
 public class AttendeeDetailRegisterDto
 {
     [Required]
-    [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
     public string Name { get; set; }
 
     [Required]
@@ -22,7 +21,6 @@ public class AttendeeDetailRegisterDto
     public string Email { get; set; }
 
     [Required]
-    [Phone(ErrorMessage = "Invalid phone number.")]
     public string Phone { get; set; }
 }
 

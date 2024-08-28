@@ -20,6 +20,6 @@ namespace BusinessObject.IService
         Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsByStatus(string status, int page, int pageSize);
 
         public Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(int organizerId,
-            int page, int pageSize);
+            int page, int pageSize, string search);
     }
 }

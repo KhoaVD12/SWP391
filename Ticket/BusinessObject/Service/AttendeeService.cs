@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 using AutoMapper;
 using BusinessObject.IService;
@@ -66,8 +65,13 @@ public class AttendeeService : IAttendeeService
         {
             response.Success = false;
             response.Message = "Error registering attendee.";
-            response.ErrorMessages = new List<string> { ex.Message };
-            Console.WriteLine(ex.ToString()); // Log detailed exception information
+            response.ErrorMessages = new List<string>
+            {
+                ex.Message,
+                ex.InnerException?.Message,
+                ex.StackTrace
+            };
+            Console.WriteLine(ex.ToString());  
         }
 
         return response;

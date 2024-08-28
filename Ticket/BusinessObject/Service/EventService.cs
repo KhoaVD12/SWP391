@@ -40,12 +40,6 @@ namespace BusinessObject.Service
                 }
 
                 var events = await _eventRepo.GetEvent();
-                if (events == null)
-                {
-                    res.Success = false;
-                    res.Message = "No events found.";
-                    return res;
-                }
 
                 if (!string.IsNullOrEmpty(search))
                 {
@@ -58,14 +52,13 @@ namespace BusinessObject.Service
                     "enddate" => events.OrderBy(e => e.EndDate),
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
-                var eventDTOs=_mapper.Map<IEnumerable<ViewEventDTO >>(events);
+                var eventDTOs = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
 
                 var paginationModel =
                     await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
 
                 res.Data = paginationModel;
                 res.Success = true;
-                res.Message = "Events retrieved successfully!";
             }
             catch (Exception ex)
             {
@@ -90,12 +83,6 @@ namespace BusinessObject.Service
 
                 // Retrieve all events
                 var events = await _eventRepo.GetEventsForGuestsAsync();
-                if (events == null)
-                {
-                    res.Success = false;
-                    res.Message = "No events found.";
-                    return res;
-                }
 
                 // Apply search filter
                 if (!string.IsNullOrEmpty(search))
@@ -111,14 +98,13 @@ namespace BusinessObject.Service
                     _ => events.OrderBy(e => e.Id)
                 };
 
-                var eventDTOs=_mapper.Map<IEnumerable<ViewEventDTO >>(events);
+                var eventDTOs = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
 
                 // Apply pagination
                 var paginationModel = await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
 
                 res.Data = paginationModel;
                 res.Success = true;
-                res.Message = "Events retrieved successfully!";
             }
             catch (Exception ex)
             {
@@ -143,34 +129,9 @@ namespace BusinessObject.Service
                 }
 
 
-                var eventDetails = new ViewEventDTO()
-                {
-                    Id = eventEntity.Id,
-                    Title = eventEntity.Title,
-                    Description = eventEntity.Description,
-                    OrganizerId = eventEntity.OrganizerId,
-                    OrganizerName = eventEntity.Organizer.Name,
-                    VenueId = eventEntity.VenueId,
-                    VenueName = eventEntity.Venue.Name,
-                    StartDate = eventEntity.StartDate,
-                    EndDate = eventEntity.EndDate,
-                    ImageURL = eventEntity.ImageUrl,
-                    Presenter = eventEntity.Presenter,
-                    Host = eventEntity.Host,
-                    Status = eventEntity.Status,
-                    Ticket = new ViewTicketDTO
-                    {
-                        Id = eventEntity.Ticket.Id,
-                        EventId = eventEntity.Ticket.EventId,
-                        Price = eventEntity.Ticket.Price,
-                        Quantity = eventEntity.Ticket.Quantity,
-                        TicketSaleEndDate = eventEntity.Ticket.TicketSaleEndDate
-                    },
-                    BoothNames = eventEntity.Booths.Select(b => b.Name).ToList()
-                };
+                var eventDetails = _mapper.Map<ViewEventDTO>(eventEntity);
 
                 res.Data = eventDetails;
-
                 res.Success = true;
             }
             catch (Exception ex)
@@ -192,8 +153,9 @@ namespace BusinessObject.Service
             // Convert StartDate and EndDate to SE Asia Standard Time
             var startDateTime = TimeZoneInfo.ConvertTimeFromUtc(eventDTO.StartDate.ToUniversalTime(), seAsiaTimeZone);
             var endDateTime = TimeZoneInfo.ConvertTimeFromUtc(eventDTO.EndDate.ToUniversalTime(), seAsiaTimeZone);
+            var currentDateTimeInSeAsia = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, seAsiaTimeZone);
 
-            if (startDateTime.Date < DateTime.UtcNow.Date)
+            if (startDateTime.Date < currentDateTimeInSeAsia.Date)
             {
                 result.Success = false;
                 result.Message = "StartDate cannot be in the past.";
@@ -211,16 +173,35 @@ namespace BusinessObject.Service
 
             if (eventDTO.StaffId.HasValue)
             {
-                var isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
-                if (isStaffAssigned)
+                var staff = await _userRepo.GetByIdAsync(eventDTO.StaffId.Value);
+                if (staff == null)
                 {
                     result.Success = false;
-                    result.Message = "The staff member is already assigned to another event with a conflicting status.";
+                    result.Message = "Staff member not found.";
                     return result;
                 }
 
-                // If StaffId is provided and the staff is not assigned, set status to "Ready"
-                eventStatus = EventStatus.READY;
+                if (!staff.Role.Contains("Staff"))
+                {
+                    result.Success = false;
+                    result.Message = "The staff member does not have the 'Staff' role.";
+                    return result;
+                }
+
+                if (eventDTO.StaffId.HasValue)
+                {
+                    var isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
+                    if (isStaffAssigned)
+                    {
+                        result.Success = false;
+                        result.Message =
+                            "The staff member is already assigned to another event with a conflicting status.";
+                        return result;
+                    }
+
+                    // If StaffId is provided and the staff is not assigned, set status to "Ready"
+                    eventStatus = EventStatus.READY;
+                }
             }
 
             try
@@ -266,7 +247,7 @@ namespace BusinessObject.Service
                         StaffId = eventDTO.StaffId,
                         VenueId = eventDTO.VenueId,
                         Description = eventDTO.Description,
-                        Status = eventStatus, // Set the status based on whether StaffId was provided
+                        Status = eventStatus,
                         Presenter = eventDTO.Presenter,
                         Host = eventDTO.Host
                     };
@@ -488,17 +469,35 @@ namespace BusinessObject.Service
                     return res;
                 }
 
-                // Check for staff assignment conflicts
-                if (eventDTO.StaffId.HasValue && eventDTO.StaffId.Value != eventToUpdate.StaffId)
+                if (eventDTO.StaffId.HasValue)
                 {
-                    // Check if the new staff member is assigned to another event with conflicting status
-                    bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
-                    if (isStaffAssigned)
+                    var staff = await _userRepo.GetByIdAsync(eventDTO.StaffId.Value);
+                    if (staff == null)
                     {
                         res.Success = false;
-                        res.Message =
-                            "The staff member is already assigned to another event with a conflicting status.";
+                        res.Message = "Staff member not found.";
                         return res;
+                    }
+
+                    if (!staff.Role.Contains("Staff"))
+                    {
+                        res.Success = false;
+                        res.Message = "The staff member does not have the 'Staff' role.";
+                        return res;
+                    }
+
+                    // Check if the new staff member is assigned to another event with conflicting status
+                    if (eventDTO.StaffId.Value != eventToUpdate.StaffId)
+                    {
+                        bool isStaffAssigned =
+                            await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
+                        if (isStaffAssigned)
+                        {
+                            res.Success = false;
+                            res.Message =
+                                "The staff member is already assigned to another event with a conflicting status.";
+                            return res;
+                        }
                     }
                 }
 
@@ -634,7 +633,7 @@ namespace BusinessObject.Service
             try
             {
                 var events = await _eventRepo.GetEventsByStatusAsync(status);
-                var eventDTOs=_mapper.Map<IEnumerable<ViewEventDTO >>(events);
+                var eventDTOs = _mapper.Map<IEnumerable<ViewEventDTO>>(events);
                 var paging = await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
                 result.Data = paging;
                 result.Success = true;
@@ -649,8 +648,9 @@ namespace BusinessObject.Service
             return result;
         }
 
-        public async Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(int organizerId,
-            int page, int pageSize)
+        public async Task<ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>> GetEventByOrganizer(
+            int organizerId,
+            int page, int pageSize, string search)
         {
             var res = new ServiceResponse<PaginationModel<ViewOrganizerEventDTO>>();
             try
@@ -658,6 +658,11 @@ namespace BusinessObject.Service
                 var result = await _eventRepo.GetEventByOrganizer(organizerId);
                 if (result.Any())
                 {
+                    if (!string.IsNullOrEmpty(search))
+                    {
+                        result = result.Where(e => e.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                    }
+
                     var map = _mapper.Map<IEnumerable<ViewOrganizerEventDTO>>(result);
                     var paging = await Pagination.GetPaginationEnum(map, page, pageSize);
                     res.Data = paging;

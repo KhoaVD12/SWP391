@@ -222,9 +222,9 @@ namespace TicketAPI.Controllers
 
         [HttpGet("organizer/{organizerId}")]
         public async Task<IActionResult> GetEventsByOrganizer(int organizerId, [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 5)
+            [FromQuery] int pageSize = 5, string search = "")
         {
-            var result = await _eventService.GetEventByOrganizer(organizerId, page, pageSize);
+            var result = await _eventService.GetEventByOrganizer(organizerId, page, pageSize, search);
             if (!result.Success)
             {
                 return BadRequest(result);
