@@ -58,8 +58,8 @@ namespace BusinessObject.Service
                     "enddate" => events.OrderBy(e => e.EndDate),
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
-
-                var eventDTOs = events.Select(e => new ViewEventDTO
+                var eventDTOs=_mapper.Map<IEnumerable<ViewEventDTO >>(events);
+                /*var eventDTOs = events.Select(e => new ViewEventDTO
                 {
                     Id = e.Id,
                     Title = e.Title,
@@ -85,7 +85,7 @@ namespace BusinessObject.Service
                         TicketSaleEndDate = e.Ticket.TicketSaleEndDate
                     },
                     BoothNames = e.Booths.Select(b => b.Name).ToList()
-                }).ToList();
+                }).ToList();*/
 
                 var paginationModel =
                     await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
