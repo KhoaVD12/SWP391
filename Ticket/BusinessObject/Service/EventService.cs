@@ -59,33 +59,6 @@ namespace BusinessObject.Service
                     _ => events.OrderBy(e => e.Id).ToList()
                 };
                 var eventDTOs=_mapper.Map<IEnumerable<ViewEventDTO >>(events);
-                /*var eventDTOs = events.Select(e => new ViewEventDTO
-                {
-                    Id = e.Id,
-                    Title = e.Title,
-                    Description = e.Description,
-                    OrganizerId = e.OrganizerId,
-                    OrganizerName = e.Organizer.Name,
-                    VenueId = e.VenueId,
-                    VenueName = e.Venue.Name,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    ImageURL = e.ImageUrl,
-                    Status = e.Status,
-                    StaffId = e.StaffId,
-                    StaffName = e.Staff?.Name,
-                    Presenter = e.Presenter,
-                    Host = e.Host,
-                    Ticket = new ViewTicketDTO
-                    {
-                        Id = e.Ticket.Id,
-                        EventId = e.Ticket.EventId,
-                        Price = e.Ticket.Price,
-                        Quantity = e.Ticket.Quantity,
-                        TicketSaleEndDate = e.Ticket.TicketSaleEndDate
-                    },
-                    BoothNames = e.Booths.Select(b => b.Name).ToList()
-                }).ToList();*/
 
                 var paginationModel =
                     await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
