@@ -74,6 +74,29 @@ namespace TicketAPI.Controllers
         }
 
         /// <summary>
+        /// Retrieves events for guests.
+        /// </summary>
+        /// <param name="page">The page number for pagination.</param>
+        /// <param name="pageSize">The number of events per page.</param>
+        /// <param name="search">The search term to filter events by title.</param>
+        /// <param name="sort">The sorting criteria (e.g., "startdate", "enddate").</param>
+        /// <returns>A paginated list of events matching the criteria.</returns>
+        [HttpGet("guest-events")]
+        public async Task<IActionResult> GetEventsForGuests(int page = 1, int pageSize = 10, string search = "",
+            string sort = "")
+        {
+            // Call the service method to get events for guests
+            var result = await _eventService.GetEventsForGuests(page, pageSize, search, sort);
+
+            if (!result.Success)
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Get an event by its ID.
         /// </summary>
         /// <param name="id">Event ID.</param>
@@ -90,24 +113,6 @@ namespace TicketAPI.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Assigns a staff member to an event.
-        /// </summary>
-        /// <param name="staffId">The ID of the staff member.</param>
-        /// <param name="eventId">The ID of the event.</param>
-        /// <returns>A response indicating the success or failure of the assignment.</returns>
-        [HttpPost("{eventId}/staff/{staffId}")]
-        public async Task<IActionResult> AssignStaffToEvent(int staffId, int eventId)
-        {
-            var response = await _eventService.AssignStaffToEventAsync(staffId, eventId);
-
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
-        }
 
         /// <summary>
         /// Retrieves the events assigned to a specific staff member.

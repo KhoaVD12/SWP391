@@ -27,15 +27,13 @@ public class UpdateStatusEntitiesJob : IJob
         var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
 
 
-        // Filter events that should become ongoing, excluding those with status "CANCELLED"
         var activeEvents = await _context.Events
             .Where(e => e.StartDate <= localDateTime && e.EndDate > localDateTime &&
-                        e.Status != EventStatus.ONGOING && e.Status != EventStatus.CANCEL)
+                        e.Status != EventStatus.ONGOING && e.Status != EventStatus.CANCEL && e.Status != EventStatus.PENDING)
             .ToListAsync();
 
-        // Filter events that should become ended, excluding those with status "CANCELLED"
         var endedEvents = await _context.Events
-            .Where(e => e.EndDate <= localDateTime && e.Status != EventStatus.ENDED && e.Status != EventStatus.CANCEL)
+            .Where(e => e.EndDate <= localDateTime && e.Status != EventStatus.ENDED && e.Status != EventStatus.CANCEL && e.Status != EventStatus.PENDING)
             .ToListAsync();
 
         if (activeEvents.Count != 0)

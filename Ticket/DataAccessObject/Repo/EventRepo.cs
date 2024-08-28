@@ -1,4 +1,5 @@
 ﻿using DataAccessObject.Entities;
+using DataAccessObject.Enums;
 using DataAccessObject.IRepo;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,26 @@ namespace DataAccessObject.Repo
                 .Include(e => e.Venue)
                 .Include(e => e.Booths)
                 .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Event>> GetEventsForGuestsAsync()
+        {
+            // Define the statuses you want to filter for guests
+            var activeStatuses = new List<string>
+            {
+                EventStatus.ACTIVE,
+                EventStatus.ONGOING
+            };
+
+            return await _context.Events
+                .Where(e => activeStatuses.Contains(e.Status)) // Filter by status
+                .Include(e => e.Organizer)
+                .Include(e => e.Staff)
+                .Include(e => e.Ticket)
+                .Include(e => e.Venue)
+                .Include(e => e.Booths)
+                .AsNoTracking() // Prevent tracking of entities for performance reasons
                 .ToListAsync();
         }
 
@@ -117,8 +138,18 @@ namespace DataAccessObject.Repo
 
         public async Task<bool> IsStaffAssignedToAnotherEventAsync(int staffId)
         {
-            return await _context.Events
-                .AnyAsync(e => e.StaffId == staffId);
+            var conflictingStatuses = new List<string>
+            {
+                EventStatus.READY,
+                EventStatus.ACTIVE,
+                EventStatus.ONGOING
+            };
+
+            // Query the database to check if any event with the specified staffId has a conflicting status
+            var isAssigned = await _context.Events
+                .AnyAsync(e => e.StaffId == staffId && conflictingStatuses.Contains(e.Status));
+
+            return isAssigned;
         }
 
         public async Task<IEnumerable<Attendee>> GetAttendeesByEventAsync(int eventId)
