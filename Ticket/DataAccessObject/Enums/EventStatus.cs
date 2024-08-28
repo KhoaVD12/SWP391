@@ -7,5 +7,6 @@ public class EventStatus
     public static readonly string ENDED = "Ended";
     public static readonly string CANCEL = "Cancel";
     public static readonly string ONGOING = "OnGoing";
+    public static readonly string READY = "Ready";
 
 }

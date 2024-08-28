@@ -40,6 +40,12 @@ namespace BusinessObject.Service
                 }
 
                 var events = await _eventRepo.GetEvent();
+                if (events == null)
+                {
+                    res.Success = false;
+                    res.Message = "No events found.";
+                    return res;
+                }
 
                 if (!string.IsNullOrEmpty(search))
                 {
@@ -83,6 +89,86 @@ namespace BusinessObject.Service
 
                 var paginationModel =
                     await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
+
+                res.Data = paginationModel;
+                res.Success = true;
+                res.Message = "Events retrieved successfully!";
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = ex.InnerException?.Message ?? ex.Message;
+            }
+
+            return res;
+        }
+
+        public async Task<ServiceResponse<PaginationModel<ViewEventDTO>>> GetEventsForGuests(int page, int pageSize,
+            string search, string sort)
+        {
+            var res = new ServiceResponse<PaginationModel<ViewEventDTO>>();
+
+            try
+            {
+                if (page <= 0)
+                {
+                    page = 1;
+                }
+
+                // Retrieve all events
+                var events = await _eventRepo.GetEventsForGuestsAsync();
+                if (events == null)
+                {
+                    res.Success = false;
+                    res.Message = "No events found.";
+                    return res;
+                }
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(search))
+                {
+                    events = events.Where(e => e.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Apply sorting
+                events = sort.ToLower().Trim() switch
+                {
+                    "startdate" => events.OrderBy(e => e.StartDate),
+                    "enddate" => events.OrderBy(e => e.EndDate),
+                    _ => events.OrderBy(e => e.Id)
+                };
+
+                // Project events to DTOs
+                var eventDTOs = events.Select(e => new ViewEventDTO
+                {
+                    Id = e.Id,
+                    Title = e.Title,
+                    Description = e.Description,
+                    OrganizerId = e.OrganizerId,
+                    OrganizerName = e.Organizer.Name,
+                    VenueId = e.VenueId,
+                    VenueName = e.Venue.Name,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    ImageURL = e.ImageUrl,
+                    Status = e.Status,
+                    StaffId = e.StaffId,
+                    StaffName = e.Staff?.Name,
+                    Presenter = e.Presenter,
+                    Host = e.Host,
+                    Ticket = new ViewTicketDTO
+                    {
+                        Id = e.Ticket.Id,
+                        EventId = e.Ticket.EventId,
+                        Price = e.Ticket.Price,
+                        Quantity = e.Ticket.Quantity,
+                        TicketSaleEndDate = e.Ticket.TicketSaleEndDate
+                    },
+                    BoothNames = e.Booths.Select(b => b.Name).ToList()
+                }).ToList();
+
+                // Apply pagination
+                var paginationModel = await Pagination.GetPaginationEnum(eventDTOs, page, pageSize);
 
                 res.Data = paginationModel;
                 res.Success = true;
@@ -175,15 +261,20 @@ namespace BusinessObject.Service
                 return result;
             }
 
+            var eventStatus = EventStatus.PENDING;
+
             if (eventDTO.StaffId.HasValue)
             {
-                bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
+                var isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
                 if (isStaffAssigned)
                 {
                     result.Success = false;
-                    result.Message = "The staff member is already assigned to another event.";
+                    result.Message = "The staff member is already assigned to another event with a conflicting status.";
                     return result;
                 }
+
+                // If StaffId is provided and the staff is not assigned, set status to "Ready"
+                eventStatus = EventStatus.READY;
             }
 
             try
@@ -229,7 +320,7 @@ namespace BusinessObject.Service
                         StaffId = eventDTO.StaffId,
                         VenueId = eventDTO.VenueId,
                         Description = eventDTO.Description,
-                        Status = EventStatus.PENDING,
+                        Status = eventStatus, // Set the status based on whether StaffId was provided
                         Presenter = eventDTO.Presenter,
                         Host = eventDTO.Host
                     };
@@ -332,42 +423,6 @@ namespace BusinessObject.Service
             }
 
             return false;
-        }
-
-        public async Task<ServiceResponse<bool>> AssignStaffToEventAsync(int staffId, int eventId)
-        {
-            var response = new ServiceResponse<bool>();
-
-            try
-            {
-                // Get the event by ID
-                var eventEntity = await _eventRepo.GetByIdAsync(eventId);
-
-                if (eventEntity == null)
-                {
-                    response.Success = false;
-                    response.Message = "Event not found.";
-                    return response;
-                }
-
-                // Assign the staff to the event
-                eventEntity.StaffId = staffId;
-
-                // Save changes to the database
-                await _eventRepo.UpdateAsync(eventEntity);
-
-                response.Data = true;
-                response.Success = true;
-                response.Message = "Staff assigned to the event successfully.";
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = "Error assigning staff to the event.";
-                response.ErrorMessages = new List<string> { ex.Message };
-            }
-
-            return response;
         }
 
         public async Task<ServiceResponse<EventStaffDTO?>> GetEventByStaffAsync(int staffId)
@@ -487,13 +542,16 @@ namespace BusinessObject.Service
                     return res;
                 }
 
+                // Check for staff assignment conflicts
                 if (eventDTO.StaffId.HasValue && eventDTO.StaffId.Value != eventToUpdate.StaffId)
                 {
+                    // Check if the new staff member is assigned to another event with conflicting status
                     bool isStaffAssigned = await _eventRepo.IsStaffAssignedToAnotherEventAsync(eventDTO.StaffId.Value);
                     if (isStaffAssigned)
                     {
                         res.Success = false;
-                        res.Message = "The staff member is already assigned to another event.";
+                        res.Message =
+                            "The staff member is already assigned to another event with a conflicting status.";
                         return res;
                     }
                 }
@@ -508,13 +566,12 @@ namespace BusinessObject.Service
                     return res;
                 }
 
-                // Update the event properties, but not the status
+                // Update the event properties
                 eventToUpdate.Title = eventDTO.Title ?? eventToUpdate.Title;
                 eventToUpdate.Description = eventDTO.Description ?? eventToUpdate.Description;
-                eventToUpdate.VenueId = eventDTO.VenueId != null ? eventDTO.VenueId.Value : eventToUpdate.VenueId;
-                eventToUpdate.StartDate =
-                    eventDTO.StartDate != null ? eventDTO.StartDate.Value : eventToUpdate.StartDate;
-                eventToUpdate.EndDate = eventDTO.EndDate != null ? eventDTO.EndDate.Value : eventToUpdate.EndDate;
+                eventToUpdate.VenueId = eventDTO.VenueId ?? eventToUpdate.VenueId;
+                eventToUpdate.StartDate = eventDTO.StartDate ?? eventToUpdate.StartDate;
+                eventToUpdate.EndDate = eventDTO.EndDate ?? eventToUpdate.EndDate;
                 eventToUpdate.StaffId = eventDTO.StaffId ?? eventToUpdate.StaffId;
                 eventToUpdate.ImageUrl = eventDTO.ImageUrl ?? eventToUpdate.ImageUrl;
                 eventToUpdate.Presenter = eventDTO.Presenter ?? eventToUpdate.Presenter;
@@ -536,7 +593,13 @@ namespace BusinessObject.Service
                     return res;
                 }
 
-                // Prevent status change
+                // Change status to "Ready" if staff is assigned and was not assigned before
+                if (eventDTO.StaffId.HasValue && eventToUpdate.StaffId == null)
+                {
+                    eventToUpdate.Status = EventStatus.READY;
+                }
+
+                // Update the event in the repository
                 await _eventRepo.UpdateAsync(eventToUpdate);
 
                 var updatedEvent = new ViewEventDTO
@@ -551,7 +614,7 @@ namespace BusinessObject.Service
                     StartDate = eventToUpdate.StartDate,
                     EndDate = eventToUpdate.EndDate,
                     ImageURL = eventToUpdate.ImageUrl,
-                    Status = eventToUpdate.Status, // Ensure status remains unchanged
+                    Status = eventToUpdate.Status, // Ensure status is updated correctly
                     StaffId = eventToUpdate.StaffId,
                     StaffName = eventToUpdate.Staff?.Name,
                     Presenter = eventToUpdate.Presenter,
@@ -639,7 +702,7 @@ namespace BusinessObject.Service
                     ImageURL = e.ImageUrl,
                     Status = e.Status,
                     StaffId = e.StaffId,
-                    StaffName = e.Staff?.Name,
+                    StaffName = e.Staff.Name,
                     Presenter = e.Presenter,
                     Host = e.Host,
                     Ticket = new ViewTicketDTO
